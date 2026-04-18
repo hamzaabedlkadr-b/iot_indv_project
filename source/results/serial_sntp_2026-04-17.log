@@ -1,0 +1,161 @@
+﻿I (11674) sampling_control: Adaptive sampling hold | window=1 dominant=5.00 Hz peak=1.9964 fs=40.0 Hz
+I (11674) signal_processing: Window 1 ready | fs=40.0Hz samples=200 avg=0.0124 min=-5.6723 max=5.6722 duration=4.96s
+I (11684) signal_processing: FFT result | window=1 dominant=5.00 Hz peak=1.9964 expected_3Hz=1.0011 expected_5Hz=1.9964
+I (11694) signal_processing: FFT peak[0] | bin=25 freq=5.00 Hz magnitude=1.9964
+I (11694) signal_processing: FFT peak[1] | bin=15 freq=3.00 Hz magnitude=1.0011
+I (11704) signal_input: Generated sample id=500 t=11.070s value=5.1731 fs=40.0Hz
+I (11714) signal_processing: FFT peak[2] | bin=1 freq=0.20 Hz magnitude=0.0123
+I (11714) signal_processing: Window 2 sample[0] = -1.9597
+I (11724) comm_mqtt: Prepared MQTT aggregate payload | window=1 topic=project/adaptive-sampling-node/aggregate edge_delay_us=363347 time_sync=1
+I (11724) signal_processing: Window 2 sample[1] = -1.3764
+I (11724) comm_lorawan: Prepared LoRaWAN aggregate payload | window=1 topic=ttn/uplink payload={"device":"adaptive-sampling-node","window_id":1,"fport":1,"payload_hex":"000100C8019001F4000C","sample_count":200,"sampling_frequency_hz":40.0,"dominant_frequency_hz":5.00,"average_value":0.0124,"created_at_us":11375447,"edge_delay_us":364298,"state":"stub_ready"}
+I (11744) signal_processing: Window 2 sample[2] = 0.6971
+I (11734) comm_mqtt: Published MQTT aggregate | window=1 msg_id=15221 topic=project/adaptive-sampling-node/aggregate edge_latency_us=382907
+I (11774) signal_processing: Window 2 sample[3] = 2.8486
+I (11724) metrics: Aggregate result | window=1 fs=40.0Hz samples=200 avg=0.0124 dominant=5.00 Hz
+I (11794) signal_processing: Window 2 sample[4] = 3.5144
+I (12334) signal_input: Generated sample id=525 t=11.695s value=1.6437 fs=40.0Hz
+I (12804) metrics: Metrics heartbeat | uptime_us=12390834 last_sample=12436084 last_fft=11011149 last_aggregate=11011149 last_publish=11394056 aggregates=2 latest_window=1 avg=0.0124 edge_latency_us=382907 mqtt_sent=2 lora_prepared=2
+I (12954) signal_input: Generated sample id=550 t=12.320s value=-2.8486 fs=40.0Hz
+I (13584) signal_input: Generated sample id=575 t=12.945s value=-5.6723 fs=40.0Hz
+I (14204) signal_input: Generated sample id=600 t=13.570s value=-5.1732 fs=40.0Hz
+I (14774) comm_lorawan: LoRaWAN heartbeat | radio_tx=0 pending=2 prepared=2
+I (14834) signal_input: Generated sample id=625 t=14.195s value=-1.6436 fs=40.0Hz
+I (15454) signal_input: Generated sample id=650 t=14.820s value=2.8486 fs=40.0Hz
+I (15674) sampling_control: Adaptive sampling policy waiting for FFT results
+I (16044) comm_mqtt: MQTT heartbeat | wifi=1 mqtt=1 pending=0 prepared=2 sent=2
+I (16084) signal_input: Generated sample id=675 t=15.445s value=5.6722 fs=40.0Hz
+I (16674) signal_processing: Window 2 ready | fs=40.0Hz samples=200 avg=-0.0000 min=-5.6723 max=5.6723 duration=4.98s
+I (16674) sampling_control: Adaptive sampling hold | window=2 dominant=5.00 Hz peak=2.0000 fs=40.0 Hz
+I (16684) app_display: Display heartbeat | mode=1 events=0xFF fs=40.0Hz dominant=5.00Hz avg=-0.0000 window=2
+I (16674) signal_processing: FFT result | window=2 dominant=5.00 Hz peak=2.0000 expected_3Hz=1.0000 expected_5Hz=2.0000
+I (16704) signal_input: Generated sample id=700 t=16.070s value=5.1731 fs=40.0Hz
+I (16704) signal_processing: FFT peak[0] | bin=25 freq=5.00 Hz magnitude=2.0000
+I (16714) signal_processing: FFT peak[1] | bin=15 freq=3.00 Hz magnitude=1.0000
+I (16724) signal_processing: FFT peak[2] | bin=95 freq=19.00 Hz magnitude=0.0000
+I (16724) signal_processing: Window 3 sample[0] = -1.9596
+I (16734) comm_mqtt: Prepared MQTT aggregate payload | window=2 topic=project/adaptive-sampling-node/aggregate edge_delay_us=373080 time_sync=1
+I (16734) signal_processing: Window 3 sample[1] = -1.3763
+I (16734) comm_lorawan: Prepared LoRaWAN aggregate payload | window=2 topic=ttn/uplink payload={"device":"adaptive-sampling-node","window_id":2,"fport":1,"payload_hex":"000200C8019001F40000","sample_count":200,"sampling_frequency_hz":40.0,"dominant_frequency_hz":5.00,"average_value":-0.0000,"created_at_us":16385160,"edge_delay_us":374001,"state":"stub_ready"}
+I (16754) signal_processing: Window 3 sample[2] = 0.6970
+I (16744) comm_mqtt: Published MQTT aggregate | window=2 msg_id=61341 topic=project/adaptive-sampling-node/aggregate edge_latency_us=392662
+I (16784) signal_processing: Window 3 sample[3] = 2.8486
+I (16804) signal_processing: Window 3 sample[4] = 3.5145
+I (16814) metrics: Aggregate result | window=2 fs=40.0Hz samples=200 avg=-0.0000 dominant=5.00 Hz
+I (17334) signal_input: Generated sample id=725 t=16.695s value=1.6436 fs=40.0Hz
+I (17954) signal_input: Generated sample id=750 t=17.320s value=-2.8496 fs=40.0Hz
+I (18584) signal_input: Generated sample id=775 t=17.945s value=-5.6722 fs=40.0Hz
+I (18814) metrics: Metrics heartbeat | uptime_us=18395840 last_sample=18461084 last_fft=16011159 last_aggregate=16011159 last_publish=16403821 aggregates=3 latest_window=2 avg=-0.0000 edge_latency_us=392662 mqtt_sent=3 lora_prepared=3
+I (19204) signal_input: Generated sample id=800 t=18.570s value=-5.1731 fs=40.0Hz
+I (19834) signal_input: Generated sample id=825 t=19.195s value=-1.6437 fs=40.0Hz
+I (20454) signal_input: Generated sample id=850 t=19.820s value=2.8486 fs=40.0Hz
+I (20684) sampling_control: Adaptive sampling policy waiting for FFT results
+I (20734) app_main: Queue status | sample=0 fft=0 aggregate_mqtt=0 aggregate_lora=0 mqtt=0 lora=3
+I (20734) app_main: Supervisor heartbeat | events=0xFF mode=virtual_sensor samples=857 windows=3 aggregates=3 mqtt=3 lora=3 fs=40.0Hz dominant=5.00Hz avg=-0.0000 updates=1
+I (21054) comm_mqtt: MQTT heartbeat | wifi=1 mqtt=1 pending=0 prepared=3 sent=3
+I (21084) signal_input: Generated sample id=875 t=20.445s value=5.6722 fs=40.0Hz
+I (21674) signal_processing: Window 3 ready | fs=40.0Hz samples=200 avg=-0.0000 min=-5.6723 max=5.6723 duration=4.98s
+I (21674) sampling_control: Adaptive sampling hold | window=3 dominant=5.00 Hz peak=2.0000 fs=40.0 Hz
+I (21674) signal_processing: FFT result | window=3 dominant=5.00 Hz peak=2.0000 expected_3Hz=1.0000 expected_5Hz=2.0000
+I (21694) signal_processing: FFT peak[0] | bin=25 freq=5.00 Hz magnitude=2.0000
+I (21694) signal_processing: FFT peak[1] | bin=15 freq=3.00 Hz magnitude=1.0000
+I (21704) signal_input: Generated sample id=900 t=21.070s value=5.1732 fs=40.0Hz
+I (21714) signal_processing: FFT peak[2] | bin=95 freq=19.00 Hz magnitude=0.0000
+I (21724) signal_processing: Window 4 sample[0] = -1.9597
+I (21724) comm_mqtt: Prepared MQTT aggregate payload | window=3 topic=project/adaptive-sampling-node/aggregate edge_delay_us=363512 time_sync=1
+I (21724) signal_processing: Window 4 sample[1] = -1.3764
+I (21724) comm_lorawan: Prepared LoRaWAN aggregate payload | window=3 topic=ttn/uplink payload={"device":"adaptive-sampling-node","window_id":3,"fport":1,"payload_hex":"000300C8019001F40000","sample_count":200,"sampling_frequency_hz":40.0,"dominant_frequency_hz":5.00,"average_value":-0.0000,"created_at_us":21375606,"edge_delay_us":364351,"state":"stub_ready"}
+I (21744) signal_processing: Window 4 sample[2] = 0.6971
+I (21774) signal_processing: Window 4 sample[3] = 2.8488
+I (21734) comm_mqtt: Published MQTT aggregate | window=3 msg_id=2187 topic=project/adaptive-sampling-node/aggregate edge_latency_us=383232
+I (21784) signal_processing: Window 4 sample[4] = 3.5145
+I (21814) metrics: Aggregate result | window=3 fs=40.0Hz samples=200 avg=-0.0000 dominant=5.00 Hz
+I (22024) comm_lorawan: LoRaWAN heartbeat | radio_tx=0 pending=4 prepared=4
+I (22334) signal_input: Generated sample id=925 t=21.695s value=1.6437 fs=40.0Hz
+I (22954) signal_input: Generated sample id=950 t=22.320s value=-2.8486 fs=40.0Hz
+I (23584) signal_input: Generated sample id=975 t=22.945s value=-5.6722 fs=40.0Hz
+I (24204) signal_input: Generated sample id=1000 t=23.570s value=-5.1732 fs=40.0Hz
+I (24694) app_display: Display heartbeat | mode=1 events=0xFF fs=40.0Hz dominant=5.00Hz avg=-0.0000 window=3
+I (24814) metrics: Metrics heartbeat | uptime_us=24395843 last_sample=24461084 last_fft=21011255 last_aggregate=21011255 last_publish=21394487 aggregates=4 latest_window=3 avg=-0.0000 edge_latency_us=383232 mqtt_sent=4 lora_prepared=4
+I (24834) signal_input: Generated sample id=1025 t=24.195s value=-1.6435 fs=40.0Hz
+I (25454) signal_input: Generated sample id=1050 t=24.820s value=2.8487 fs=40.0Hz
+I (25684) sampling_control: Adaptive sampling policy waiting for FFT results
+I (26084) signal_input: Generated sample id=1075 t=25.445s value=5.6723 fs=40.0Hz
+I (26294) comm_mqtt: MQTT heartbeat | wifi=1 mqtt=1 pending=0 prepared=4 sent=4
+I (26674) signal_processing: Window 4 ready | fs=40.0Hz samples=200 avg=-0.0000 min=-5.6723 max=5.6723 duration=4.98s
+I (26674) sampling_control: Adaptive sampling hold | window=4 dominant=5.00 Hz peak=2.0000 fs=40.0 Hz
+I (26674) signal_processing: FFT result | window=4 dominant=5.00 Hz peak=2.0000 expected_3Hz=1.0000 expected_5Hz=2.0000
+I (26694) signal_processing: FFT peak[0] | bin=25 freq=5.00 Hz magnitude=2.0000
+I (26694) signal_processing: FFT peak[1] | bin=15 freq=3.00 Hz magnitude=1.0000
+I (26704) signal_input: Generated sample id=1100 t=26.070s value=5.1731 fs=40.0Hz
+I (26714) signal_processing: FFT peak[2] | bin=74 freq=14.80 Hz magnitude=0.0000
+I (26714) signal_processing: Window 5 sample[0] = -1.9597
+I (26724) comm_mqtt: Prepared MQTT aggregate payload | window=4 topic=project/adaptive-sampling-node/aggregate edge_delay_us=363321 time_sync=1
+I (26724) signal_processing: Window 5 sample[1] = -1.3763
+I (26724) comm_lorawan: Prepared LoRaWAN aggregate payload | window=4 topic=ttn/uplink payload={"device":"adaptive-sampling-node","window_id":4,"fport":1,"payload_hex":"000400C8019001F40000","sample_count":200,"sampling_frequency_hz":40.0,"dominant_frequency_hz":5.00,"average_value":-0.0000,"created_at_us":26375428,"edge_delay_us":364146,"state":"stub_ready"}
+I (26744) signal_processing: Window 5 sample[2] = 0.6969
+I (26734) comm_mqtt: Published MQTT aggregate | window=4 msg_id=43300 topic=project/adaptive-sampling-node/aggregate edge_latency_us=382915
+I (26774) signal_processing: Window 5 sample[3] = 2.8486
+I (26794) signal_processing: Window 5 sample[4] = 3.5145
+I (26814) metrics: Aggregate result | window=4 fs=40.0Hz samples=200 avg=-0.0000 dominant=5.00 Hz
+I (27334) signal_input: Generated sample id=1125 t=26.695s value=1.6437 fs=40.0Hz
+I (27954) signal_input: Generated sample id=1150 t=27.320s value=-2.8487 fs=40.0Hz
+I (28584) signal_input: Generated sample id=1175 t=27.945s value=-5.6722 fs=40.0Hz
+I (29024) comm_lorawan: LoRaWAN heartbeat | radio_tx=0 pending=5 prepared=5
+I (29204) signal_input: Generated sample id=1200 t=28.570s value=-5.1732 fs=40.0Hz
+I (29834) signal_input: Generated sample id=1225 t=29.195s value=-1.6438 fs=40.0Hz
+I (30454) signal_input: Generated sample id=1250 t=29.820s value=2.8486 fs=40.0Hz
+I (30684) sampling_control: Adaptive sampling policy waiting for FFT results
+I (30744) app_main: Queue status | sample=0 fft=0 aggregate_mqtt=0 aggregate_lora=0 mqtt=0 lora=5
+I (30744) app_main: Supervisor heartbeat | events=0xFF mode=virtual_sensor samples=1257 windows=5 aggregates=5 mqtt=5 lora=5 fs=40.0Hz dominant=5.00Hz avg=-0.0000 updates=1
+I (31064) metrics: Metrics heartbeat | uptime_us=30645846 last_sample=30711084 last_fft=26011282 last_aggregate=26011282 last_publish=26394197 aggregates=5 latest_window=4 avg=-0.0000 edge_latency_us=382915 mqtt_sent=5 lora_prepared=5
+I (31084) signal_input: Generated sample id=1275 t=30.445s value=5.6722 fs=40.0Hz
+I (31294) comm_mqtt: MQTT heartbeat | wifi=1 mqtt=1 pending=0 prepared=5 sent=5
+I (31674) sampling_control: Adaptive sampling hold | window=5 dominant=5.00 Hz peak=2.0000 fs=40.0 Hz
+I (31674) signal_processing: Window 5 ready | fs=40.0Hz samples=200 avg=-0.0000 min=-5.6723 max=5.6723 duration=4.98s
+I (31684) signal_processing: FFT result | window=5 dominant=5.00 Hz peak=2.0000 expected_3Hz=1.0000 expected_5Hz=2.0000
+I (31694) signal_processing: FFT peak[0] | bin=25 freq=5.00 Hz magnitude=2.0000
+I (31694) signal_processing: FFT peak[1] | bin=15 freq=3.00 Hz magnitude=1.0000
+I (31704) signal_input: Generated sample id=1300 t=31.070s value=5.1731 fs=40.0Hz
+I (31714) signal_processing: FFT peak[2] | bin=72 freq=14.40 Hz magnitude=0.0000
+I (31724) signal_processing: Window 6 sample[0] = -1.9597
+I (31724) comm_mqtt: Prepared MQTT aggregate payload | window=5 topic=project/adaptive-sampling-node/aggregate edge_delay_us=364370 time_sync=1
+I (31724) signal_processing: Window 6 sample[1] = -1.3765
+I (31724) comm_lorawan: Prepared LoRaWAN aggregate payload | window=5 topic=ttn/uplink payload={"device":"adaptive-sampling-node","window_id":5,"fport":1,"payload_hex":"000500C8019001F40000","sample_count":200,"sampling_frequency_hz":40.0,"dominant_frequency_hz":5.00,"average_value":-0.0000,"created_at_us":31376403,"edge_delay_us":365254,"state":"stub_ready"}
+I (31744) signal_processing: Window 6 sample[2] = 0.6970
+I (31744) comm_mqtt: Published MQTT aggregate | window=5 msg_id=31419 topic=project/adaptive-sampling-node/aggregate edge_latency_us=383952
+I (31784) signal_processing: Window 6 sample[3] = 2.8487
+I (31794) signal_processing: Window 6 sample[4] = 3.5145
+I (31814) metrics: Aggregate result | window=5 fs=40.0Hz samples=200 avg=-0.0000 dominant=5.00 Hz
+I (32334) signal_input: Generated sample id=1325 t=31.695s value=1.6436 fs=40.0Hz
+I (32694) app_display: Display heartbeat | mode=1 events=0xFF fs=40.0Hz dominant=5.00Hz avg=-0.0000 window=5
+I (32954) signal_input: Generated sample id=1350 t=32.320s value=-2.8487 fs=40.0Hz
+I (33584) signal_input: Generated sample id=1375 t=32.945s value=-5.6722 fs=40.0Hz
+I (34204) signal_input: Generated sample id=1400 t=33.570s value=-5.1732 fs=40.0Hz
+I (34834) signal_input: Generated sample id=1425 t=34.195s value=-1.6434 fs=40.0Hz
+I (35454) signal_input: Generated sample id=1450 t=34.820s value=2.8486 fs=40.0Hz
+I (35674) sampling_control: Adaptive sampling policy waiting for FFT results
+I (36024) comm_lorawan: LoRaWAN heartbeat | radio_tx=0 pending=6 prepared=6
+I (36084) signal_input: Generated sample id=1475 t=35.445s value=5.6723 fs=40.0Hz
+I (36544) comm_mqtt: MQTT heartbeat | wifi=1 mqtt=1 pending=0 prepared=6 sent=6
+I (36674) signal_processing: Window 6 ready | fs=40.0Hz samples=200 avg=0.0000 min=-5.6723 max=5.6723 duration=4.98s
+I (36674) sampling_control: Adaptive sampling hold | window=6 dominant=5.00 Hz peak=2.0000 fs=40.0 Hz
+I (36674) signal_processing: FFT result | window=6 dominant=5.00 Hz peak=2.0000 expected_3Hz=1.0000 expected_5Hz=2.0000
+I (36694) signal_processing: FFT peak[0] | bin=25 freq=5.00 Hz magnitude=2.0000
+I (36694) signal_processing: FFT peak[1] | bin=15 freq=3.00 Hz magnitude=1.0000
+I (36704) signal_input: Generated sample id=1500 t=36.070s value=5.1732 fs=40.0Hz
+I (36714) signal_processing: FFT peak[2] | bin=99 freq=19.80 Hz magnitude=0.0000
+I (36724) signal_processing: Window 7 sample[0] = -1.9596
+I (36724) comm_mqtt: Prepared MQTT aggregate payload | window=6 topic=project/adaptive-sampling-node/aggregate edge_delay_us=364543 time_sync=1
+I (36724) signal_processing: Window 7 sample[1] = -1.3762
+I (36724) comm_lorawan: Prepared LoRaWAN aggregate payload | window=6 topic=ttn/uplink payload={"device":"adaptive-sampling-node","window_id":6,"fport":1,"payload_hex":"000600C8019001F40000","sample_count":200,"sampling_frequency_hz":40.0,"dominant_frequency_hz":5.00,"average_value":0.0000,"created_at_us":36376600,"edge_delay_us":365451,"state":"stub_ready"}
+I (36744) signal_processing: Window 7 sample[2] = 0.6969
+I (36744) comm_mqtt: Published MQTT aggregate | window=6 msg_id=52968 topic=project/adaptive-sampling-node/aggregate edge_latency_us=384117
+I (36784) signal_processing: Window 7 sample[3] = 2.8485
+I (36794) signal_processing: Window 7 sample[4] = 3.5145
+I (36814) metrics: Aggregate result | window=6 fs=40.0Hz samples=200 avg=0.0000 dominant=5.00 Hz
+I (37064) metrics: Metrics heartbeat | uptime_us=36645846 last_sample=36711086 last_fft=36011149 last_aggregate=36011149 last_publish=36395266 aggregates=7 latest_window=6 avg=0.0000 edge_latency_us=384117 mqtt_sent=7 lora_prepared=7
+I (37334) signal_input: Generated sample id=1525 t=36.695s value=1.6435 fs=40.0Hz
+I (37954) signal_input: Generated sample id=1550 t=37.320s value=-2.8486 fs=40.0Hz
+I (38584) signal_input: Generated sample id=1575 t=37.945s value=-5.6723 fs=40.0Hz
+I (39204) signal_input: Generated sample id=1600 t=38.570s value=-5.1732 fs=40.0Hz

@@ -1,0 +1,649 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{listings}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codeframe}{RGB}{220,220,220}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{codebg},
+    frame=single,
+    rulecolor=\color{codeframe},
+    breaklines=true,
+    columns=fullflexible,
+    keepspaces=true
+}
+
+\newcounter{reportfigure}
+\newcommand{\reportfigure}[3]{
+    \refstepcounter{reportfigure}
+    \begin{center}
+        \includegraphics[width=#1]{#2}\\[4pt]
+        \small\textbf{Figure \thereportfigure.} #3
+    \end{center}
+}
+
+\title{Current Progress Report\\ESP32 Adaptive Sampling IoT Project}
+\author{IoT Adaptive Sampling Project}
+\date{April 18, 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+This document is the current detailed progress report for the project. It is
+meant to complement the older historical report in
+\texttt{PHASE1\_REPORT.tex}, which documents Phases 1 to 7 in depth but does
+not reflect the latest hardware validation, saved MQTT evidence, three-signal
+results, or the current project status.
+
+The purpose of this report is to present:
+
+\begin{itemize}
+    \item what has been implemented so far,
+    \item what has already been validated on real hardware,
+    \item what measured results exist today,
+    \item what is still pending before final submission.
+\end{itemize}
+
+\section{Executive Summary}
+
+The project now has a working \texttt{ESP32 + FreeRTOS} pipeline that:
+
+\begin{itemize}
+    \item generates the required input signal through a virtual sensor,
+    \item collects samples into fixed-duration windows,
+    \item estimates the dominant frequency from each window,
+    \item adapts the sampling rate at runtime,
+    \item computes a per-window aggregate,
+    \item publishes real aggregate messages to a nearby edge server over
+    \texttt{MQTT/WiFi},
+    \item prepares compact aggregate payloads for \texttt{LoRaWAN + TTN}.
+\end{itemize}
+
+The strongest completed milestone is the end-to-end \texttt{MQTT/WiFi}
+validation on the real Heltec board. Real timing data were captured with
+synchronized timestamps, and three different signal profiles were also
+validated on the real board.
+
+The main items still pending are:
+
+\begin{itemize}
+    \item the live \texttt{LoRaWAN/TTN} campus validation,
+    \item energy measurements with a cleaner two-board setup,
+    \item one live \texttt{MQTTS} validation run if a TLS-capable broker is available.
+\end{itemize}
+
+\section{Current Phase Status}
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{0.08\textwidth}|>{\raggedright\arraybackslash}p{0.23\textwidth}|>{\raggedright\arraybackslash}p{0.14\textwidth}|>{\raggedright\arraybackslash}p{0.43\textwidth}|}
+\hline
+\textbf{Phase} & \textbf{Topic} & \textbf{Status} & \textbf{Notes} \\
+\hline
+\texttt{1} & Environment setup & Complete & Board, PlatformIO, serial, and broker environment validated \\
+\hline
+\texttt{2} & Firmware skeleton & Complete & Modular FreeRTOS structure and shared data types implemented \\
+\hline
+\texttt{3} & Virtual sensor & Complete & Required sinusoidal signal generated in firmware \\
+\hline
+\texttt{4} & Maximum sampling frequency & Complete & Strict benchmark executed on the real board \\
+\hline
+\texttt{5} & Frequency analysis & Complete & Dominant-frequency detection validated \\
+\hline
+\texttt{6} & Adaptive sampling & Complete & Runtime update from \texttt{50 Hz} to \texttt{40 Hz} validated \\
+\hline
+\texttt{7} & Aggregate computation & Complete & Window averages computed and passed downstream \\
+\hline
+\texttt{8} & MQTT over WiFi & Complete & End-to-end home-network validation completed on hardware \\
+\hline
+\texttt{9} & LoRaWAN + TTN & Partial & Payload path implemented, but real TTN proof still pending \\
+\hline
+\texttt{10} & Performance measurements & Partial & Latency and payload-size evidence exist; energy still pending \\
+\hline
+\texttt{11} & Optional physical sensor / extras & Optional & Not required for the core project \\
+\hline
+\texttt{12} & Final packaging and write-up & In progress & README, evidence map, and screenshot assets are being prepared \\
+\hline
+\end{longtable}
+
+\section{Project Architecture}
+
+The implemented data path is:
+
+\begin{lstlisting}
+virtual signal
+    -> sampling task
+    -> FFT / dominant-frequency detection
+    -> adaptive sampling control
+    -> 5 s aggregate window
+    -> MQTT over WiFi to nearby edge listener
+    -> compact LoRaWAN payload for TTN
+\end{lstlisting}
+
+The modular structure is important because each task has a clear
+responsibility:
+
+\begin{itemize}
+    \item \texttt{signal\_input}: sample generation and runtime sampling-rate changes,
+    \item \texttt{signal\_processing}: window buffering, frequency estimation, and aggregate creation,
+    \item \texttt{sampling\_control}: adaptive policy,
+    \item \texttt{comm\_mqtt}: edge publishing,
+    \item \texttt{comm\_lorawan}: compact uplink payload preparation,
+    \item \texttt{metrics}: runtime counters and timing support.
+\end{itemize}
+
+\section{Hardware And Software Used}
+
+\subsection{Hardware}
+
+\begin{itemize}
+    \item \texttt{Heltec WiFi LoRa 32 V3} compatible board
+    \item integrated \texttt{WiFi}
+    \item integrated \texttt{868 MHz LoRa} radio
+    \item integrated OLED
+    \item laptop running the local broker and edge listener
+\end{itemize}
+
+\subsection{Software}
+
+\begin{itemize}
+    \item \texttt{PlatformIO}
+    \item \texttt{ESP-IDF}
+    \item \texttt{Mosquitto}
+    \item Python-based \texttt{MQTT} listener and analyzer
+    \item \texttt{BetterSerialPlotter}
+\end{itemize}
+
+\section{Signal Model And Profiles}
+
+The core virtual input signal follows the assignment requirement:
+
+\begin{lstlisting}
+2*sin(2*pi*3*t) + 4*sin(2*pi*5*t)
+\end{lstlisting}
+
+This produces two spectral components:
+
+\begin{itemize}
+    \item \texttt{3 Hz}
+    \item \texttt{5 Hz}
+\end{itemize}
+
+The current implementation uses three profiles:
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{0.22\textwidth}|>{\raggedright\arraybackslash}p{0.18\textwidth}|X|}
+\hline
+\textbf{Profile} & \textbf{Purpose} & \textbf{Notes} \\
+\hline
+\texttt{clean\_reference} & baseline & deterministic signal without noise \\
+\hline
+\texttt{noisy\_reference} & robustness & same signal plus low random noise \\
+\hline
+\texttt{anomaly\_stress} & bonus / stress & noisy signal plus sparse spike injection \\
+\hline
+\end{tabularx}
+\end{center}
+
+The selected profile is carried through the aggregate object and the MQTT
+payload as \texttt{signal\_profile}, and anomaly windows also report
+\texttt{anomaly\_count}.
+
+\section{Maximum Sampling Frequency Benchmark}
+
+The strict benchmark from Phase 4 tested multiple target rates and classified a
+rate as stable only if timing stayed clean under the project rule.
+
+\subsection{Measured Result Table}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{0.12\textwidth}|>{\raggedright\arraybackslash}p{0.14\textwidth}|>{\centering\arraybackslash}p{0.08\textwidth}|>{\centering\arraybackslash}p{0.09\textwidth}|>{\centering\arraybackslash}p{0.09\textwidth}|X|}
+\hline
+\textbf{Target} & \textbf{Achieved} & \textbf{Drops} & \textbf{Miss.} & \textbf{Stable} & \textbf{Observation} \\
+\hline
+\texttt{50 Hz} & \texttt{50.25 Hz} & 0 & 0 & Yes & clean stable run \\
+\hline
+\texttt{100 Hz} & \texttt{100.25 Hz} & 0 & 1 & No & very close, but one miss occurred \\
+\hline
+\texttt{200 Hz} & \texttt{200.25 Hz} & 0 & 2 & No & throughput held, timing did not \\
+\hline
+\texttt{250 Hz} & \texttt{250.25 Hz} & 0 & 12 & No & watchdog instability started \\
+\hline
+\texttt{500 Hz} & \texttt{500.25 Hz} & 0 & 26 & No & repeated instability \\
+\hline
+\texttt{1000 Hz} & \texttt{1000.00 Hz} & 1 & 55 & No & severe instability \\
+\hline
+\end{tabularx}
+\normalsize
+\end{center}
+
+\subsection{Interpretation}
+
+The important conclusion is:
+
+\begin{itemize}
+    \item the board can technically generate and consume data above \texttt{50 Hz},
+    \item but under the current strict stability rule, the highest clean operating point is \texttt{50 Hz}.
+\end{itemize}
+
+This is why the project uses:
+
+\begin{itemize}
+    \item \texttt{50 Hz} as the baseline oversampling reference,
+    \item \texttt{40 Hz} as the first stable adaptive rate for the current signal.
+\end{itemize}
+
+\section{FFT And Adaptive Sampling}
+
+After the first stable \texttt{50 Hz} window, the firmware detects the
+dominant component correctly and updates the rate:
+
+\begin{lstlisting}
+Window 0 ready | fs=50.0Hz samples=250 avg=0.0041 min=-5.6139 max=5.6139 duration=4.97s
+Adaptive sampling update | window=0 dominant=5.00 Hz peak=2.0000 previous_fs=50.0 Hz new_fs=40.0 Hz
+Applying adaptive sampling frequency 40.0 Hz
+\end{lstlisting}
+
+\subsection{Why \texttt{40 Hz} Is Correct}
+
+The current policy uses:
+
+\begin{itemize}
+    \item oversampling factor: \texttt{8x}
+    \item dominant frequency: \texttt{5 Hz}
+\end{itemize}
+
+So:
+
+\begin{lstlisting}
+5 Hz * 8 = 40 Hz
+\end{lstlisting}
+
+That result matches the validated runtime behavior.
+
+\section{Aggregate Computation}
+
+Each completed window becomes an aggregate object that contains:
+
+\begin{itemize}
+    \item \texttt{window\_id}
+    \item \texttt{window\_start\_us}
+    \item \texttt{window\_end\_us}
+    \item \texttt{sample\_count}
+    \item \texttt{sampling\_frequency\_hz}
+    \item \texttt{dominant\_frequency\_hz}
+    \item \texttt{average\_value}
+    \item \texttt{signal\_profile}
+    \item \texttt{anomaly\_count}
+\end{itemize}
+
+The first clean aggregate appeared at the initial baseline rate:
+
+\begin{lstlisting}
+Aggregate result | window=0 fs=50.0Hz samples=250 avg=0.0041 dominant=5.00 Hz
+\end{lstlisting}
+
+After adaptation, the aggregate pipeline remained correct:
+
+\begin{lstlisting}
+Aggregate result | window=1 fs=40.0Hz samples=200 avg=-0.0000 dominant=5.00 Hz
+\end{lstlisting}
+
+This confirms that:
+
+\begin{itemize}
+    \item the aggregate function is correct,
+    \item the adaptive transition does not break the aggregate path,
+    \item the edge and cloud paths can consume real summary data instead of placeholders.
+\end{itemize}
+
+\section{MQTT Over WiFi Validation}
+
+The local edge path was fully validated on the real board on the home network.
+
+\subsection{What Was Proven}
+
+\begin{itemize}
+    \item the Heltec connected to the home WiFi,
+    \item the board reached the local broker,
+    \item the edge listener received real aggregate messages,
+    \item the messages contained synchronized timestamps,
+    \item the saved run had no missing windows.
+\end{itemize}
+
+\subsection{Latest Clean Listener Run}
+
+Source: \texttt{results/summaries/mqtt\_summary\_2026-04-18\_listener.md}
+
+\subsubsection*{Overview}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+Messages received & \texttt{5} \\
+\hline
+Unique windows & \texttt{5} \\
+\hline
+Missing windows & \texttt{0} \\
+\hline
+First window & \texttt{296} \\
+\hline
+Last window & \texttt{300} \\
+\hline
+Received span & \texttt{20.002 s} \\
+\hline
+Signal profile & \texttt{clean\_reference} \\
+\hline
+Total payload bytes & \texttt{2270} \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsubsection*{Timing Metrics}
+
+\begin{center}
+\begin{tabular}{|l|r|r|r|r|}
+\hline
+\textbf{Metric} & \textbf{Min} & \textbf{Avg} & \textbf{P95} & \textbf{Max} \\
+\hline
+\texttt{listener\_latency\_us} & 1232577 & 1234421.6 & 1239997 & 1239997 \\
+\hline
+\texttt{end\_to\_end\_latency\_us} & 1584866 & 1587868.6 & 1596541 & 1596541 \\
+\hline
+\texttt{edge\_delay\_us} & 352289 & 353447.0 & 356544 & 356544 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsubsection*{Signal Metrics}
+
+\begin{center}
+\begin{tabular}{|l|r|r|r|}
+\hline
+\textbf{Metric} & \textbf{Min} & \textbf{Avg} & \textbf{Max} \\
+\hline
+\texttt{sample\_count} & 200 & 200.0 & 200 \\
+\hline
+\texttt{sampling\_frequency\_hz} & 40.0 & 40.0 & 40.0 \\
+\hline
+\texttt{dominant\_frequency\_hz} & 5.0 & 5.0 & 5.0 \\
+\hline
+\texttt{payload\_size\_bytes} & 454 & 454.0 & 454 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Interpretation}
+
+The edge path is no longer just implemented in code. It has been validated
+end-to-end with:
+
+\begin{itemize}
+    \item real board,
+    \item real WiFi,
+    \item real broker,
+    \item real listener output,
+    \item saved artifacts.
+\end{itemize}
+
+\reportfigure{\textwidth}{../results/screenshots/mqtt_listener_received_message_2026-04-18.png}{Python edge listener receiving consecutive MQTT aggregate messages from the Heltec board.}
+
+\section{Three-Signal Validation}
+
+The bonus-ready signal profiles were also validated through real-board MQTT
+runs.
+
+\subsection{Comparison Table}
+
+\begin{center}
+\small
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|r|r|r|r|r|}
+\hline
+\textbf{Profile} & \textbf{Avg dominant [Hz]} & \textbf{Avg sampling [Hz]} & \textbf{Avg anomaly} & \textbf{Avg payload [B]} & \textbf{Avg listener latency [us]} \\
+\hline
+\texttt{clean\_reference} & 5.000 Hz & 40.000 Hz & 0.000 & 446.0 B & 854014.8 us \\
+\hline
+\texttt{noisy\_reference} & 5.000 Hz & 40.000 Hz & 0.000 & 445.6 B & 845563.8 us \\
+\hline
+\texttt{anomaly\_stress} & 5.000 Hz & 40.000 Hz & 2.800 & 444.6 B & 823576.4 us \\
+\hline
+\end{tabular}
+}
+\normalsize
+\end{center}
+
+\subsection{Main Observations}
+
+\begin{itemize}
+    \item all three profiles preserved \texttt{5.00 Hz} as the dominant frequency in the saved windows,
+    \item the anomaly profile produced non-zero \texttt{anomaly\_count} values as expected,
+    \item the payload size remained almost constant because each window still produces one compact aggregate.
+\end{itemize}
+
+\reportfigure{\textwidth}{../results/screenshots/signal_profile_comparison_2026-04-18.png}{Comparison of the three saved signal-profile runs captured from the real board over MQTT.}
+
+\reportfigure{0.9\textwidth}{../results/screenshots/anomaly_profile_nonzero_count_2026-04-17.png}{Non-zero anomaly counts recorded in the anomaly-stress profile.}
+
+\section{BetterSerialPlotter Validation}
+
+The project includes a simplified serial stream for \texttt{BetterSerialPlotter}.
+This visual evidence shows:
+
+\begin{itemize}
+    \item current sampling frequency,
+    \item dominant frequency,
+    \item aggregate average.
+\end{itemize}
+
+This figure is useful for presenting the live signal-processing pipeline, but
+it is not used as proof of MQTT or TTN delivery.
+
+\reportfigure{\textwidth}{../pics/2026-04-18_better_serial_plotter_live_view.png}{BetterSerialPlotter receiving the live adaptive-sampling stream from the Heltec board.}
+
+\section{LoRaWAN And TTN Status}
+
+The \texttt{LoRaWAN} path is implemented up to the payload-preparation stage.
+
+What is already true:
+
+\begin{itemize}
+    \item the aggregate is serialized into a compact uplink payload,
+    \item the LoRa path is integrated into the same pipeline as MQTT,
+    \item the runtime logs show prepared payloads such as \texttt{000100C8019001F4FFE8}.
+\end{itemize}
+
+What is still missing:
+
+\begin{itemize}
+    \item a real uplink through a reachable gateway,
+    \item \texttt{TTN} live data screenshots,
+    \item decoded cloud-side proof.
+\end{itemize}
+
+So the correct current description is:
+
+\begin{itemize}
+    \item \texttt{LoRaWAN/TTN} path is implemented and stub-ready,
+    \item live \texttt{TTN} validation is still pending.
+\end{itemize}
+
+\section{Secure MQTT Status}
+
+The MQTT client now supports:
+
+\begin{itemize}
+    \item plain \texttt{mqtt://},
+    \item verified \texttt{mqtts://},
+    \item optional username/password authentication,
+    \item certificate verification through the ESP-IDF CA bundle.
+\end{itemize}
+
+However, the captured saved run is still the plain local-broker run.
+
+So the honest current status is:
+
+\begin{itemize}
+    \item secure MQTT support is implemented in firmware,
+    \item a live secure-broker validation run is still pending.
+\end{itemize}
+
+\section{Energy Measurement Status}
+
+Energy is a required grading item, but the cleanest measurement setup needs two
+boards:
+
+\begin{itemize}
+    \item one board under test,
+    \item one board or monitor path reading the \texttt{INA219}.
+\end{itemize}
+
+Because only one Heltec is currently available, the project keeps the energy
+section prepared but deferred.
+
+What has already been done:
+
+\begin{itemize}
+    \item the firmware now has a baseline-versus-adaptive switch,
+    \item the measurement runbook has been written,
+    \item the \texttt{INA219} setup for the Heltec V3 has been documented.
+\end{itemize}
+
+What is still missing:
+
+\begin{itemize}
+    \item real measured power or energy values,
+    \item screenshots of the measurement setup,
+    \item final baseline-versus-adaptive comparison table.
+\end{itemize}
+
+\section{Communication Volume Discussion}
+
+One subtle but important observation is that this project sends one aggregate
+per completed window, not raw samples over MQTT.
+
+That means:
+
+\begin{itemize}
+    \item adaptive sampling reduces local sampling and processing work,
+    \item but it does not automatically reduce the MQTT message size very much.
+\end{itemize}
+
+This is exactly what the saved payload summaries show:
+
+\begin{itemize}
+    \item payload sizes remain around \texttt{444} to \texttt{454} bytes depending on the profile.
+\end{itemize}
+
+So the communication-volume section in the final report should explain that:
+
+\begin{itemize}
+    \item the main gain from adaptive sampling in this implementation is local efficiency,
+    \item the network payload count per window is mostly unchanged.
+\end{itemize}
+
+\section{Build And Resource Status}
+
+The current firmware still builds successfully after the recent additions such
+as:
+
+\begin{itemize}
+    \item three signal profiles,
+    \item secure MQTT support,
+    \item baseline/adaptive configuration switch.
+\end{itemize}
+
+Current build snapshot:
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Resource} & \textbf{Usage} \\
+\hline
+RAM & \texttt{38520 B} (\texttt{11.8\%}) \\
+\hline
+Flash & \texttt{973469 B} (\texttt{92.8\%}) \\
+\hline
+\end{tabular}
+\end{center}
+
+This is still acceptable, but flash headroom is now limited.
+
+\section{Remaining Work}
+
+The remaining work before final submission is:
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{0.23\textwidth}|>{\raggedright\arraybackslash}p{0.14\textwidth}|X|}
+\hline
+\textbf{Item} & \textbf{Status} & \textbf{Notes} \\
+\hline
+\texttt{LoRaWAN/TTN} live proof & pending & must be done on campus or under real gateway coverage \\
+\hline
+Energy measurements & pending & deferred until a cleaner two-board setup is available \\
+\hline
+Secure MQTT live TLS proof & pending & firmware support exists, but no saved live TLS run yet \\
+\hline
+Prompt log curation & pending & intentionally left for later \\
+\hline
+Final short report & pending & this detailed report will make that much easier \\
+\hline
+\end{tabularx}
+\end{center}
+
+\section{Conclusion}
+
+At this checkpoint, the project has moved well beyond the early scaffolding
+phases.
+
+The most important completed achievements are:
+
+\begin{itemize}
+    \item stable virtual-signal generation on the real board,
+    \item measured maximum stable sampling benchmark,
+    \item correct dominant-frequency detection,
+    \item working adaptive-sampling transition from \texttt{50 Hz} to \texttt{40 Hz},
+    \item correct per-window aggregate computation,
+    \item full home-network \texttt{MQTT/WiFi} validation on hardware,
+    \item real latency measurements based on synchronized timestamps,
+    \item three validated signal profiles including anomaly-aware evidence.
+\end{itemize}
+
+The most important missing items are now concentrated and clear:
+
+\begin{itemize}
+    \item real \texttt{TTN} uplink evidence,
+    \item energy comparison measurements,
+    \item one secure \texttt{MQTTS} validation run.
+\end{itemize}
+
+This means the project is already in a strong state for the workshop: the core
+pipeline works, the edge path is proven, and the remaining work is focused on
+final measurement and cloud validation rather than on missing core
+functionality.
+
+\end{document}

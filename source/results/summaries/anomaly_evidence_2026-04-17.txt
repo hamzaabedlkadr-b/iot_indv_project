@@ -1,0 +1,11 @@
+Non-zero anomaly evidence from the saved anomaly-stress MQTT run
+
+window_id   signal_profile   anomaly_count   dominant_frequency_hz   average_value
+2           anomaly_stress   1               5.0                     -0.0379
+3           anomaly_stress   4               5.0                      0.1560
+4           anomaly_stress   5               5.0                     -0.1217
+5           anomaly_stress   2               5.0                      0.0814
+6           anomaly_stress   2               5.0                     -0.0065
+
+source file
+- mqtt_run_2026-04-17_anomaly_profile_synced.jsonl

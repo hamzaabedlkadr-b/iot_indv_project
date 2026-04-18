@@ -1,0 +1,58 @@
+{
+  "messages_received": 4,
+  "unique_windows": 0,
+  "missing_windows_between_first_and_last": 0,
+  "first_window_id": null,
+  "last_window_id": null,
+  "received_span_s": 14.949,
+  "listener_latency_us": {
+    "count": 0,
+    "min": null,
+    "max": null,
+    "avg": null,
+    "p95": null
+  },
+  "end_to_end_latency_us": {
+    "count": 0,
+    "min": null,
+    "max": null,
+    "avg": null,
+    "p95": null
+  },
+  "edge_delay_us": {
+    "count": 0,
+    "min": null,
+    "max": null,
+    "avg": null,
+    "p95": null
+  },
+  "sample_count": {
+    "count": 0,
+    "min": null,
+    "max": null,
+    "avg": null,
+    "p95": null
+  },
+  "sampling_frequency_hz": {
+    "count": 0,
+    "min": null,
+    "max": null,
+    "avg": null,
+    "p95": null
+  },
+  "dominant_frequency_hz": {
+    "count": 0,
+    "min": null,
+    "max": null,
+    "avg": null,
+    "p95": null
+  },
+  "payload_size_bytes": {
+    "count": 4,
+    "min": 319.0,
+    "max": 319.0,
+    "avg": 319.0,
+    "p95": 319.0
+  },
+  "total_payload_bytes": 1276
+}
