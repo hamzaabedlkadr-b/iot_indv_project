@@ -75,7 +75,7 @@ That means:
 
 ### Best Setup: Two Boards
 
-This is the cleanest version if later you have two LoRa / ESP32 boards.
+This is the cleanest version and it matches the best pattern found in the reference repositories shared by the instructor.
 
 Use:
 
@@ -94,6 +94,25 @@ Why this is best:
 - no USB power bypass on the board under test
 - no self-measurement overhead mixed into the result
 - easier live plotting with `BetterSerialPlotter`
+- easier final baseline-vs-adaptive comparison under identical conditions
+
+### Two-Board Setup Without A Separate Bench Supply
+
+If you do not have a dedicated external power supply, use the monitor board's USB-fed `5V` pin as the source.
+
+Use:
+
+- `Board B` on USB to the PC
+- `Board B` `5V` / `VIN` / `VU` / `VBUS` pin as the positive source into `INA219 VIN+`
+- `INA219 VIN-` into the `5V` / `VIN` input of `Board A`
+
+Important:
+
+- this is acceptable for a relative baseline-vs-adaptive comparison
+- do **not** use the monitor board `3.3V` pin to power `Board A`
+- keep `Board A` USB disconnected during the measurement run, or the `INA219` can be bypassed
+
+If the DUT becomes unstable during WiFi peaks, switch later to a powered USB hub or a separate `5V` source.
 
 ### Usable Setup Now: One Heltec + One INA219
 
@@ -135,6 +154,21 @@ For the actual comparison, pair the `INA219` setup with the firmware switch alre
 - `PROJECT_ENABLE_ADAPTIVE_SAMPLING = 0U` for the fixed `50 Hz` baseline
 - `PROJECT_ENABLE_ADAPTIVE_SAMPLING = 1U` for the adaptive run
 
+For the graded requirement in this repository, use these exact DUT settings:
+
+- `PROJECT_COMMUNICATION_MODE = PROJECT_COMMUNICATION_MODE_MQTT_ONLY`
+- `PROJECT_SIGNAL_PROFILE = PROJECT_SIGNAL_PROFILE_CLEAN_REFERENCE`
+- keep `PROJECT_INITIAL_SAMPLING_FREQUENCY_HZ = 50.0f`
+- keep `PROJECT_ENABLE_BETTER_SERIAL_PLOTTER = 0U` during the energy runs
+
+Why this is the right test:
+
+- it isolates the adaptive-sampling benefit for the same main project pipeline
+- it reuses the already validated `MQTT` path and listener tooling
+- it avoids mixing in LoRaWAN duty-cycle variability or unrelated deep-sleep behavior
+
+The deep-sleep example from the reference repos is useful as a bonus discussion, but it should not replace the core graded comparison for this project.
+
 Suggested experiment order:
 
 1. flash baseline mode
@@ -152,6 +186,13 @@ If you stream the `INA219` values to `BetterSerialPlotter`, the most useful seri
 - optionally `busvoltage`
 
 The professor's example already prints values in a plotter-friendly tab-separated format, so that part is aligned with the tooling you already installed.
+
+The repo now includes a ready-to-upload monitor firmware and post-processing scripts:
+
+- [`../firmware/ina219_power_monitor/README.md`](../firmware/ina219_power_monitor/README.md)
+- [`../firmware/ina219_power_monitor/src/main.cpp`](../firmware/ina219_power_monitor/src/main.cpp)
+- [`../results/analyze_ina219_log.py`](../results/analyze_ina219_log.py)
+- [`../results/compare_ina219_runs.py`](../results/compare_ina219_runs.py)
 
 ## What To Save As Evidence
 

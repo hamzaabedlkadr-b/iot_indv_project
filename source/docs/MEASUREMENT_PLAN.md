@@ -77,11 +77,13 @@ Energy is a graded requirement, so we should decide the method before test day.
 The concrete execution steps now live in:
 
 - `docs/ENERGY_MEASUREMENT_RUNBOOK.md`
+- `docs/INA219_ENERGY_SETUP.md`
+- `firmware/ina219_power_monitor/README.md`
 
 Preferred order:
 
-1. direct measurement with a USB power meter or current-measurement setup,
-2. repeated timed runs comparing baseline versus adaptive mode under the same conditions,
+1. direct measurement with the `INA219` two-board setup,
+2. timed baseline versus adaptive runs under the same conditions,
 3. saved notes about instrumentation limits if only an approximate comparison is possible.
 
 For each energy run, record:
@@ -93,6 +95,19 @@ For each energy run, record:
 - total transmitted messages,
 - observed power or energy value,
 - any uncertainty or limitations.
+
+For this project, the minimum meaningful graded comparison is:
+
+- baseline fixed `50 Hz`
+- adaptive run that settles to `40 Hz`
+
+under:
+
+- `clean_reference`
+- `MQTT_ONLY`
+- equal run duration
+
+The deep-sleep examples in some reference repos are useful as additional context, but they should not replace this core comparison.
 
 ## Saved Artifacts
 
