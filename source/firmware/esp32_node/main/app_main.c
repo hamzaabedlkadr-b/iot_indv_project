@@ -201,7 +201,7 @@ void app_main(void)
 
     xTaskCreate(comm_lorawan_task,
                 "comm_lorawan_task",
-                PROJECT_TASK_STACK_SIZE,
+                PROJECT_LORAWAN_TASK_STACK_SIZE,
                 &g_project_context,
                 PROJECT_TASK_PRIORITY_COMM,
                 NULL);
@@ -252,7 +252,7 @@ void app_main(void)
                 ESP_LOGI(TAG,
                          "Supervisor heartbeat | events=0x%02X mode=%s samples=%" PRIu32
                          " windows=%" PRIu32 " aggregates=%" PRIu32
-                         " mqtt=%" PRIu32 " lora=%" PRIu32 " profile=%s"
+                         " mqtt=%" PRIu32 " lora=%" PRIu32 "/%" PRIu32 " profile=%s"
                          " fs=%.1fHz dominant=%.2fHz avg=%.4f updates=%" PRIu32,
                          (unsigned)bits,
                          project_mode_to_string(g_project_context.mode),
@@ -261,6 +261,7 @@ void app_main(void)
                          snapshot.aggregates_processed,
                          snapshot.mqtt_messages_prepared,
                          snapshot.lora_messages_prepared,
+                         snapshot.lora_messages_sent,
                          project_signal_profile_name(g_project_context.latest_aggregate.signal_profile),
                          (double)g_project_context.adaptive.current_sampling_frequency_hz,
                          (double)g_project_context.adaptive.last_dominant_frequency_hz,
@@ -270,7 +271,7 @@ void app_main(void)
                 ESP_LOGI(TAG,
                          "Supervisor heartbeat | events=0x%02X mode=%s samples=%" PRIu32
                          " windows=%" PRIu32 " aggregates=%" PRIu32
-                         " mqtt=%" PRIu32 " lora=%" PRIu32 " profile=%s"
+                         " mqtt=%" PRIu32 " lora=%" PRIu32 "/%" PRIu32 " profile=%s"
                          " fs=%.1fHz dominant=%.2fHz updates=%" PRIu32,
                          (unsigned)bits,
                          project_mode_to_string(g_project_context.mode),
@@ -279,6 +280,7 @@ void app_main(void)
                          snapshot.aggregates_processed,
                          snapshot.mqtt_messages_prepared,
                          snapshot.lora_messages_prepared,
+                         snapshot.lora_messages_sent,
                          project_signal_profile_name(g_project_context.signal_profile),
                          (double)g_project_context.adaptive.current_sampling_frequency_hz,
                          (double)g_project_context.adaptive.last_dominant_frequency_hz,

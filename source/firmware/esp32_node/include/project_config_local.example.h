@@ -28,4 +28,32 @@
 #undef PROJECT_MQTT_TLS_SKIP_COMMON_NAME_CHECK
 #define PROJECT_MQTT_TLS_SKIP_COMMON_NAME_CHECK 0U
 
+#undef PROJECT_LORAWAN_ENABLE_RADIO_TX
+#define PROJECT_LORAWAN_ENABLE_RADIO_TX 1U
+
+#undef PROJECT_LORAWAN_JOIN_EUI_BYTES
+#define PROJECT_LORAWAN_JOIN_EUI_BYTES \
+    { 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U }
+
+#undef PROJECT_LORAWAN_DEV_EUI_BYTES
+#define PROJECT_LORAWAN_DEV_EUI_BYTES \
+    { 0x70U, 0xB3U, 0xD5U, 0x7EU, 0xD0U, 0x07U, 0x70U, 0x26U }
+
+#undef PROJECT_LORAWAN_APP_KEY_BYTES
+#define PROJECT_LORAWAN_APP_KEY_BYTES                                                    \
+    {                                                                                    \
+        0xAAU, 0xBBU, 0xCCU, 0xDDU, 0xEEU, 0xFFU, 0x00U, 0x11U,                         \
+            0x22U, 0x33U, 0x44U, 0x55U, 0x66U, 0x77U, 0x88U, 0x99U                      \
+    }
+
+#undef PROJECT_LORAWAN_HELTEC_LICENSE_WORDS
+#define PROJECT_LORAWAN_HELTEC_LICENSE_WORDS                                             \
+    {                                                                                    \
+        0x11111111U, 0x22222222U, 0x33333333U, 0x44444444U                              \
+    }
+
+// Leave this disabled after the board has already been activated once.
+#undef PROJECT_LORAWAN_APPLY_HELTEC_LICENSE_AT_BOOT
+#define PROJECT_LORAWAN_APPLY_HELTEC_LICENSE_AT_BOOT 0U
+
 #endif

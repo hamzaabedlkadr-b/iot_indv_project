@@ -21,6 +21,12 @@ source/docs/*.log
 source/edge_server/mqtt_listener/logs/
 source/results/summaries/*_live.txt
 source/test_codes/
+source/firmware/esp32_node/_heltec_objdump/
+source/firmware/esp32_node/lorawan_*.log
+source/firmware/heltec_lorawan_smoke_test/
+source/firmware/heltec_lorawan_smoke_test/include/lorawan_smoke_test_local.h
+source/firmware/heltec_lorawan_smoke_test/sketch/heltec_lorawan_smoke_test/lorawan_smoke_test_local.h
+source/pics/Screenshot*.png
 
 tools/
 material/

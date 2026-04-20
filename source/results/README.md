@@ -10,8 +10,10 @@ Available offline tooling:
 
 The current `CSV` format also preserves `signal_profile` and `anomaly_count`, which makes it easier to compare the three bonus signal runs without manually renaming files later.
 
-For the visual evidence we still need to capture later, use:
+Current visual evidence bundles:
 
+- [`lorawan_evidence_2026-04-20.md`](./lorawan_evidence_2026-04-20.md)
+- [`mqtt_evidence_2026-04-18.md`](./mqtt_evidence_2026-04-18.md)
 - [`../docs/EVIDENCE_SCREENSHOT_CHECKLIST.md`](../docs/EVIDENCE_SCREENSHOT_CHECKLIST.md)
 - [`screenshot_inventory_2026-04-18.md`](./screenshot_inventory_2026-04-18.md)
 
@@ -56,6 +58,15 @@ Reference artifacts from the follow-up live MQTT evidence run on `2026-04-18`:
 - `summaries/mqtt_summary_2026-04-18_listener.md`
 - `summaries/mqtt_listener_2026-04-18_live.txt`
 - `mqtt_evidence_2026-04-18.md`
+
+Reference artifacts from the integrated `LoRaWAN + TTN` validation run on `2026-04-20`:
+
+- `lorawan_evidence_2026-04-20.md`
+- `../pics/2026-04-20_serial_lorawan_join_tx.png`
+- `../pics/2026-04-20_serial_lorawan_payload.png`
+- `../pics/2026-04-20_ttn_live_data_uplink.png`
+- `../pics/2026-04-20_ttn_uplink_decoded.png`
+- `../pics/2026-04-20_ttn_device_overview.png`
 
 Examples of artifacts to keep here:
 

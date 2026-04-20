@@ -102,7 +102,8 @@ void metrics_task(void *pvParameters)
                          " last_aggregate=%llu last_publish=%llu aggregates=%" PRIu32
                          " latest_window=%" PRIu32 " profile=%s anomalies=%" PRIu32
                          " avg=%.4f edge_latency_us=%llu"
-                         " mqtt_sent=%" PRIu32 " lora_prepared=%" PRIu32,
+                         " mqtt_sent=%" PRIu32 " lora_prepared=%" PRIu32
+                         " lora_sent=%" PRIu32,
                          snapshot.boot_time_us == 0 ? 0ULL : now_us - snapshot.boot_time_us,
                          snapshot.last_sample_us,
                          snapshot.last_fft_us,
@@ -115,13 +116,14 @@ void metrics_task(void *pvParameters)
                          (double)ctx->latest_aggregate.average_value,
                          snapshot.last_edge_latency_us,
                          snapshot.mqtt_messages_sent,
-                         snapshot.lora_messages_prepared);
+                         snapshot.lora_messages_prepared,
+                         snapshot.lora_messages_sent);
             } else {
                 ESP_LOGI(TAG,
                          "Metrics heartbeat | uptime_us=%llu last_sample=%llu last_fft=%llu"
                          " last_aggregate=%llu last_publish=%llu aggregates=%" PRIu32
                          " edge_latency_us=%llu mqtt_sent=%" PRIu32
-                         " lora_prepared=%" PRIu32,
+                         " lora_prepared=%" PRIu32 " lora_sent=%" PRIu32,
                          snapshot.boot_time_us == 0 ? 0ULL : now_us - snapshot.boot_time_us,
                          snapshot.last_sample_us,
                          snapshot.last_fft_us,
@@ -130,7 +132,8 @@ void metrics_task(void *pvParameters)
                          snapshot.aggregates_processed,
                          snapshot.last_edge_latency_us,
                          snapshot.mqtt_messages_sent,
-                         snapshot.lora_messages_prepared);
+                         snapshot.lora_messages_prepared,
+                         snapshot.lora_messages_sent);
             }
 
             last_heartbeat_us = now_us;

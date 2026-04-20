@@ -90,6 +90,9 @@ typedef struct {
     uint32_t window_id;
     uint64_t source_timestamp_us;
     uint64_t publish_latency_us;
+    uint8_t port;
+    uint8_t binary_payload_size;
+    uint8_t binary_payload[16];
     char topic[64];
     char payload[512];
 } transmission_payload_t;
@@ -106,6 +109,7 @@ typedef struct {
     uint32_t mqtt_messages_prepared;
     uint32_t mqtt_messages_sent;
     uint32_t lora_messages_prepared;
+    uint32_t lora_messages_sent;
     uint64_t last_edge_latency_us;
 } timing_metrics_t;
 

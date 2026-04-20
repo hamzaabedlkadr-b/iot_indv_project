@@ -1,6 +1,6 @@
 # ESP32 Adaptive Sampling IoT Project
 
-This repository contains an `ESP32 + FreeRTOS` implementation of the individual IoT assignment: generate or read a signal, estimate its dominant frequency locally, adapt the sampling rate, compute a windowed aggregate, send the result to an edge server with `MQTT/WiFi`, and prepare the same aggregate for `LoRaWAN + TTN`.
+This repository contains an `ESP32 + FreeRTOS` implementation of the individual IoT assignment: generate or read a signal, estimate its dominant frequency locally, adapt the sampling rate, compute a windowed aggregate, send the result to an edge server with `MQTT/WiFi`, and send the same aggregate over `LoRaWAN + TTN`.
 
 The project is intentionally built around a `virtual sensor` so the required signal is repeatable, measurable, and easy to compare across runs. An optional real-sensor path can be added later, but the graded pipeline is the virtual-signal path.
 
@@ -9,20 +9,22 @@ The project is intentionally built around a `virtual sensor` so the required sig
 - `MQTT/WiFi` validation is complete on the real Heltec board on the home network.
 - The firmware supports three signal profiles: `clean_reference`, `noisy_reference`, and `anomaly_stress`.
 - The board has already been visualized live with `BetterSerialPlotter`.
-- The `LoRaWAN/TTN` payload path is implemented and produces compact uplink payloads, but the real gateway test is still pending on campus.
+- The integrated main app now publishes compact aggregate payloads over `LoRaWAN/TTN` on real hardware near working gateway coverage, and the serial plus `TTN` screenshots are saved in the repo.
 - `Energy` comparison is still open, and `secure MQTT` is now implemented but still needs a live TLS validation run.
 
 ## Where To Start
 
 - Assignment brief: [`ASSIGNMENT_BRIEF.md`](./ASSIGNMENT_BRIEF.md)
 - Requirements and implementation framing: [`PROJECT_REQUIREMENTS.md`](./PROJECT_REQUIREMENTS.md)
+- Submission snapshot: [`docs/SUBMISSION_SNAPSHOT.md`](./docs/SUBMISSION_SNAPSHOT.md)
 - Evidence map: [`docs/GRADING_EVIDENCE_MATRIX.md`](./docs/GRADING_EVIDENCE_MATRIX.md)
 - Current detailed progress report: [`docs/CURRENT_PROGRESS_REPORT.md`](./docs/CURRENT_PROGRESS_REPORT.md)
-- Current detailed LaTeX report: [`docs/CURRENT_PROGRESS_REPORT.tex`](./docs/CURRENT_PROGRESS_REPORT.tex) and [`docs/CURRENT_PROGRESS_REPORT.pdf`](./docs/CURRENT_PROGRESS_REPORT.pdf)
+- Historical detailed phase report: [`docs/PHASE1_REPORT.tex`](./docs/PHASE1_REPORT.tex) and [`docs/PHASE1_REPORT.pdf`](./docs/PHASE1_REPORT.pdf)
 - Presentation strategy: [`docs/PRESENTATION_PLAYBOOK.md`](./docs/PRESENTATION_PLAYBOOK.md)
 - Screenshot checklist: [`docs/EVIDENCE_SCREENSHOT_CHECKLIST.md`](./docs/EVIDENCE_SCREENSHOT_CHECKLIST.md)
 - Runtime notes from the live board sessions: [`results/runtime_notes_2026-04-17.md`](./results/runtime_notes_2026-04-17.md)
 - Latest clean MQTT evidence bundle: [`results/mqtt_evidence_2026-04-18.md`](./results/mqtt_evidence_2026-04-18.md)
+- Latest LoRaWAN evidence bundle: [`results/lorawan_evidence_2026-04-20.md`](./results/lorawan_evidence_2026-04-20.md)
 
 ## System Pipeline
 
@@ -46,7 +48,7 @@ The final implementation path is the modular firmware under [`firmware/esp32_nod
 | Optimal sampling frequency | Dominant frequency `5 Hz` leads to adaptive rate change `50 Hz -> 40 Hz` | [`docs/PHASE1_REPORT.tex`](./docs/PHASE1_REPORT.tex), [`pics/2026-04-18_better_serial_plotter_live_view.png`](./pics/2026-04-18_better_serial_plotter_live_view.png) | Validated |
 | Aggregate over a window | `5 s` window average is computed and carried through MQTT / LoRa payloads | [`results/runtime_notes_2026-04-17.md`](./results/runtime_notes_2026-04-17.md) | Validated |
 | MQTT edge delivery | Real board publishes to local broker and listener receives consecutive windows | [`results/mqtt_evidence_2026-04-18.md`](./results/mqtt_evidence_2026-04-18.md) | Validated |
-| LoRaWAN / TTN cloud delivery | Compact uplink payloads are prepared; live TTN validation still pending | [`cloud/ttn_payloads/README.md`](./cloud/ttn_payloads/README.md), [`results/serial_sntp_2026-04-17.log`](./results/serial_sntp_2026-04-17.log) | Pending campus test |
+| LoRaWAN / TTN cloud delivery | Integrated main-app LoRaWAN path validated on hardware; serial evidence shows `joined=1`, radio queuing, `Tx Done`, and `TTN` uplinks on `FPort 1` | [`results/lorawan_evidence_2026-04-20.md`](./results/lorawan_evidence_2026-04-20.md), [`cloud/ttn_payloads/README.md`](./cloud/ttn_payloads/README.md) | Validated |
 | End-to-end latency | Clean home-network dataset captured from synchronized timestamps | [`results/summaries/mqtt_summary_2026-04-18_listener.md`](./results/summaries/mqtt_summary_2026-04-18_listener.md) | Validated |
 | Communication volume | Adaptive payload size is measured; baseline-vs-adaptive comparison still needs the fixed-rate run | [`results/summaries/mqtt_summary_2026-04-18_listener.md`](./results/summaries/mqtt_summary_2026-04-18_listener.md) | Partial |
 | Energy savings | Measurement method and run order are prepared; real meter runs still pending | [`docs/ENERGY_MEASUREMENT_RUNBOOK.md`](./docs/ENERGY_MEASUREMENT_RUNBOOK.md) | Pending |
@@ -130,14 +132,19 @@ Key numbers from that run:
 
 ### 5. LoRaWAN + TTN
 
-The firmware already serializes a compact LoRa-style aggregate payload and records it in the runtime logs. The campus-only step that remains is the actual uplink through a reachable gateway and the `TTN` console screenshot.
+The firmware now runs the Heltec `LoRaWAN` stack directly inside the main ESP-IDF application and records real radio activity in the runtime logs. The live validation on `2026-04-20` showed queued aggregate payloads, `joined=1` in the LoRaWAN heartbeat, and successful `Tx Done` events from the integrated main app.
 
 Prepared artifacts:
 
+- [`results/lorawan_evidence_2026-04-20.md`](./results/lorawan_evidence_2026-04-20.md)
 - [`cloud/ttn_payloads/README.md`](./cloud/ttn_payloads/README.md)
 - [`cloud/ttn_payloads/ttn_decoder.js`](./cloud/ttn_payloads/ttn_decoder.js)
-- [`results/serial_sntp_2026-04-17.log`](./results/serial_sntp_2026-04-17.log)
 - [`docs/RUNTIME_VALIDATION_CHECKLIST.md`](./docs/RUNTIME_VALIDATION_CHECKLIST.md)
+- [`pics/2026-04-20_serial_lorawan_join_tx.png`](./pics/2026-04-20_serial_lorawan_join_tx.png)
+- [`pics/2026-04-20_serial_lorawan_payload.png`](./pics/2026-04-20_serial_lorawan_payload.png)
+- [`pics/2026-04-20_ttn_live_data_uplink.png`](./pics/2026-04-20_ttn_live_data_uplink.png)
+- [`pics/2026-04-20_ttn_uplink_decoded.png`](./pics/2026-04-20_ttn_uplink_decoded.png)
+- [`pics/2026-04-20_ttn_device_overview.png`](./pics/2026-04-20_ttn_device_overview.png)
 
 ### 6. Performance Evaluation
 
@@ -215,8 +222,8 @@ The final submission still needs the prompt history to be curated into a cleaner
 
 ## Remaining Work Before Submission
 
-- perform the real `LoRaWAN/TTN` uplink test on campus
 - run the meter-based `energy` comparison for baseline versus adaptive mode
+- reuse the fixed-rate baseline run to finish the direct communication-volume comparison row
 - validate the `secure MQTT` path against a TLS-capable broker and capture one saved run
 - capture the remaining screenshots listed in [`docs/EVIDENCE_SCREENSHOT_CHECKLIST.md`](./docs/EVIDENCE_SCREENSHOT_CHECKLIST.md)
 

@@ -18,7 +18,7 @@ Present the project in a way that is:
 - easy to follow quickly during the workshop
 - aligned with the grading rubric
 - backed by concrete evidence
-- honest about what is already validated and what still requires campus testing
+- honest about what is already validated and what still requires a final live run
 
 ## Best Patterns To Reuse
 
@@ -95,7 +95,7 @@ This is risky in a workshop evaluation.
 
 Avoid:
 
-- saying LoRaWAN is "done" before the live campus test exists
+- saying LoRaWAN is "done" before the saved `TTN` evidence exists
 - saying MQTT is secure before TLS is actually in place
 - presenting future measurement work as completed evidence
 
@@ -139,7 +139,7 @@ Recommended demo flow:
 6. show MQTT message reception and saved summary
 7. show the three signal profiles and their saved summaries
 8. show energy and latency evidence
-9. show LoRaWAN / TTN evidence on campus
+9. show the saved LoRaWAN / TTN evidence captured near working gateway coverage
 
 This keeps the presentation aligned with the rubric and avoids jumping around.
 
@@ -178,7 +178,7 @@ Before submission, the main `README.md` should explicitly answer:
 - how latency was measured
 - how communication volume was measured
 - what the three signal profiles are
-- which parts were validated at home and which on campus
+- which parts were validated on the home network and which near working `TTN` gateway coverage
 - what prompts and LLM limitations are being reported
 
 ## Closing Rule

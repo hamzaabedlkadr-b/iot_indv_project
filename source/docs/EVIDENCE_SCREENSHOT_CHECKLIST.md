@@ -24,13 +24,13 @@ Examples:
 
 Recommended destination folders:
 
-- final README figures: `results/`
-- raw workshop screenshots: `results/`
+- final README figures: `pics/`
+- raw workshop screenshots: `pics/`
 - if the number grows large, create subfolders later such as:
-  - `results/screenshots/runtime/`
-  - `results/screenshots/mqtt/`
-  - `results/screenshots/ttn/`
-  - `results/screenshots/power/`
+  - `pics/runtime/`
+  - `pics/mqtt/`
+  - `pics/ttn/`
+  - `pics/power/`
 
 ## Mandatory Screenshots
 
@@ -309,10 +309,16 @@ Suggested caption:
 
 ### 15. TTN Uplink Received
 
-What to capture later on campus:
+What to capture near working gateway coverage:
 
 - TTN console screenshot showing the real uplink
 - decoded payload if possible
+
+Already captured example files:
+
+- `../pics/2026-04-20_ttn_live_data_uplink.png`
+- `../pics/2026-04-20_ttn_uplink_decoded.png`
+- `../pics/2026-04-20_ttn_device_overview.png`
 
 Why it matters:
 
@@ -354,15 +360,19 @@ Suggested filename:
 
 - `supervisor_heartbeat.png`
 
-### 3. LoRaWAN Stub-Ready Payload Before Campus
+### 3. LoRaWAN Main-App Serial Proof
 
 What to capture:
 
-- serial output showing compact LoRaWAN payload creation
+- serial output showing:
+  - `joined=1`
+  - `LoRaWAN uplink queued to radio`
+  - `Event : Tx Done`
+  - or `Prepared LoRaWAN aggregate payload`
 
 Suggested filename:
 
-- `lorawan_stub_payload_ready.png`
+- `lorawan_join_and_tx_done.png`
 
 ### 4. Runtime Notes Or Results Folder Snapshot
 

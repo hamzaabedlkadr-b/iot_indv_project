@@ -1,8 +1,8 @@
-# Screenshot Inventory - 2026-04-18
+# Screenshot Inventory
 
 This file lists the evidence screenshots that were generated from the saved project artifacts.
 
-## Generated PNG Evidence
+## 2026-04-18 MQTT And Plotter Evidence
 
 - `screenshots/mqtt_listener_received_message_2026-04-18.png`
   Caption: `Edge listener receiving real aggregate messages from the ESP32 over MQTT.`
@@ -20,3 +20,20 @@ This file lists the evidence screenshots that were generated from the saved proj
 
 - `../pics/2026-04-18_better_serial_plotter_live_view.png`
   Caption: `BetterSerialPlotter receiving the live adaptive-sampling stream from the Heltec board, showing sampling frequency, dominant frequency, and aggregate average.`
+
+## 2026-04-20 LoRaWAN And TTN Evidence
+
+- `../pics/2026-04-20_serial_lorawan_join_tx.png`
+  Caption: `Integrated main-app serial log showing joined=1, LoRaWAN radio queuing, and Tx Done on the Heltec board.`
+
+- `../pics/2026-04-20_serial_lorawan_payload.png`
+  Caption: `Integrated main-app serial log showing the compact 10-byte LoRaWAN payload and the aggregate fields used to build it.`
+
+- `../pics/2026-04-20_ttn_live_data_uplink.png`
+  Caption: `TTN Live Data view showing fresh uplinks from the integrated main app on FPort 1.`
+
+- `../pics/2026-04-20_ttn_uplink_decoded.png`
+  Caption: `TTN event details showing the uplink message and raw frm_payload for the validated LoRaWAN transmission.`
+
+- `../pics/2026-04-20_ttn_device_overview.png`
+  Caption: `TTN device overview showing recent activity and repeated cloud-side visibility for the Heltec node.`

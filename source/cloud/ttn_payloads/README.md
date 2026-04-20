@@ -13,13 +13,23 @@ Current payload layout:
 Current firmware behavior:
 
 - prepares a hex representation of this payload for logs and queue inspection,
-- keeps radio transmission disabled until the real `TTN` test on campus,
+- drives the integrated Heltec `LoRaWAN` radio path from the main application when credentials are present,
 - uses `FPort 1` by default.
 
 Included offline artifact:
 
 - [`ttn_decoder.js`](./ttn_decoder.js) decodes the current 10-byte aggregate payload inside `TTN`.
 
-Next step:
+Validation bundle saved on `2026-04-20`:
 
-- verify during the campus test that the decoded `TTN` values match the original aggregate fields.
+- [`../../results/lorawan_evidence_2026-04-20.md`](../../results/lorawan_evidence_2026-04-20.md)
+- [`../../pics/2026-04-20_serial_lorawan_join_tx.png`](../../pics/2026-04-20_serial_lorawan_join_tx.png)
+- [`../../pics/2026-04-20_serial_lorawan_payload.png`](../../pics/2026-04-20_serial_lorawan_payload.png)
+- [`../../pics/2026-04-20_ttn_live_data_uplink.png`](../../pics/2026-04-20_ttn_live_data_uplink.png)
+- [`../../pics/2026-04-20_ttn_uplink_decoded.png`](../../pics/2026-04-20_ttn_uplink_decoded.png)
+- [`../../pics/2026-04-20_ttn_device_overview.png`](../../pics/2026-04-20_ttn_device_overview.png)
+
+If the payload layout changes later:
+
+- update [`ttn_decoder.js`](./ttn_decoder.js),
+- repeat the same screenshot set so the decoded values still match the serialized aggregate fields.

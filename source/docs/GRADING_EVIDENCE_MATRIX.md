@@ -18,7 +18,7 @@ Status legend:
 | Measure correctly the end-to-end latency | `5` | Validated | [`../results/summaries/mqtt_summary_2026-04-18_listener.md`](../results/summaries/mqtt_summary_2026-04-18_listener.md) and [`../results/mqtt_evidence_2026-04-18.md`](../results/mqtt_evidence_2026-04-18.md) | Take or reuse one screenshot of the saved summary |
 | Transmit the result to the MQTT server in a secure way | `10` | Partial | [`SECURE_MQTT_SETUP.md`](./SECURE_MQTT_SETUP.md) and the updated MQTT client support `mqtts://`, certificate verification, and optional credentials | Validate the TLS path against a real secure broker and save one proof run |
 | Quality of the FreeRTOS code | `5` | Validated | Modular task pipeline under [`../firmware/esp32_node/`](../firmware/esp32_node/), queue separation, comments, and component READMEs | Be ready to explain task ownership, queues, and timing decisions in the workshop |
-| Quality of presentation of project in the GitHub repository | `5` | Partial | [`../README.md`](../README.md), [`PRESENTATION_PLAYBOOK.md`](./PRESENTATION_PLAYBOOK.md), [`EVIDENCE_SCREENSHOT_CHECKLIST.md`](./EVIDENCE_SCREENSHOT_CHECKLIST.md) | Add the remaining screenshots and fill the final README figures |
+| Quality of presentation of project in the GitHub repository | `5` | Validated | [`../../README.md`](../../README.md), [`../README.md`](../README.md), [`../results/lorawan_evidence_2026-04-20.md`](../results/lorawan_evidence_2026-04-20.md), [`../results/mqtt_evidence_2026-04-18.md`](../results/mqtt_evidence_2026-04-18.md) | Keep the README tables and screenshot links synchronized when the deferred energy and secure-MQTT results are added |
 | Consider three different input signals | `20` | Validated | [`../results/summaries/mqtt_summary_2026-04-17_clean_profile_synced.md`](../results/summaries/mqtt_summary_2026-04-17_clean_profile_synced.md), [`../results/summaries/mqtt_summary_2026-04-17_noisy_profile_synced.md`](../results/summaries/mqtt_summary_2026-04-17_noisy_profile_synced.md), [`../results/summaries/mqtt_summary_2026-04-17_anomaly_profile_synced.md`](../results/summaries/mqtt_summary_2026-04-17_anomaly_profile_synced.md) | Capture one screenshot per profile or a combined comparison table |
 
 ## Most Important Missing Proofs
@@ -26,7 +26,7 @@ Status legend:
 If time is short, the highest-value missing items are:
 
 1. `Energy` comparison screenshots and numbers
-2. `TTN` campus uplink screenshot
+2. one fixed-rate baseline run to finish the direct communication-volume comparison row
 3. `Secure MQTT` validation if a TLS-capable broker is available
 
 ## Recommended Workshop Order
@@ -35,5 +35,6 @@ If time is short, the highest-value missing items are:
 2. Show the `50 Hz` maximum stable benchmark result.
 3. Show the adaptive update to `40 Hz`.
 4. Show the aggregate and MQTT listener evidence.
-5. Show the three signal-profile summaries.
-6. Show energy and TTN once those final artifacts are collected.
+5. Show the LoRa serial proof and `TTN` screenshots from `2026-04-20`.
+6. Show the three signal-profile summaries.
+7. Close with the deferred energy and secure-MQTT items, or show them once those final artifacts are collected.

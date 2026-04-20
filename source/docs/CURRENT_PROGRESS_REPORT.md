@@ -1,6 +1,6 @@
 # Current Progress Report
 
-Date: `2026-04-18`
+Date: `2026-04-20`
 
 This report summarizes the project state up to the current checkpoint. It is meant to be the readable, up-to-date companion to the older historical report in [`PHASE1_REPORT.tex`](./PHASE1_REPORT.tex), which still documents Phases `1` to `7` in depth.
 
@@ -21,7 +21,7 @@ The project now has a working `ESP32 + FreeRTOS` pipeline that:
 - adapts the sampling frequency at runtime
 - computes a per-window aggregate
 - publishes real aggregate messages to a nearby edge server over `MQTT/WiFi`
-- prepares compact aggregate payloads for `LoRaWAN + TTN`
+- publishes compact aggregate payloads through `LoRaWAN + TTN`
 
 The main local validation milestone is complete:
 
@@ -32,8 +32,8 @@ The main local validation milestone is complete:
 
 The project is not fully finished yet. The remaining work is:
 
-- a real `LoRaWAN/TTN` validation run on campus
 - energy measurements using a cleaner `INA219` setup when two Heltec boards are available
+- one fixed-rate baseline run to finish the direct communication-volume comparison row from the same controlled setup
 - one live `MQTTS` validation run if a TLS-capable broker is available
 
 ## 2. Current Phase Status
@@ -48,10 +48,10 @@ The project is not fully finished yet. The remaining work is:
 | `6` | Adaptive sampling | Complete | Runtime update from `50 Hz` to `40 Hz` validated |
 | `7` | Aggregate computation | Complete | Window averages are computed and passed downstream |
 | `8` | MQTT over WiFi | Complete | End-to-end home-network validation completed on hardware |
-| `9` | LoRaWAN + TTN | Partial | Payload path is implemented, but real TTN proof is still pending |
+| `9` | LoRaWAN + TTN | Complete | Integrated main-app LoRaWAN validation succeeded on real hardware near working gateway coverage |
 | `10` | Performance measurements | Partial | Latency and payload-size evidence exist; energy is still pending |
 | `11` | Optional physical sensor / extras | Optional | Not required for the core project |
-| `12` | Final packaging and write-up | In progress | README, evidence map, and screenshot assets are being prepared |
+| `12` | Final packaging and write-up | In progress | README, evidence map, and the latest LoRaWAN screenshots are now curated; final short write-up remains |
 
 ## 3. Project Architecture
 
@@ -73,7 +73,7 @@ The modular structure is important for the workshop because each task has a clea
 - `signal_processing`: window buffering, dominant-frequency estimation, and aggregate creation
 - `sampling_control`: adaptive policy
 - `comm_mqtt`: edge publishing
-- `comm_lorawan`: compact uplink payload preparation
+- `comm_lorawan`: compact uplink packing and integrated Heltec radio delivery
 - `metrics`: runtime counters and timing support
 
 ## 4. Hardware And Software Used
@@ -303,25 +303,29 @@ This is presentation evidence for the live signal-processing pipeline, not for M
 
 ## 12. LoRaWAN And TTN Status
 
-The `LoRaWAN` path is implemented up to the payload-preparation stage.
+The `LoRaWAN` path is now validated in the integrated main application.
 
 What is already true:
 
-- the aggregate is serialized into a compact uplink payload
+- the aggregate is serialized into a compact `10-byte` uplink payload
 - the LoRa path is integrated into the same pipeline as MQTT
-- the runtime logs show prepared payloads such as:
-  `000100C8019001F4FFE8`
+- the live `2026-04-20` main-app run showed queued payloads such as `000100C8019001F40000`
+- the LoRaWAN heartbeat reported `joined=1`
+- the radio path logged `LoRaWAN uplink queued to radio` and `Event : Tx Done`
 
-What is still missing:
+Saved evidence bundle:
 
-- a real uplink through a reachable gateway
-- `TTN` live data screenshots
-- decoded cloud-side proof
+- [`../results/lorawan_evidence_2026-04-20.md`](../results/lorawan_evidence_2026-04-20.md)
+- [`../pics/2026-04-20_serial_lorawan_join_tx.png`](../pics/2026-04-20_serial_lorawan_join_tx.png)
+- [`../pics/2026-04-20_serial_lorawan_payload.png`](../pics/2026-04-20_serial_lorawan_payload.png)
+- [`../pics/2026-04-20_ttn_live_data_uplink.png`](../pics/2026-04-20_ttn_live_data_uplink.png)
+- [`../pics/2026-04-20_ttn_uplink_decoded.png`](../pics/2026-04-20_ttn_uplink_decoded.png)
+- [`../pics/2026-04-20_ttn_device_overview.png`](../pics/2026-04-20_ttn_device_overview.png)
 
 So the correct current description is:
 
-- `LoRaWAN/TTN` path is `implemented and stub-ready`
-- `live TTN validation is still pending`
+- `LoRaWAN/TTN` path is `implemented and validated on hardware`
+- the repo already contains the serial and `TTN` screenshots needed to present that proof
 
 ## 13. Secure MQTT Status
 
@@ -402,9 +406,12 @@ Useful current evidence files include:
 - [`PHASE1_REPORT.tex`](./PHASE1_REPORT.tex)
 - [`../results/runtime_notes_2026-04-17.md`](../results/runtime_notes_2026-04-17.md)
 - [`../results/mqtt_evidence_2026-04-18.md`](../results/mqtt_evidence_2026-04-18.md)
+- [`../results/lorawan_evidence_2026-04-20.md`](../results/lorawan_evidence_2026-04-20.md)
 - [`../results/screenshot_inventory_2026-04-18.md`](../results/screenshot_inventory_2026-04-18.md)
 - [`../results/screenshots/`](../results/screenshots/)
 - [`../results/summaries/`](../results/summaries/)
+- [`../pics/2026-04-20_ttn_live_data_uplink.png`](../pics/2026-04-20_ttn_live_data_uplink.png)
+- [`../pics/2026-04-20_ttn_uplink_decoded.png`](../pics/2026-04-20_ttn_uplink_decoded.png)
 
 ## 18. Remaining Work
 
@@ -412,11 +419,10 @@ The remaining work before the final submission is:
 
 | Item | Status | Notes |
 | --- | --- | --- |
-| `LoRaWAN/TTN` live proof | pending | must be done on campus or under real gateway coverage |
-| Energy measurements | pending | deferred until a cleaner two-board setup is available |
+| Energy measurements and fixed-rate baseline comparison | pending | deferred until a cleaner two-board setup is available; the same run should finish the direct communication-volume comparison |
 | Secure MQTT live TLS proof | pending | firmware support exists, but no saved live TLS run yet |
 | Prompt log curation | pending | intentionally left for later |
-| Final short report | pending | this detailed report will make that much easier |
+| Final short report | complete | [`SUBMISSION_SNAPSHOT.md`](./SUBMISSION_SNAPSHOT.md) now captures the honest submission-ready state |
 
 ## 19. Conclusion
 
@@ -433,10 +439,9 @@ The most important completed achievements are:
 - real latency measurements based on synchronized timestamps
 - three validated signal profiles including anomaly-aware evidence
 
-The most important missing items are now concentrated and clear:
+The most important remaining items are now concentrated and clear:
 
-- real `TTN` uplink evidence
-- energy comparison measurements
+- energy comparison measurements and the matching fixed-rate baseline comparison
 - one secure `MQTTS` validation run
 
-This means the project is already in a strong state for the workshop: the core pipeline works, the edge path is proven, and the remaining work is focused on final measurement and cloud validation rather than on missing core functionality.
+This means the project is already in a strong state for the workshop: the core pipeline works, both communication paths have been proven on hardware, and the remaining work is focused on final measurement and evidence packaging rather than on missing core functionality.
