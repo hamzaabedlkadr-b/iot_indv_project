@@ -1,103 +1,309 @@
-# ESP32 Adaptive Sampling IoT Assignment
+# ESP32 Adaptive Sampling IoT System
 
-This repository contains an `ESP32 + FreeRTOS` implementation of the individual IoT assignment: generate a virtual sensor signal, estimate its dominant frequency with an `FFT`, adapt the sampling rate, compute a windowed aggregate, publish that aggregate to a nearby edge server over `MQTT/WiFi`, and send the same aggregate over `LoRaWAN + TTN`.
+Individual IoT assignment implementation using a `Heltec WiFi LoRa 32 V3`, `ESP-IDF`, and `FreeRTOS`.
 
-The technical project files live under [`source/`](./source/). The repository root is intentionally kept lightweight so the public submission looks clean and focused.
+This project builds an IoT node that generates a virtual sensor signal, samples it, analyzes it locally with an FFT, adapts the sampling frequency, computes a `5 s` aggregate, sends the aggregate to a nearby edge server over `MQTT/WiFi`, and sends the same aggregate to the cloud through `LoRaWAN + TTN`.
 
-## Status Snapshot
+## Table Of Contents
 
-| Assignment area | Current status | Main evidence |
+- [Overview](#overview)
+- [Assignment Coverage](#assignment-coverage)
+- [System Architecture](#system-architecture)
+- [Code Organization](#code-organization)
+- [Implementation Details](#implementation-details)
+- [Performance Evaluation](#performance-evaluation)
+- [Evidence Gallery](#evidence-gallery)
+- [Setup And Run](#setup-and-run)
+- [Current Limitation](#current-limitation)
+
+## Overview
+
+The input signal follows the assignment model:
+
+```text
+s(t) = 2*sin(2*pi*3*t) + 4*sin(2*pi*5*t)
+```
+
+The firmware detects the `5 Hz` dominant component and adapts the sampling rate from the fixed baseline `50 Hz` to the optimized steady-state rate `40 Hz` using an `8x` oversampling policy.
+
+Main features:
+
+- FreeRTOS task pipeline for sampling, processing, control, communication, metrics, and display.
+- Raw maximum sampling benchmark measured at `199,126.59 Hz`.
+- FFT-based dominant-frequency detection.
+- Adaptive sampling from `50 Hz` to `40 Hz`.
+- Window average over `5 s`.
+- MQTT edge delivery with saved listener logs and latency summaries.
+- LoRaWAN + TTN uplink proof with serial and TTN screenshots.
+- INA219 energy comparison for baseline, adaptive, and adaptive + deep sleep.
+- Three signal profiles and extended anomaly-filter evaluation.
+
+## Assignment Coverage
+
+| Requirement | Result | Evidence |
 | --- | --- | --- |
-| Maximum sampling frequency | Raw benchmark measured `199,126.59 Hz`; strict full-pipeline baseline remains `50 Hz` | [`source/pics/Sampling_frequency.png`](./source/pics/Sampling_frequency.png), [`source/docs/CURRENT_PROGRESS_REPORT.md`](./source/docs/CURRENT_PROGRESS_REPORT.md) |
-| FFT-based adaptive sampling | Validated (`50 Hz -> 40 Hz`) | [`source/README.md`](./source/README.md) |
-| Aggregate over a `5 s` window | Validated | [`source/README.md`](./source/README.md) |
-| MQTT over WiFi to edge server | Validated on real hardware, including a fresh WiFi run after the network change | [`source/results/mqtt_evidence_2026-04-18.md`](./source/results/mqtt_evidence_2026-04-18.md), [`source/results/wifi_mqtt_evidence_2026-04-21.md`](./source/results/wifi_mqtt_evidence_2026-04-21.md) |
-| Three input signals bonus | Validated for `clean_reference`, `noisy_reference`, and `anomaly_stress` | [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md), [`source/results/summaries/signal_profile_comparison_2026-04-18.txt`](./source/results/summaries/signal_profile_comparison_2026-04-18.txt) |
-| Anomaly filters bonus | Evaluated with `Z-score` and `Hampel` filters at `p=1%, 5%, 10%` | [`source/results/summaries/anomaly_filter_evaluation_2026-04-21.md`](./source/results/summaries/anomaly_filter_evaluation_2026-04-21.md) |
-| LoRaWAN + TTN cloud path | Validated on real hardware with the integrated main app; serial and `TTN` screenshots are saved in the repo | [`source/results/lorawan_evidence_2026-04-20.md`](./source/results/lorawan_evidence_2026-04-20.md) |
-| Communication volume | Baseline-vs-adaptive table completed; aggregate MQTT bytes stay flat while represented samples drop `20%` | [`source/results/summaries/communication_volume_comparison_2026-04-21.md`](./source/results/summaries/communication_volume_comparison_2026-04-21.md) |
-| Energy comparison | INA219 two-board baseline/adaptive measurement completed; adaptive saved `0.06%` energy, and optional deep sleep saved `26.04%` | [`source/results/summaries/ina219_comparison_2026-04-21.md`](./source/results/summaries/ina219_comparison_2026-04-21.md), [`source/results/summaries/ina219_three_mode_comparison_2026-04-21.md`](./source/results/summaries/ina219_three_mode_comparison_2026-04-21.md) |
-| Secure MQTT | TLS-capable firmware path implemented, live proof still pending | [`source/docs/SECURE_MQTT_SETUP.md`](./source/docs/SECURE_MQTT_SETUP.md) |
+| Maximum sampling frequency | Raw benchmark: `199,126.59 Hz`; strict full-pipeline baseline: `50 Hz` | [`source/pics/Sampling_frequency.png`](./source/pics/Sampling_frequency.png), [`source/docs/CURRENT_PROGRESS_REPORT.md`](./source/docs/CURRENT_PROGRESS_REPORT.md) |
+| Optimal sampling frequency | Dominant `5 Hz`, adaptive rate `40 Hz` | [`source/pics/2026-04-18_better_serial_plotter_live_view.png`](./source/pics/2026-04-18_better_serial_plotter_live_view.png) |
+| Aggregate over window | `5 s` window average computed and propagated to MQTT and LoRaWAN | [`source/results/runtime_notes_2026-04-17.md`](./source/results/runtime_notes_2026-04-17.md) |
+| MQTT over WiFi | Real Heltec board published aggregate messages to the edge listener | [`source/results/mqtt_evidence_2026-04-18.md`](./source/results/mqtt_evidence_2026-04-18.md), [`source/results/wifi_mqtt_evidence_2026-04-21.md`](./source/results/wifi_mqtt_evidence_2026-04-21.md) |
+| LoRaWAN + TTN | Integrated main app joined and sent uplinks to TTN | [`source/results/lorawan_evidence_2026-04-20.md`](./source/results/lorawan_evidence_2026-04-20.md) |
+| Energy saving | Adaptive awake run: `-0.06%`; optional deep sleep: `-26.04%` | [`source/results/summaries/ina219_comparison_2026-04-21.md`](./source/results/summaries/ina219_comparison_2026-04-21.md) |
+| Communication volume | Represented samples drop `20%`; aggregate MQTT bytes stay flat | [`source/results/summaries/communication_volume_comparison_2026-04-21.md`](./source/results/summaries/communication_volume_comparison_2026-04-21.md) |
+| End-to-end latency | Saved synchronized MQTT listener run | [`source/results/summaries/mqtt_summary_2026-04-18_listener.md`](./source/results/summaries/mqtt_summary_2026-04-18_listener.md) |
+| Three input signals | `clean_reference`, `noisy_reference`, `anomaly_stress` | [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md) |
+| Anomaly filters bonus | Z-score and Hampel evaluated at `p=1%, 5%, 10%` | [`source/results/summaries/anomaly_filter_evaluation_2026-04-21.md`](./source/results/summaries/anomaly_filter_evaluation_2026-04-21.md) |
+| Secure MQTT | Firmware supports `mqtts://`; live TLS broker proof still pending | [`source/docs/SECURE_MQTT_SETUP.md`](./source/docs/SECURE_MQTT_SETUP.md) |
 
-## Start Here
+## System Architecture
 
-- Main technical walkthrough: [`source/README.md`](./source/README.md)
-- Assignment requirements and project framing: [`source/PROJECT_REQUIREMENTS.md`](./source/PROJECT_REQUIREMENTS.md)
-- Clean assignment brief summary: [`source/ASSIGNMENT_BRIEF.md`](./source/ASSIGNMENT_BRIEF.md)
-- Submission snapshot: [`source/docs/SUBMISSION_SNAPSHOT.md`](./source/docs/SUBMISSION_SNAPSHOT.md)
-- Evidence map: [`source/docs/GRADING_EVIDENCE_MATRIX.md`](./source/docs/GRADING_EVIDENCE_MATRIX.md)
-- Current progress report: [`source/docs/CURRENT_PROGRESS_REPORT.md`](./source/docs/CURRENT_PROGRESS_REPORT.md)
-- Final evidence index: [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md)
-- Power-test quickstart for helpers: [`source/docs/POWER_TEST_QUICKSTART_FOR_FRIEND.md`](./source/docs/POWER_TEST_QUICKSTART_FOR_FRIEND.md)
-- Firmware guide: [`source/firmware/esp32_node/README.md`](./source/firmware/esp32_node/README.md)
-- Edge listener guide: [`source/edge_server/mqtt_listener/README.md`](./source/edge_server/mqtt_listener/README.md)
-- Fresh WiFi/MQTT evidence bundle: [`source/results/wifi_mqtt_evidence_2026-04-21.md`](./source/results/wifi_mqtt_evidence_2026-04-21.md)
-- LoRaWAN evidence bundle: [`source/results/lorawan_evidence_2026-04-20.md`](./source/results/lorawan_evidence_2026-04-20.md)
+```text
+virtual signal
+    -> sampling task
+    -> FFT / dominant-frequency detection
+    -> adaptive sampling controller
+    -> 5 s aggregate window
+    -> MQTT/WiFi edge server
+    -> LoRaWAN/TTN cloud uplink
+```
+
+![System architecture overview](./source/pics/architecture_pipeline_overview.png)
+
+Hardware used:
+
+| Component | Purpose |
+| --- | --- |
+| `Heltec WiFi LoRa 32 V3` | Device under test running the main FreeRTOS firmware |
+| `INA219` | Current and power measurement |
+| second ESP32 or Heltec | INA219 monitor board |
+| laptop | PlatformIO build, serial monitor, Mosquitto broker, MQTT listener |
+| TTN console | LoRaWAN cloud validation |
+
+## Code Organization
+
+```text
+source/
+  firmware/esp32_node/        final ESP32 FreeRTOS firmware
+  firmware/ina219_power_monitor/
+                               second-board INA219 monitor firmware
+  edge_server/mqtt_listener/  local MQTT listener and logger
+  cloud/ttn_payloads/         TTN payload decoder and notes
+  docs/                       reports, runbooks, setup notes
+  results/                    saved CSV/JSON/Markdown measurements
+  pics/                       screenshots and hardware photos
+```
+
+Most important files:
+
+| Path | Purpose |
+| --- | --- |
+| [`source/firmware/esp32_node/main/app_main.c`](./source/firmware/esp32_node/main/app_main.c) | FreeRTOS task creation and supervision |
+| [`source/firmware/esp32_node/components/signal_input/`](./source/firmware/esp32_node/components/signal_input/) | virtual signal generation and benchmarks |
+| [`source/firmware/esp32_node/components/signal_processing/`](./source/firmware/esp32_node/components/signal_processing/) | FFT, windowing, aggregate generation |
+| [`source/firmware/esp32_node/components/comm_mqtt/`](./source/firmware/esp32_node/components/comm_mqtt/) | WiFi and MQTT publishing |
+| [`source/firmware/esp32_node/components/comm_lorawan/`](./source/firmware/esp32_node/components/comm_lorawan/) | compact LoRaWAN payload and Heltec radio integration |
+| [`source/firmware/ina219_power_monitor/src/main.cpp`](./source/firmware/ina219_power_monitor/src/main.cpp) | INA219 monitor output |
+| [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md) | map of evidence to assignment requirements |
+
+## Implementation Details
+
+### 1. Maximum Sampling Frequency
+
+The project reports two frequencies because they answer different questions.
+
+| Benchmark | Result | Meaning |
+| --- | --- | --- |
+| Raw class-style benchmark | `199,126.59 Hz` | maximum synthetic sample-generation throughput |
+| Strict full-pipeline baseline | `50 Hz` | stable operating point with windows, FFT, queues, MQTT/LoRa paths, and supervision enabled |
+
+The raw benchmark is the number used for comparison with the class reference repositories. The strict value is the safe baseline for the real adaptive pipeline.
+
+### 2. FFT And Adaptive Sampling
+
+The firmware computes the frequency spectrum for each window and detects the dominant component:
+
+```text
+dominant_frequency_hz = 5.00
+adaptive_rate = 5.00 * 8 = 40.0 Hz
+```
+
+The board starts at `50 Hz`, then changes to `40 Hz` after the first window.
+
+### 3. Aggregate Function
+
+Every `5 s` window produces one aggregate object containing:
+
+```text
+window_id
+sample_count
+sampling_frequency_hz
+dominant_frequency_hz
+average_value
+signal_profile
+anomaly_count
+timing fields
+```
+
+Both MQTT and LoRaWAN use this aggregate instead of sending raw samples.
+
+### 4. MQTT Edge Server
+
+The ESP32 publishes JSON aggregate messages to:
+
+```text
+project/adaptive-sampling-node/aggregate
+```
+
+The Python edge listener records:
+
+- receive timestamp
+- raw JSON payload
+- parsed latency fields
+- CSV and JSONL logs
+- Markdown summary
+
+### 5. LoRaWAN + TTN
+
+The same aggregate is packed into a compact `10-byte` LoRaWAN payload and sent on `FPort 1`. The integrated main app was validated with a real TTN uplink and saved screenshots from the TTN console.
+
+### 6. Signal Profiles
+
+| Profile | Description |
+| --- | --- |
+| `clean_reference` | original `3 Hz + 5 Hz` signal |
+| `noisy_reference` | signal plus Gaussian-like noise |
+| `anomaly_stress` | noisy signal plus sparse injected spikes |
+
+The anomaly evaluation also compares Z-score and Hampel filtering.
+
+## Performance Evaluation
+
+### Energy Consumption
+
+The final INA219 measurement compares fixed baseline and adaptive mode using the same DUT, same monitor, same signal, same WiFi/MQTT workload, and same run duration.
+
+| Metric | Baseline `50 Hz` | Adaptive `40 Hz` | Adaptive + deep sleep |
+| --- | ---: | ---: | ---: |
+| Average power | `553.0000 mW` | `552.6775 mW` | `410.8682 mW` |
+| Integrated energy | `18.433238 mWh` | `18.422466 mWh` | `13.632451 mWh` |
+| Delta vs baseline | reference | `-0.06%` | `-26.04%` |
+
+Interpretation:
+
+- Adaptive sampling reduced the local sample-processing rate from `50 Hz` to `40 Hz`.
+- Awake average power changed only slightly because WiFi, display, MQTT, and always-on FreeRTOS tasks dominate the board power.
+- Deep sleep is a separate low-power strategy and produces the larger reduction.
+
+### Communication Volume
+
+| Mode | Sampling rate | Samples represented | MQTT messages | Total payload |
+| --- | ---: | ---: | ---: | ---: |
+| Fixed baseline | `50 Hz` | `1250` | `5` | `2270 B` |
+| Adaptive | `40 Hz` | `1000` | `5` | `2270 B` |
+
+The represented local samples drop by `20%`, while MQTT bytes remain effectively constant because the system sends one aggregate per window.
+
+### End-To-End Latency
+
+The saved clean MQTT listener run recorded:
+
+| Metric | Average |
+| --- | ---: |
+| listener latency | `1,234,421.6 us` |
+| end-to-end latency | `1,587,868.6 us` |
+| edge delay | `353,447.0 us` |
+
+Evidence:
+
+- [`source/results/summaries/mqtt_summary_2026-04-18_listener.md`](./source/results/summaries/mqtt_summary_2026-04-18_listener.md)
+
+### Bonus Anomaly Filters
+
+The anomaly-filter evaluation covers:
+
+- anomaly rates `p=1%, 5%, 10%`
+- Z-score and Hampel filters
+- true positive rate
+- false positive rate
+- mean-error reduction
+- FFT dominant-frequency impact
+- execution time
+- estimated filter energy
+- Hampel window-size tradeoff
+
+Main artifact:
+
+- [`source/results/summaries/anomaly_filter_evaluation_2026-04-21.md`](./source/results/summaries/anomaly_filter_evaluation_2026-04-21.md)
 
 ## Evidence Gallery
 
 | Raw Sampling Benchmark | Hardware Power Setup | Adaptive Pipeline | TTN Live Uplink |
 | --- | --- | --- | --- |
 | ![Serial output showing the raw sampling benchmark result on the Heltec board.](./source/pics/Sampling_frequency.png) | ![INA219 and Heltec hardware setup used for energy measurement.](./source/pics/hardware.png) | ![BetterSerialPlotter view of the adaptive-sampling pipeline on the Heltec board.](./source/pics/2026-04-18_better_serial_plotter_live_view.png) | ![TTN Live Data showing fresh uplinks from the integrated main app.](./source/pics/2026-04-20_ttn_live_data_uplink.png) |
-| Raw class-style maximum sampling benchmark measured at `199,126.59 Hz`. | Hardware proof for the two-board `INA219` energy-measurement setup. | Live visualization of sampling frequency, dominant frequency, and aggregate average. | Cloud-side proof that the compact `FPort 1` aggregate uplink reached `TTN`. |
+| `199,126.59 Hz` raw benchmark. | Two-board INA219 measurement setup. | Live sampling, frequency, and aggregate visualization. | Cloud-side proof of LoRaWAN uplinks. |
 
 | Adaptive Power | Deep-Sleep Power | TTN Decoded Payload | TTN Device Overview |
 | --- | --- | --- | --- |
 | ![BetterSerialPlotter INA219 adaptive power trace.](./source/pics/2026-04-21_ina219_adaptive_betterserialplotter.png) | ![BetterSerialPlotter INA219 deep-sleep power trace.](./source/pics/2026-04-21_ina219_deepsleep_betterserialplotter.png) | ![TTN decoded uplink details showing payload metadata.](./source/pics/2026-04-20_ttn_uplink_decoded.png) | ![TTN device overview showing recent activity for the Heltec node.](./source/pics/2026-04-20_ttn_device_overview.png) |
-| Adaptive awake run used for the direct `50 Hz` vs `40 Hz` comparison. | Optional low-power duty-cycle experiment showing a drop to about `48 mW`. | Cloud-side decoded aggregate evidence from `TTN`. | Device page showing recent activity and repeated uplink visibility after the main-app integration. |
+| Adaptive awake power run. | Optional deep-sleep power run. | Decoded TTN uplink metadata. | Device activity after main-app integration. |
 
-## Repository Layout
+## Setup And Run
 
-```text
-source/
-  firmware/esp32_node/        ESP32 FreeRTOS firmware
-  edge_server/mqtt_listener/  local MQTT listener and logger
-  cloud/ttn_payloads/         TTN decoder and cloud notes
-  docs/                       runbooks, evidence matrix, reports
-  results/                    saved measurements and summaries
-  pics/                       screenshots used in the write-up
-```
-
-## Quick Run
-
-### 1. Configure local credentials without committing them
-
-Copy:
-
-- [`source/firmware/esp32_node/include/project_config_local.example.h`](./source/firmware/esp32_node/include/project_config_local.example.h)
-
-to:
-
-- `source/firmware/esp32_node/include/project_config_local.h`
-
-and set your local WiFi and broker values there. The real override file is ignored by git.
-
-### 2. Install the edge-listener dependency
+### 1. Clone
 
 ```powershell
-python -m pip install -r source/edge_server/mqtt_listener/requirements.txt
+git clone https://github.com/hamzaabedlkadr-b/iot_indv_project.git
+cd iot_indv_project
 ```
 
-### 3. Build and flash the firmware
+### 2. Configure Local Secrets
+
+Copy the local config template:
 
 ```powershell
-pio run -d source/firmware/esp32_node
-pio run -d source/firmware/esp32_node -t upload
+copy source\firmware\esp32_node\include\project_config_local.example.h source\firmware\esp32_node\include\project_config_local.h
 ```
 
-### 4. Run the local MQTT listener
+Edit `project_config_local.h` with WiFi, MQTT, and TTN values. This file is ignored by git.
+
+### 3. Build Firmware
 
 ```powershell
-python source/edge_server/mqtt_listener/listen_aggregates.py --host <BROKER_HOST> --port 1883 --topic project/adaptive-sampling-node/aggregate --csv source/results/summaries/latest_listener.csv --jsonl source/results/summaries/latest_listener.jsonl
+pio run -d source\firmware\esp32_node -e heltec_wifi_lora_32_V3
 ```
 
-## Professional-Repo Notes
+### 4. Upload Firmware
 
-- Live secrets were removed from the committed firmware config.
-- Build output, Python cache files, local logs, and workspace-only tooling are ignored.
-- The README now includes direct visual proof for the adaptive pipeline and the integrated `LoRaWAN/TTN` path.
-- The documentation states clearly what is already validated and what is still pending, so the repository does not overclaim.
+```powershell
+pio run -d source\firmware\esp32_node -e heltec_wifi_lora_32_V3 -t upload
+```
 
-## Remaining Final-Submission Work
+### 5. Run Edge Listener
 
-- save one live `MQTTS` validation run
+```powershell
+python -m pip install -r source\edge_server\mqtt_listener\requirements.txt
+```
+
+```powershell
+python source\edge_server\mqtt_listener\listen_aggregates.py --host <BROKER_HOST> --port 1883 --topic project/adaptive-sampling-node/aggregate --csv source\results\summaries\latest_listener.csv --jsonl source\results\summaries\latest_listener.jsonl
+```
+
+### 6. Power Test Helper
+
+For a second person rerunning the power test, use:
+
+- [`source/docs/POWER_TEST_QUICKSTART_FOR_FRIEND.md`](./source/docs/POWER_TEST_QUICKSTART_FOR_FRIEND.md)
+
+## Current Limitation
+
+The only remaining weaker item is live secure-MQTT proof. The firmware supports `mqtts://`, certificate verification, and optional authentication, but the saved live broker evidence is still for local plain MQTT.
+
+Setup note:
+
+- [`source/docs/SECURE_MQTT_SETUP.md`](./source/docs/SECURE_MQTT_SETUP.md)
+
+## Submission Notes
+
+- Local secrets are kept out of git through `project_config_local.h`.
+- Build outputs, PlatformIO cache, local logs, and scratch test folders are ignored.
+- The main evidence map is [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md).
+- The grading matrix is [`source/docs/GRADING_EVIDENCE_MATRIX.md`](./source/docs/GRADING_EVIDENCE_MATRIX.md).
