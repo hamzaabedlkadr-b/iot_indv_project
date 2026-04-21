@@ -23,6 +23,7 @@ The project is intentionally built around a `virtual sensor` so the required sig
 - Historical detailed phase report: [`docs/PHASE1_REPORT.tex`](./docs/PHASE1_REPORT.tex) and [`docs/PHASE1_REPORT.pdf`](./docs/PHASE1_REPORT.pdf)
 - Presentation strategy: [`docs/PRESENTATION_PLAYBOOK.md`](./docs/PRESENTATION_PLAYBOOK.md)
 - Screenshot checklist: [`docs/EVIDENCE_SCREENSHOT_CHECKLIST.md`](./docs/EVIDENCE_SCREENSHOT_CHECKLIST.md)
+- Power-test quickstart for helpers: [`docs/POWER_TEST_QUICKSTART_FOR_FRIEND.md`](./docs/POWER_TEST_QUICKSTART_FOR_FRIEND.md)
 - Runtime notes from the live board sessions: [`results/runtime_notes_2026-04-17.md`](./results/runtime_notes_2026-04-17.md)
 - Latest clean MQTT evidence bundle: [`results/mqtt_evidence_2026-04-18.md`](./results/mqtt_evidence_2026-04-18.md)
 - Fresh WiFi/MQTT evidence bundle after the network change: [`results/wifi_mqtt_evidence_2026-04-21.md`](./results/wifi_mqtt_evidence_2026-04-21.md)
