@@ -9,6 +9,15 @@ Full reference docs:
 - [`INA219_ENERGY_SETUP.md`](./INA219_ENERGY_SETUP.md)
 - [`../firmware/ina219_power_monitor/README.md`](../firmware/ina219_power_monitor/README.md)
 
+## Where The Code And Results Are
+
+- Main DUT firmware code: [`../firmware/esp32_node/`](../firmware/esp32_node/). This is the code uploaded to the Heltec that runs the virtual signal, FFT, adaptive sampling, MQTT, and LoRaWAN logic.
+- Monitor firmware code: [`../firmware/ina219_power_monitor/`](../firmware/ina219_power_monitor/). This is the code uploaded to the second ESP32/Heltec connected to the `INA219`.
+- Main configuration file: [`../firmware/esp32_node/include/project_config.h`](../firmware/esp32_node/include/project_config.h). Local WiFi/MQTT secrets go in ignored `project_config_local.h`.
+- Saved result summaries: [`../results/summaries/`](../results/summaries/). Check here for `ina219_*`, `mqtt_*`, anomaly-filter, and communication-volume results.
+- Saved screenshots/photos: [`../pics/`](../pics/). Check here for hardware photos, BetterSerialPlotter screenshots, MQTT proof, and TTN proof.
+- Final evidence map: [`../results/final_evidence_index_2026-04-21.md`](../results/final_evidence_index_2026-04-21.md). This is the best single file to know which result proves which assignment requirement.
+
 ## Goal
 
 Measure the same DUT under the same conditions in two modes:
@@ -244,4 +253,3 @@ In the current saved project run:
 | `VIN-` much lower than `VIN+` with no load | Check screw terminal contact and wiring; `VIN+`/`VIN-` should be nearly the same with no load |
 | DUT resets during WiFi | USB source may not supply enough current; use powered USB hub or stable `5V` source |
 | Weird I2C behavior | Do not place LEDs or other loads on `SDA`/`SCL` during the real test |
-
