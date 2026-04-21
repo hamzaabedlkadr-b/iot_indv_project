@@ -5,8 +5,8 @@ This is the working step-by-step plan for the project. Each step has a clear goa
 ## Current Status Snapshot
 
 - Phases `1` to `8` are implemented locally, and the `MQTT/WiFi` edge path has been validated on the real Heltec board.
-- Phase `9` is prepared in code, but still needs a live `LoRaWAN/TTN` uplink test on campus.
-- Phase `10` has started: the repo now contains listener tooling, analyzers, and the first clean MQTT latency dataset captured from hardware.
+- Phase `9` is validated: the integrated main app produced live `LoRaWAN/TTN` uplinks with saved serial and TTN screenshots.
+- Phase `10` is mostly complete: the repo contains listener tooling, analyzers, MQTT latency/payload datasets, INA219 energy runs, communication-volume comparison, and anomaly-filter evaluation.
 - Phase `11` remains optional.
 - Phase `12` is in progress through the updated READMEs, runtime notes, and measurement templates.
 
@@ -283,9 +283,8 @@ Prepare the repository for submission.
 1. Write a clear top-level `README.md`.
 2. Document setup and run steps.
 3. Add architecture diagrams or flow figures.
-4. Record the LLM prompts used during development.
-5. Summarize code quality, strengths, and limitations of the LLM.
-6. Add results tables and discussion.
+4. Add results tables and discussion.
+5. Link the saved evidence artifacts for each grading item.
 
 ### Done When
 

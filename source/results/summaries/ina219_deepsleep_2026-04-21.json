@@ -1,0 +1,14 @@
+{
+  "label": "adaptive_deep_sleep",
+  "sample_count": 1161,
+  "duration_s": 119.48,
+  "avg_bus_voltage_V": 5.036010335917313,
+  "avg_load_voltage_V": 5.027822480620156,
+  "avg_current_mA": 81.75219638242895,
+  "avg_power_mW": 410.86821705426354,
+  "max_current_mA": 141.1,
+  "max_power_mW": 675.0,
+  "min_power_mW": 48.0,
+  "energy_mWh": 13.632450555555605,
+  "energy_mJ": 49076.82200000018
+}

@@ -131,6 +131,8 @@ static const char *signal_input_mode_name(project_mode_t mode)
             return "virtual_sensor";
         case PROJECT_MODE_SAMPLING_BENCHMARK:
             return "sampling_benchmark";
+        case PROJECT_MODE_RAW_SAMPLING_BENCHMARK:
+            return "raw_sampling_benchmark";
         case PROJECT_MODE_HC_SR04_DEMO:
             return "hc_sr04_demo";
         case PROJECT_MODE_PHASE2_SKELETON:
@@ -237,6 +239,54 @@ static void benchmark_finish_stage(project_context_t *ctx, uint64_t stage_end_us
              (double)ctx->benchmark.min_interval_us,
              (double)ctx->benchmark.max_interval_us,
              ctx->benchmark.worst_lateness_us,
+             ctx->benchmark.last_stage_stable ? "yes" : "no",
+             (double)duration_seconds);
+}
+
+static void benchmark_reset_raw_mode(project_context_t *ctx)
+{
+    ctx->benchmark.stage_index = 0U;
+    ctx->benchmark.total_stages = 1U;
+    ctx->benchmark.samples_generated_in_stage = 0U;
+    ctx->benchmark.samples_consumed_in_stage = 0U;
+    ctx->benchmark.queue_drops_in_stage = 0U;
+    ctx->benchmark.deadline_misses_in_stage = 0U;
+    ctx->benchmark.target_frequency_hz = 0.0f;
+    ctx->benchmark.achieved_frequency_hz = 0.0f;
+    ctx->benchmark.min_interval_us = 0.0f;
+    ctx->benchmark.max_interval_us = 0.0f;
+    ctx->benchmark.worst_lateness_us = 0;
+    ctx->benchmark.stage_start_us = (uint64_t)esp_timer_get_time();
+    ctx->benchmark.last_stage_duration_us = 0U;
+    ctx->benchmark.stage_completed = 0U;
+    ctx->benchmark.benchmark_complete = 0U;
+    ctx->benchmark.last_stage_stable = 0U;
+
+    ESP_LOGI(TAG,
+             "Raw sampling benchmark started for %u ms",
+             (unsigned)PROJECT_RAW_BENCHMARK_DURATION_MS);
+}
+
+static void benchmark_finish_raw_mode(project_context_t *ctx, uint64_t stage_end_us)
+{
+    const uint64_t duration_us = stage_end_us - ctx->benchmark.stage_start_us;
+    const float duration_seconds = (float)duration_us / 1000000.0f;
+
+    ctx->benchmark.last_stage_duration_us = duration_us;
+    ctx->benchmark.achieved_frequency_hz = duration_seconds > 0.0f
+                                               ? (float)ctx->benchmark.samples_generated_in_stage / duration_seconds
+                                               : 0.0f;
+    ctx->benchmark.last_stage_stable = 1U;
+    ctx->benchmark.stage_completed = 1U;
+    ctx->benchmark.benchmark_complete = 1U;
+
+    ESP_LOGI(TAG,
+             "Raw benchmark result | generated=%" PRIu32 " min_dt=%.1fus max_dt=%.1fus"
+             " achieved=%.2fHz stable=%s duration=%.2fs",
+             ctx->benchmark.samples_generated_in_stage,
+             (double)ctx->benchmark.min_interval_us,
+             (double)ctx->benchmark.max_interval_us,
+             (double)ctx->benchmark.achieved_frequency_hz,
              ctx->benchmark.last_stage_stable ? "yes" : "no",
              (double)duration_seconds);
 }
@@ -427,6 +477,81 @@ static void run_sampling_benchmark_mode(project_context_t *ctx)
     }
 }
 
+static void run_raw_sampling_benchmark_mode(project_context_t *ctx)
+{
+    const uint64_t benchmark_duration_us = (uint64_t)PROJECT_RAW_BENCHMARK_DURATION_MS * 1000ULL;
+    const uint64_t benchmark_start_us = (uint64_t)esp_timer_get_time();
+    uint64_t benchmark_end_us = benchmark_start_us;
+    uint64_t last_progress_report_us = benchmark_start_us;
+    uint64_t last_sample_timestamp_us = 0U;
+    uint32_t global_sample_id = 0U;
+    uint32_t rng_state = PROJECT_SIGNAL_RANDOM_SEED;
+
+    benchmark_reset_raw_mode(ctx);
+
+    for (;;) {
+        const uint64_t now_us = (uint64_t)esp_timer_get_time();
+        const uint64_t elapsed_us = now_us - benchmark_start_us;
+
+        if (elapsed_us >= benchmark_duration_us) {
+            benchmark_end_us = now_us;
+            break;
+        }
+
+        const float elapsed_seconds = (float)elapsed_us / 1000000.0f;
+        uint8_t anomaly_injected = 0U;
+        raw_sample_t sample = {
+            .sample_id = global_sample_id++,
+            .timestamp_us = now_us,
+            .value = generate_profiled_signal(ctx->signal_profile,
+                                              elapsed_seconds,
+                                              &rng_state,
+                                              &anomaly_injected,
+                                              NULL),
+            .sampling_frequency_hz = 0.0f,
+            .source = SENSOR_SOURCE_VIRTUAL,
+            .signal_profile = ctx->signal_profile,
+            .anomaly_injected = anomaly_injected,
+        };
+
+        if (ctx->benchmark.samples_generated_in_stage == 0U) {
+            ctx->benchmark.min_interval_us = 0.0f;
+            ctx->benchmark.max_interval_us = 0.0f;
+        } else {
+            const float interval_us = (float)(now_us - last_sample_timestamp_us);
+            if (ctx->benchmark.samples_generated_in_stage == 1U ||
+                interval_us < ctx->benchmark.min_interval_us) {
+                ctx->benchmark.min_interval_us = interval_us;
+            }
+            if (ctx->benchmark.samples_generated_in_stage == 1U ||
+                interval_us > ctx->benchmark.max_interval_us) {
+                ctx->benchmark.max_interval_us = interval_us;
+            }
+        }
+        last_sample_timestamp_us = now_us;
+
+        (void)sample;
+        ctx->timing.samples_generated++;
+        ctx->timing.last_sample_us = sample.timestamp_us;
+        ctx->benchmark.samples_generated_in_stage++;
+
+        if ((now_us - last_progress_report_us) >= (uint64_t)PROJECT_BENCHMARK_PROGRESS_REPORT_MS * 1000ULL) {
+            ESP_LOGI(TAG,
+                     "Raw benchmark progress | generated=%" PRIu32
+                     " elapsed=%.2fs",
+                     ctx->benchmark.samples_generated_in_stage,
+                     (double)((float)elapsed_us / 1000000.0f));
+            last_progress_report_us = now_us;
+        }
+    }
+
+    benchmark_finish_raw_mode(ctx, benchmark_end_us);
+
+    for (;;) {
+        vTaskDelay(pdMS_TO_TICKS(PROJECT_SUPERVISOR_HEARTBEAT_MS));
+    }
+}
+
 esp_err_t signal_input_init(project_context_t *ctx)
 {
     if (ctx == NULL || ctx->system_events == NULL || ctx->sample_queue == NULL) {
@@ -455,6 +580,11 @@ void signal_input_task(void *pvParameters)
 
     if (ctx->mode == PROJECT_MODE_SAMPLING_BENCHMARK) {
         run_sampling_benchmark_mode(ctx);
+        return;
+    }
+
+    if (ctx->mode == PROJECT_MODE_RAW_SAMPLING_BENCHMARK) {
+        run_raw_sampling_benchmark_mode(ctx);
         return;
     }
 

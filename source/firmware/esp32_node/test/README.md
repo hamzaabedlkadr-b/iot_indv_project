@@ -4,7 +4,7 @@ This folder tracks board-facing validation notes and known runtime limitations.
 
 Current useful artifacts:
 
-- [`../../results/runtime_notes_2026-04-17.md`](../../results/runtime_notes_2026-04-17.md) records the first successful Heltec build, flash, and serial validation session
+- [`../../../results/runtime_notes_2026-04-17.md`](../../../results/runtime_notes_2026-04-17.md) records the first successful Heltec build, flash, and serial validation session
 
 Recommended contents for future sessions:
 

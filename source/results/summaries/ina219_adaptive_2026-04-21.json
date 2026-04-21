@@ -1,0 +1,14 @@
+{
+  "label": "adaptive_40hz",
+  "sample_count": 1166,
+  "duration_s": 119.995,
+  "avg_bus_voltage_V": 4.981718696397942,
+  "avg_load_voltage_V": 4.9706391938250425,
+  "avg_current_mA": 110.6983704974271,
+  "avg_power_mW": 552.6775300171527,
+  "max_current_mA": 159.9,
+  "max_power_mW": 793.0,
+  "min_power_mW": 505.0,
+  "energy_mWh": 18.422465555555583,
+  "energy_mJ": 66320.87600000009
+}

@@ -5,6 +5,8 @@ This folder stores the artifacts used in the final report.
 Available offline tooling:
 
 - [`analyze_mqtt_results.py`](./analyze_mqtt_results.py) summarizes the `CSV` logs produced by the edge listener
+- [`compare_communication_volume.py`](./compare_communication_volume.py) generates the fixed-baseline versus adaptive network-volume comparison
+- [`anomaly_filter_evaluation.py`](./anomaly_filter_evaluation.py) generates the `Z-score` and `Hampel` anomaly-filter bonus metrics
 - [`convert_mosquitto_log_to_csv.py`](./convert_mosquitto_log_to_csv.py) converts timestamped `mosquitto_sub` captures into the same `CSV` format
 - [`measurement_summary_template.md`](./measurement_summary_template.md) provides a report-ready structure for the required metrics
 
@@ -58,6 +60,14 @@ Reference artifacts from the follow-up live MQTT evidence run on `2026-04-18`:
 - `summaries/mqtt_summary_2026-04-18_listener.md`
 - `summaries/mqtt_listener_2026-04-18_live.txt`
 - `mqtt_evidence_2026-04-18.md`
+- `summaries/communication_volume_comparison_2026-04-21.md`
+
+Reference artifacts for the anomaly-filter bonus:
+
+- `summaries/anomaly_filter_evaluation_2026-04-21.md`
+- `summaries/anomaly_filter_evaluation_2026-04-21.json`
+- `summaries/anomaly_filter_metrics_2026-04-21.csv`
+- `summaries/anomaly_filter_window_tradeoff_2026-04-21.csv`
 
 Reference artifacts from the integrated `LoRaWAN + TTN` validation run on `2026-04-20`:
 

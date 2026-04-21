@@ -26,6 +26,61 @@
 namespace {
 Adafruit_INA219 g_ina219;
 uint32_t g_start_ms = 0;
+bool g_ina219_ready = false;
+uint32_t g_last_init_attempt_ms = 0;
+
+void scan_i2c_bus();
+void print_banner();
+
+void apply_calibration() {
+#if INA219_USE_16V_400MA_CALIBRATION
+  g_ina219.setCalibration_16V_400mA();
+#else
+  g_ina219.setCalibration_32V_1A();
+#endif
+}
+
+bool try_initialize_ina219(bool verbose) {
+  if (g_ina219.begin()) {
+    apply_calibration();
+    g_start_ms = millis();
+    g_ina219_ready = true;
+    print_banner();
+    return true;
+  }
+
+  if (verbose) {
+    Serial.println("# Failed to initialize INA219 via Adafruit driver");
+    Serial.printf("# INA219 still not detected | sda=%u scl=%u\n",
+                  static_cast<unsigned>(INA219_I2C_SDA_PIN),
+                  static_cast<unsigned>(INA219_I2C_SCL_PIN));
+    scan_i2c_bus();
+  }
+
+  return false;
+}
+
+void scan_i2c_bus() {
+  bool found_any = false;
+
+  Serial.printf("# Scanning I2C bus on SDA=%u SCL=%u\n",
+                static_cast<unsigned>(INA219_I2C_SDA_PIN),
+                static_cast<unsigned>(INA219_I2C_SCL_PIN));
+
+  for (uint8_t address = 1; address < 0x7F; ++address) {
+    Wire.beginTransmission(address);
+    const uint8_t error = Wire.endTransmission();
+
+    if (error == 0) {
+      Serial.printf("# I2C device found at 0x%02X\n", address);
+      found_any = true;
+    }
+  }
+
+  if (!found_any) {
+    Serial.println("# No I2C devices found");
+  }
+}
 
 void print_banner() {
   Serial.printf(
@@ -49,25 +104,22 @@ void setup() {
   delay(250);
 
   Wire.begin(INA219_I2C_SDA_PIN, INA219_I2C_SCL_PIN);
-
-  if (!g_ina219.begin()) {
-    Serial.println("# Failed to find INA219 chip");
-    while (true) {
-      delay(100);
-    }
-  }
-
-#if INA219_USE_16V_400MA_CALIBRATION
-  g_ina219.setCalibration_16V_400mA();
-#else
-  g_ina219.setCalibration_32V_1A();
-#endif
-
-  g_start_ms = millis();
-  print_banner();
+  delay(250);
+  g_last_init_attempt_ms = millis();
+  (void)try_initialize_ina219(true);
 }
 
 void loop() {
+  if (!g_ina219_ready) {
+    const uint32_t now_ms = millis();
+    if ((now_ms - g_last_init_attempt_ms) >= 1000U) {
+      g_last_init_attempt_ms = now_ms;
+      (void)try_initialize_ina219(true);
+    }
+    delay(50);
+    return;
+  }
+
   const float shunt_voltage_mV = g_ina219.getShuntVoltage_mV();
   const float bus_voltage_V = g_ina219.getBusVoltage_V();
   const float current_mA = fabsf(g_ina219.getCurrent_mA());

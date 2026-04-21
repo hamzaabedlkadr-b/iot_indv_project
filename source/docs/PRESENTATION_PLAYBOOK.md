@@ -45,7 +45,7 @@ Recommended section order:
 9. Performance evaluation
 10. Bonus signals
 11. Setup and run guide
-12. LLM usage / prompts / limitations
+12. remaining limitation: live secure-MQTT proof
 
 ### 2. Phase-based storytelling
 
@@ -179,7 +179,7 @@ Before submission, the main `README.md` should explicitly answer:
 - how communication volume was measured
 - what the three signal profiles are
 - which parts were validated on the home network and which near working `TTN` gateway coverage
-- what prompts and LLM limitations are being reported
+- what secure-MQTT limitation remains if no TLS broker is available
 
 ## Closing Rule
 

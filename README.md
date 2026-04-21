@@ -8,13 +8,15 @@ The technical project files live under [`source/`](./source/). The repository ro
 
 | Assignment area | Current status | Main evidence |
 | --- | --- | --- |
-| Maximum stable sampling frequency | Validated on real hardware | [`source/docs/CURRENT_PROGRESS_REPORT.md`](./source/docs/CURRENT_PROGRESS_REPORT.md) |
+| Maximum sampling frequency | Raw benchmark measured `199,126.59 Hz`; strict full-pipeline baseline remains `50 Hz` | [`source/pics/Sampling_frequency.png`](./source/pics/Sampling_frequency.png), [`source/docs/CURRENT_PROGRESS_REPORT.md`](./source/docs/CURRENT_PROGRESS_REPORT.md) |
 | FFT-based adaptive sampling | Validated (`50 Hz -> 40 Hz`) | [`source/README.md`](./source/README.md) |
 | Aggregate over a `5 s` window | Validated | [`source/README.md`](./source/README.md) |
-| MQTT over WiFi to edge server | Validated on real hardware | [`source/results/mqtt_evidence_2026-04-18.md`](./source/results/mqtt_evidence_2026-04-18.md) |
-| Three input signals bonus | Validated | [`source/results/summaries/`](./source/results/summaries/) |
+| MQTT over WiFi to edge server | Validated on real hardware, including a fresh WiFi run after the network change | [`source/results/mqtt_evidence_2026-04-18.md`](./source/results/mqtt_evidence_2026-04-18.md), [`source/results/wifi_mqtt_evidence_2026-04-21.md`](./source/results/wifi_mqtt_evidence_2026-04-21.md) |
+| Three input signals bonus | Validated for `clean_reference`, `noisy_reference`, and `anomaly_stress` | [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md), [`source/results/summaries/signal_profile_comparison_2026-04-18.txt`](./source/results/summaries/signal_profile_comparison_2026-04-18.txt) |
+| Anomaly filters bonus | Evaluated with `Z-score` and `Hampel` filters at `p=1%, 5%, 10%` | [`source/results/summaries/anomaly_filter_evaluation_2026-04-21.md`](./source/results/summaries/anomaly_filter_evaluation_2026-04-21.md) |
 | LoRaWAN + TTN cloud path | Validated on real hardware with the integrated main app; serial and `TTN` screenshots are saved in the repo | [`source/results/lorawan_evidence_2026-04-20.md`](./source/results/lorawan_evidence_2026-04-20.md) |
-| Energy comparison | Runbook prepared, meter-based measurements still pending | [`source/docs/ENERGY_MEASUREMENT_RUNBOOK.md`](./source/docs/ENERGY_MEASUREMENT_RUNBOOK.md) |
+| Communication volume | Baseline-vs-adaptive table completed; aggregate MQTT bytes stay flat while represented samples drop `20%` | [`source/results/summaries/communication_volume_comparison_2026-04-21.md`](./source/results/summaries/communication_volume_comparison_2026-04-21.md) |
+| Energy comparison | INA219 two-board baseline/adaptive measurement completed; adaptive saved `0.06%` energy, and optional deep sleep saved `26.04%` | [`source/results/summaries/ina219_comparison_2026-04-21.md`](./source/results/summaries/ina219_comparison_2026-04-21.md), [`source/results/summaries/ina219_three_mode_comparison_2026-04-21.md`](./source/results/summaries/ina219_three_mode_comparison_2026-04-21.md) |
 | Secure MQTT | TLS-capable firmware path implemented, live proof still pending | [`source/docs/SECURE_MQTT_SETUP.md`](./source/docs/SECURE_MQTT_SETUP.md) |
 
 ## Start Here
@@ -25,16 +27,23 @@ The technical project files live under [`source/`](./source/). The repository ro
 - Submission snapshot: [`source/docs/SUBMISSION_SNAPSHOT.md`](./source/docs/SUBMISSION_SNAPSHOT.md)
 - Evidence map: [`source/docs/GRADING_EVIDENCE_MATRIX.md`](./source/docs/GRADING_EVIDENCE_MATRIX.md)
 - Current progress report: [`source/docs/CURRENT_PROGRESS_REPORT.md`](./source/docs/CURRENT_PROGRESS_REPORT.md)
+- Final evidence index: [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md)
 - Firmware guide: [`source/firmware/esp32_node/README.md`](./source/firmware/esp32_node/README.md)
 - Edge listener guide: [`source/edge_server/mqtt_listener/README.md`](./source/edge_server/mqtt_listener/README.md)
+- Fresh WiFi/MQTT evidence bundle: [`source/results/wifi_mqtt_evidence_2026-04-21.md`](./source/results/wifi_mqtt_evidence_2026-04-21.md)
 - LoRaWAN evidence bundle: [`source/results/lorawan_evidence_2026-04-20.md`](./source/results/lorawan_evidence_2026-04-20.md)
 
 ## Evidence Gallery
 
-| Adaptive Pipeline | TTN Live Uplink | TTN Device Overview |
-| --- | --- | --- |
-| ![BetterSerialPlotter view of the adaptive-sampling pipeline on the Heltec board.](./source/pics/2026-04-18_better_serial_plotter_live_view.png) | ![TTN Live Data showing fresh uplinks from the integrated main app.](./source/pics/2026-04-20_ttn_live_data_uplink.png) | ![TTN device overview showing recent activity for the Heltec node.](./source/pics/2026-04-20_ttn_device_overview.png) |
-| Live visualization of sampling frequency, dominant frequency, and aggregate average. | Cloud-side proof that the compact `FPort 1` aggregate uplink reached `TTN`. | Device page showing recent activity and repeated uplink visibility after the main-app integration. |
+| Raw Sampling Benchmark | Hardware Power Setup | Adaptive Pipeline | TTN Live Uplink |
+| --- | --- | --- | --- |
+| ![Serial output showing the raw sampling benchmark result on the Heltec board.](./source/pics/Sampling_frequency.png) | ![INA219 and Heltec hardware setup used for energy measurement.](./source/pics/hardware.png) | ![BetterSerialPlotter view of the adaptive-sampling pipeline on the Heltec board.](./source/pics/2026-04-18_better_serial_plotter_live_view.png) | ![TTN Live Data showing fresh uplinks from the integrated main app.](./source/pics/2026-04-20_ttn_live_data_uplink.png) |
+| Raw class-style maximum sampling benchmark measured at `199,126.59 Hz`. | Hardware proof for the two-board `INA219` energy-measurement setup. | Live visualization of sampling frequency, dominant frequency, and aggregate average. | Cloud-side proof that the compact `FPort 1` aggregate uplink reached `TTN`. |
+
+| Adaptive Power | Deep-Sleep Power | TTN Decoded Payload | TTN Device Overview |
+| --- | --- | --- | --- |
+| ![BetterSerialPlotter INA219 adaptive power trace.](./source/pics/2026-04-21_ina219_adaptive_betterserialplotter.png) | ![BetterSerialPlotter INA219 deep-sleep power trace.](./source/pics/2026-04-21_ina219_deepsleep_betterserialplotter.png) | ![TTN decoded uplink details showing payload metadata.](./source/pics/2026-04-20_ttn_uplink_decoded.png) | ![TTN device overview showing recent activity for the Heltec node.](./source/pics/2026-04-20_ttn_device_overview.png) |
+| Adaptive awake run used for the direct `50 Hz` vs `40 Hz` comparison. | Optional low-power duty-cycle experiment showing a drop to about `48 mW`. | Cloud-side decoded aggregate evidence from `TTN`. | Device page showing recent activity and repeated uplink visibility after the main-app integration. |
 
 ## Repository Layout
 
@@ -45,7 +54,6 @@ source/
   cloud/ttn_payloads/         TTN decoder and cloud notes
   docs/                       runbooks, evidence matrix, reports
   results/                    saved measurements and summaries
-  prompts/                    LLM prompt-log material
   pics/                       screenshots used in the write-up
 ```
 
@@ -91,6 +99,4 @@ python source/edge_server/mqtt_listener/listen_aggregates.py --host <BROKER_HOST
 
 ## Remaining Final-Submission Work
 
-- complete the baseline-vs-adaptive energy comparison with a meter and reuse that fixed-rate run for the final communication-volume comparison row
 - save one live `MQTTS` validation run
-- curate the final prompt history in [`source/prompts/`](./source/prompts/)

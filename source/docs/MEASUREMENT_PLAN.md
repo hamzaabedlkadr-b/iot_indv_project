@@ -6,12 +6,16 @@ This file defines what we need to measure for the final report.
 
 ### 1. Maximum Sampling Frequency
 
-Measure the highest stable sampling frequency supported by the ESP32 implementation.
+Measure the highest sampling frequency supported by the ESP32 implementation in two ways:
+
+- raw class-style benchmark for maximum sample-generation throughput
+- strict full-pipeline benchmark for the conservative stable operating point
 
 Record:
 
-- configured frequency,
-- actual achieved behavior,
+- raw achieved frequency,
+- configured full-pipeline frequency,
+- actual achieved full-pipeline behavior,
 - failure point or instability symptoms.
 
 ### 2. Adaptive Sampling Benefit
@@ -62,13 +66,14 @@ Measure from:
 - data generation on the board,
 - to aggregate reception at the edge server.
 
-## Deferred Hardware Measurements
+## Hardware Measurement Status
 
-These items should be prepared now and executed later when the board is available:
+The main hardware measurements have now been executed and saved:
 
-- live `MQTT` publish validation from the ESP32,
-- live `LoRaWAN + TTN` validation near a working gateway,
-- final energy comparison between baseline and adaptive sampling.
+- live `MQTT` publish validation from the ESP32
+- live `LoRaWAN + TTN` validation near working gateway coverage
+- `INA219` energy comparison between fixed baseline and adaptive sampling
+- optional `INA219` deep-sleep duty-cycle comparison
 
 ## Energy Measurement Plan
 
@@ -108,6 +113,17 @@ under:
 - equal run duration
 
 The deep-sleep examples in some reference repos are useful as additional context, but they should not replace this core comparison.
+
+Saved energy artifacts:
+
+- `results/summaries/ina219_baseline_2026-04-21.md`
+- `results/summaries/ina219_adaptive_2026-04-21.md`
+- `results/summaries/ina219_comparison_2026-04-21.md`
+- `results/summaries/ina219_deepsleep_2026-04-21.md`
+- `results/summaries/ina219_three_mode_comparison_2026-04-21.md`
+- `pics/hardware.png`
+- `pics/2026-04-21_ina219_adaptive_betterserialplotter.png`
+- `pics/2026-04-21_ina219_deepsleep_betterserialplotter.png`
 
 ## Saved Artifacts
 

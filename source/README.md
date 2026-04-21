@@ -10,7 +10,7 @@ The project is intentionally built around a `virtual sensor` so the required sig
 - The firmware supports three signal profiles: `clean_reference`, `noisy_reference`, and `anomaly_stress`.
 - The board has already been visualized live with `BetterSerialPlotter`.
 - The integrated main app now publishes compact aggregate payloads over `LoRaWAN/TTN` on real hardware near working gateway coverage, and the serial plus `TTN` screenshots are saved in the repo.
-- `Energy` comparison is still open, and `secure MQTT` is now implemented but still needs a live TLS validation run.
+- `Energy` comparison is measured with the `INA219` two-board setup; `secure MQTT` is implemented but still needs a live TLS validation run.
 
 ## Where To Start
 
@@ -18,12 +18,14 @@ The project is intentionally built around a `virtual sensor` so the required sig
 - Requirements and implementation framing: [`PROJECT_REQUIREMENTS.md`](./PROJECT_REQUIREMENTS.md)
 - Submission snapshot: [`docs/SUBMISSION_SNAPSHOT.md`](./docs/SUBMISSION_SNAPSHOT.md)
 - Evidence map: [`docs/GRADING_EVIDENCE_MATRIX.md`](./docs/GRADING_EVIDENCE_MATRIX.md)
+- Final evidence index: [`results/final_evidence_index_2026-04-21.md`](./results/final_evidence_index_2026-04-21.md)
 - Current detailed progress report: [`docs/CURRENT_PROGRESS_REPORT.md`](./docs/CURRENT_PROGRESS_REPORT.md)
 - Historical detailed phase report: [`docs/PHASE1_REPORT.tex`](./docs/PHASE1_REPORT.tex) and [`docs/PHASE1_REPORT.pdf`](./docs/PHASE1_REPORT.pdf)
 - Presentation strategy: [`docs/PRESENTATION_PLAYBOOK.md`](./docs/PRESENTATION_PLAYBOOK.md)
 - Screenshot checklist: [`docs/EVIDENCE_SCREENSHOT_CHECKLIST.md`](./docs/EVIDENCE_SCREENSHOT_CHECKLIST.md)
 - Runtime notes from the live board sessions: [`results/runtime_notes_2026-04-17.md`](./results/runtime_notes_2026-04-17.md)
 - Latest clean MQTT evidence bundle: [`results/mqtt_evidence_2026-04-18.md`](./results/mqtt_evidence_2026-04-18.md)
+- Fresh WiFi/MQTT evidence bundle after the network change: [`results/wifi_mqtt_evidence_2026-04-21.md`](./results/wifi_mqtt_evidence_2026-04-21.md)
 - Latest LoRaWAN evidence bundle: [`results/lorawan_evidence_2026-04-20.md`](./results/lorawan_evidence_2026-04-20.md)
 
 ## System Pipeline
@@ -44,16 +46,17 @@ The final implementation path is the modular firmware under [`firmware/esp32_nod
 
 | Assignment item | Current result | Main evidence | Status |
 | --- | --- | --- | --- |
-| Maximum stable sampling frequency | Strict stable point measured at `50 Hz`; instability appears between `50 Hz` and `100 Hz` | [`docs/PHASE1_REPORT.tex`](./docs/PHASE1_REPORT.tex), [`docs/EVIDENCE_SCREENSHOT_CHECKLIST.md`](./docs/EVIDENCE_SCREENSHOT_CHECKLIST.md) | Measured |
+| Maximum sampling frequency | Raw class-style benchmark measured `199,126.59 Hz`; strict full-pipeline clean operating point remains `50 Hz` | [`pics/Sampling_frequency.png`](./pics/Sampling_frequency.png), [`docs/CURRENT_PROGRESS_REPORT.md`](./docs/CURRENT_PROGRESS_REPORT.md) | Measured |
 | Optimal sampling frequency | Dominant frequency `5 Hz` leads to adaptive rate change `50 Hz -> 40 Hz` | [`docs/PHASE1_REPORT.tex`](./docs/PHASE1_REPORT.tex), [`pics/2026-04-18_better_serial_plotter_live_view.png`](./pics/2026-04-18_better_serial_plotter_live_view.png) | Validated |
 | Aggregate over a window | `5 s` window average is computed and carried through MQTT / LoRa payloads | [`results/runtime_notes_2026-04-17.md`](./results/runtime_notes_2026-04-17.md) | Validated |
 | MQTT edge delivery | Real board publishes to local broker and listener receives consecutive windows | [`results/mqtt_evidence_2026-04-18.md`](./results/mqtt_evidence_2026-04-18.md) | Validated |
 | LoRaWAN / TTN cloud delivery | Integrated main-app LoRaWAN path validated on hardware; serial evidence shows `joined=1`, radio queuing, `Tx Done`, and `TTN` uplinks on `FPort 1` | [`results/lorawan_evidence_2026-04-20.md`](./results/lorawan_evidence_2026-04-20.md), [`cloud/ttn_payloads/README.md`](./cloud/ttn_payloads/README.md) | Validated |
 | End-to-end latency | Clean home-network dataset captured from synchronized timestamps | [`results/summaries/mqtt_summary_2026-04-18_listener.md`](./results/summaries/mqtt_summary_2026-04-18_listener.md) | Validated |
-| Communication volume | Adaptive payload size is measured; baseline-vs-adaptive comparison still needs the fixed-rate run | [`results/summaries/mqtt_summary_2026-04-18_listener.md`](./results/summaries/mqtt_summary_2026-04-18_listener.md) | Partial |
-| Energy savings | Measurement method and run order are prepared; real meter runs still pending | [`docs/ENERGY_MEASUREMENT_RUNBOOK.md`](./docs/ENERGY_MEASUREMENT_RUNBOOK.md) | Pending |
+| Communication volume | Baseline-vs-adaptive comparison is complete: local represented samples drop `20%`, while MQTT aggregate bytes stay effectively constant | [`results/summaries/communication_volume_comparison_2026-04-21.md`](./results/summaries/communication_volume_comparison_2026-04-21.md) | Validated |
+| Energy savings | `INA219` baseline/adaptive runs show a small awake-mode saving (`-0.06%`), while optional deep sleep reduces energy by `-26.04%` | [`results/summaries/ina219_comparison_2026-04-21.md`](./results/summaries/ina219_comparison_2026-04-21.md), [`results/summaries/ina219_three_mode_comparison_2026-04-21.md`](./results/summaries/ina219_three_mode_comparison_2026-04-21.md), [`pics/hardware.png`](./pics/hardware.png) | Measured |
 | Secure MQTT | TLS-capable `MQTTS` support with certificate verification is implemented; live TLS evidence still pending | [`docs/SECURE_MQTT_SETUP.md`](./docs/SECURE_MQTT_SETUP.md) | Partial |
-| Three input signals bonus | `clean`, `noisy`, and `anomaly` profiles were all validated on the real board over MQTT | [`results/summaries/`](./results/summaries/) | Validated |
+| Three input signals bonus | `clean`, `noisy`, and `anomaly` profiles were all validated on the real board over MQTT | [`results/final_evidence_index_2026-04-21.md`](./results/final_evidence_index_2026-04-21.md), [`results/summaries/signal_profile_comparison_2026-04-18.txt`](./results/summaries/signal_profile_comparison_2026-04-18.txt) | Validated |
+| Anomaly filter bonus | `Z-score` and `Hampel` filters evaluated at `p=1%, 5%, 10%`, including `TPR`, `FPR`, mean-error reduction, FFT impact, execution time, estimated filter energy, and window-size tradeoff | [`results/summaries/anomaly_filter_evaluation_2026-04-21.md`](./results/summaries/anomaly_filter_evaluation_2026-04-21.md) | Validated |
 
 ## Signal Profiles
 
@@ -73,17 +76,44 @@ The virtual sensor supports three profiles that are already wired through the fu
 
 The current anomaly profile keeps the dominant frequency stable while still producing non-zero spike counts, which is useful for the bonus discussion about robustness.
 
+### Anomaly Filter Evaluation
+
+The extended anomaly bonus is covered by a deterministic evaluation of `Z-score` and `Hampel` filters using the same synthetic signal model as the firmware. It evaluates anomaly probabilities `p=1%, 5%, 10%` and reports:
+
+- true positive rate and false positive rate
+- mean-error reduction after filtering
+- FFT dominant-frequency error before and after filtering
+- resulting adaptive sampling frequency
+- filter execution time and estimated active-energy impact
+- Hampel window-size tradeoff for delay and memory
+
+Main artifact:
+
+- [`results/summaries/anomaly_filter_evaluation_2026-04-21.md`](./results/summaries/anomaly_filter_evaluation_2026-04-21.md)
+
 ## Core Results
 
 ### 1. Maximum Sampling Frequency
 
-The strict benchmark documented in [`docs/PHASE1_REPORT.tex`](./docs/PHASE1_REPORT.tex) found:
+The latest class-style raw benchmark measured the sample-generation throughput without the full MQTT/LoRa/display pipeline:
 
-- `50 Hz` is the highest tested rate that passed the current strict stability rule
+```text
+Raw benchmark result | generated=199126 min_dt=3.0us max_dt=53.0us achieved=199126.59Hz stable=yes duration=1.00s
+```
+
+Evidence:
+
+- [`pics/Sampling_frequency.png`](./pics/Sampling_frequency.png)
+
+This is the number to present when comparing with the class example repositories that report raw or simple-loop maximum sampling rates.
+
+The older strict full-pipeline benchmark remains useful because it tests the complete application with windows, FFT, queues, aggregate creation, and runtime supervision. Under that stricter rule:
+
+- `50 Hz` is the highest tested clean operating point
 - `100 Hz` was very close but already showed one deadline miss
-- `250 Hz` and above triggered watchdog-related instability in the benchmark
+- `250 Hz` and above triggered watchdog-related instability
 
-So the current project uses `50 Hz` as the clean oversampling baseline and adapts downward from there.
+So the project reports `199,126.59 Hz` as the raw benchmark result, while still using `50 Hz` as the conservative full-pipeline baseline that adapts down to `40 Hz`.
 
 ### 2. FFT And Adaptive Sampling
 
@@ -151,11 +181,41 @@ Prepared artifacts:
 Current status by metric:
 
 - `Latency`: measured and saved from synchronized timestamps.
-- `Payload size`: measured for adaptive runs and the three signal profiles.
-- `Energy`: planned carefully, but still needs real meter-based runs.
-- `Execution time`: tracked in firmware timing counters and runtime notes, but still needs final presentation packaging.
+- `Payload size`: measured for adaptive runs and compared against the fixed-rate baseline using the same aggregate-per-window protocol.
+- `Energy`: measured with the `INA219` monitor for fixed `50 Hz` and adaptive `40 Hz` runs.
+- `Execution time`: tracked through firmware timing fields, edge-delay metrics, and the anomaly-filter execution-time table.
 
-One important observation: because the system already transmits one aggregate per window instead of raw samples, the network payload size does not change much with sampling frequency alone. The main expected benefit of adaptive sampling is lower local sensing and processing work, not a dramatic reduction in MQTT payload bytes per aggregate.
+One important observation: because the system already transmits one aggregate per window instead of raw samples, the network payload size does not change much with sampling frequency alone. The saved communication-volume table shows `1250` represented samples for the fixed `50 Hz` baseline versus `1000` represented samples for adaptive `40 Hz` over the same five windows (`-20%` local sample work), while both modes send five compact aggregate MQTT messages.
+
+Evidence:
+
+- [`results/summaries/communication_volume_comparison_2026-04-21.md`](./results/summaries/communication_volume_comparison_2026-04-21.md)
+
+### 7. Energy Measurement
+
+The final `INA219` comparison used the same DUT, monitor board, WiFi network, `MQTT_ONLY` mode, and `clean_reference` signal for both runs:
+
+| Metric | Baseline `50 Hz` | Adaptive `40 Hz` | Delta |
+| --- | --- | --- | --- |
+| Average current | `110.4953 mA` | `110.6984 mA` | `+0.18%` |
+| Average power | `553.0000 mW` | `552.6775 mW` | `-0.06%` |
+| Integrated energy | `18.433238 mWh` | `18.422466 mWh` | `-0.06%` |
+| Peak power | `873.0000 mW` | `793.0000 mW` | `-9.16%` |
+
+This result is intentionally reported honestly: adaptive sampling reduced the sample-processing rate, but the board stayed awake with WiFi, display, FreeRTOS tasks, and MQTT activity, so average electrical energy changed only slightly. This is consistent with the instructor-shared reference projects where WiFi and always-on runtime work dominate the power profile.
+
+Evidence:
+
+- [`results/summaries/ina219_baseline_2026-04-21.md`](./results/summaries/ina219_baseline_2026-04-21.md)
+- [`results/summaries/ina219_adaptive_2026-04-21.md`](./results/summaries/ina219_adaptive_2026-04-21.md)
+- [`results/summaries/ina219_comparison_2026-04-21.md`](./results/summaries/ina219_comparison_2026-04-21.md)
+- [`results/summaries/ina219_deepsleep_2026-04-21.md`](./results/summaries/ina219_deepsleep_2026-04-21.md)
+- [`results/summaries/ina219_three_mode_comparison_2026-04-21.md`](./results/summaries/ina219_three_mode_comparison_2026-04-21.md)
+- [`pics/hardware.png`](./pics/hardware.png)
+- [`pics/2026-04-21_ina219_adaptive_betterserialplotter.png`](./pics/2026-04-21_ina219_adaptive_betterserialplotter.png)
+- [`pics/2026-04-21_ina219_deepsleep_betterserialplotter.png`](./pics/2026-04-21_ina219_deepsleep_betterserialplotter.png)
+
+An additional deep-sleep experiment reduced integrated energy to `13.632451 mWh` over `119.480 s`, about `26.04%` lower than the fixed `50 Hz` awake baseline. This is reported as a separate duty-cycle optimization, not as the main adaptive-sampling comparison.
 
 ## BetterSerialPlotter Evidence
 
@@ -211,21 +271,10 @@ Typical local workflow:
 - [`results/measurement_summary_template.md`](./results/measurement_summary_template.md)
 - [`docs/SECURE_MQTT_SETUP.md`](./docs/SECURE_MQTT_SETUP.md)
 
-## LLM Usage
-
-The assignment requires documenting prompt usage and reflecting on the generated code. The repository already includes the structure for that:
-
-- [`prompts/README.md`](./prompts/README.md)
-- [`prompts/prompt_log_template.md`](./prompts/prompt_log_template.md)
-
-The final submission still needs the prompt history to be curated into a cleaner final narrative.
-
 ## Remaining Work Before Submission
 
-- run the meter-based `energy` comparison for baseline versus adaptive mode
-- reuse the fixed-rate baseline run to finish the direct communication-volume comparison row
 - validate the `secure MQTT` path against a TLS-capable broker and capture one saved run
-- capture the remaining screenshots listed in [`docs/EVIDENCE_SCREENSHOT_CHECKLIST.md`](./docs/EVIDENCE_SCREENSHOT_CHECKLIST.md)
+- if secure-MQTT evidence is added later, run one final screenshot/link synchronization pass
 
 ## Repository Guide
 
@@ -235,6 +284,5 @@ edge_server/mqtt_listener/  local MQTT listener and logger
 cloud/ttn_payloads/         TTN payload notes and decoder
 docs/                       plans, checklists, and presentation material
 results/                    captured logs, summaries, and runtime notes
-prompts/                    LLM prompt log material for the final write-up
 pics/                       saved workshop and README images
 ```

@@ -79,19 +79,22 @@ The project now has a working \texttt{ESP32 + FreeRTOS} pipeline that:
     \item computes a per-window aggregate,
     \item publishes real aggregate messages to a nearby edge server over
     \texttt{MQTT/WiFi},
-    \item prepares compact aggregate payloads for \texttt{LoRaWAN + TTN}.
+    \item publishes compact aggregate payloads through \texttt{LoRaWAN + TTN}.
 \end{itemize}
 
-The strongest completed milestone is the end-to-end \texttt{MQTT/WiFi}
-validation on the real Heltec board. Real timing data were captured with
-synchronized timestamps, and three different signal profiles were also
-validated on the real board.
-
-The main items still pending are:
+The main local validation milestones are complete. Current evidence covers:
 
 \begin{itemize}
-    \item the live \texttt{LoRaWAN/TTN} campus validation,
-    \item energy measurements with a cleaner two-board setup,
+    \item \texttt{MQTT/WiFi} edge delivery,
+    \item \texttt{LoRaWAN/TTN} cloud delivery,
+    \item adaptive sampling and three signal profiles,
+    \item anomaly-filter evaluation and communication-volume comparison,
+    \item \texttt{INA219} energy measurement on real hardware.
+\end{itemize}
+
+The only intentionally weaker item is:
+
+\begin{itemize}
     \item one live \texttt{MQTTS} validation run if a TLS-capable broker is available.
 \end{itemize}
 
@@ -117,9 +120,9 @@ The main items still pending are:
 \hline
 \texttt{8} & MQTT over WiFi & Complete & End-to-end home-network validation completed on hardware \\
 \hline
-\texttt{9} & LoRaWAN + TTN & Partial & Payload path implemented, but real TTN proof still pending \\
+\texttt{9} & LoRaWAN + TTN & Complete & Integrated main-app LoRaWAN validation succeeded on real hardware \\
 \hline
-\texttt{10} & Performance measurements & Partial & Latency and payload-size evidence exist; energy still pending \\
+\texttt{10} & Performance measurements & Mostly complete & Latency, payload-size, and INA219 energy evidence exist \\
 \hline
 \texttt{11} & Optional physical sensor / extras & Optional & Not required for the core project \\
 \hline
@@ -477,7 +480,7 @@ What is already true:
     \item the runtime logs show prepared payloads such as \texttt{000100C8019001F4FFE8}.
 \end{itemize}
 
-What is still missing:
+What was later validated:
 
 \begin{itemize}
     \item a real uplink through a reachable gateway,
@@ -488,8 +491,8 @@ What is still missing:
 So the correct current description is:
 
 \begin{itemize}
-    \item \texttt{LoRaWAN/TTN} path is implemented and stub-ready,
-    \item live \texttt{TTN} validation is still pending.
+    \item \texttt{LoRaWAN/TTN} path is implemented and validated,
+    \item serial and \texttt{TTN} evidence are saved in the repository.
 \end{itemize}
 
 \section{Secure MQTT Status}
@@ -514,32 +517,68 @@ So the honest current status is:
 
 \section{Energy Measurement Status}
 
-Energy is a required grading item, but the cleanest measurement setup needs two
-boards:
+Energy was measured with the same two-board \texttt{INA219} setup described in
+the runbook and used by the reference-style repositories:
 
 \begin{itemize}
-    \item one board under test,
-    \item one board or monitor path reading the \texttt{INA219}.
+    \item one Heltec DUT running the main FreeRTOS firmware,
+    \item one Heltec monitor reading the \texttt{INA219},
+    \item DUT powered only through the \texttt{INA219} high-side path,
+    \item same WiFi network, \texttt{MQTT\_ONLY} mode, and
+    \texttt{clean\_reference} profile for the comparable runs.
 \end{itemize}
 
-Because only one Heltec is currently available, the project keeps the energy
-section prepared but deferred.
+\subsection*{Baseline Versus Adaptive}
 
-What has already been done:
+\begin{center}
+\begin{tabular}{|l|r|r|r|}
+\hline
+\textbf{Metric} & \textbf{Baseline 50 Hz} & \textbf{Adaptive 40 Hz} & \textbf{Delta} \\
+\hline
+Average current & \texttt{110.4953 mA} & \texttt{110.6984 mA} & \texttt{+0.18\%} \\
+\hline
+Average power & \texttt{553.0000 mW} & \texttt{552.6775 mW} & \texttt{-0.06\%} \\
+\hline
+Integrated energy & \texttt{18.433238 mWh} & \texttt{18.422466 mWh} & \texttt{-0.06\%} \\
+\hline
+Peak power & \texttt{873.0000 mW} & \texttt{793.0000 mW} & \texttt{-9.16\%} \\
+\hline
+\end{tabular}
+\end{center}
+
+Evidence:
 
 \begin{itemize}
-    \item the firmware now has a baseline-versus-adaptive switch,
-    \item the measurement runbook has been written,
-    \item the \texttt{INA219} setup for the Heltec V3 has been documented.
+    \item \texttt{results/summaries/ina219\_baseline\_2026-04-21.md},
+    \item \texttt{results/summaries/ina219\_adaptive\_2026-04-21.md},
+    \item \texttt{results/summaries/ina219\_comparison\_2026-04-21.md},
+    \item \texttt{pics/hardware.png},
+    \item \texttt{pics/2026-04-21\_ina219\_adaptive\_betterserialplotter.png}.
 \end{itemize}
 
-What is still missing:
+The honest interpretation is that adaptive sampling reduces the
+sample-processing rate, but WiFi, display, MQTT, and always-on FreeRTOS
+activity dominate this board's electrical profile. Therefore, the measured
+average energy improvement is small, while the peak power is lower in the
+adaptive run.
+
+\subsection*{Optional Deep Sleep Comparison}
+
+An optional adaptive + deep-sleep experiment was also captured. It runs the
+adaptive pipeline, then enters timed deep sleep cycles. This reduced integrated
+energy to \texttt{13.632451 mWh} over \texttt{119.480 s}, about
+\texttt{26.04\%} lower than the fixed \texttt{50 Hz} awake baseline.
+
+Evidence:
 
 \begin{itemize}
-    \item real measured power or energy values,
-    \item screenshots of the measurement setup,
-    \item final baseline-versus-adaptive comparison table.
+    \item \texttt{results/summaries/ina219\_deepsleep\_2026-04-21.md},
+    \item \texttt{results/summaries/ina219\_three\_mode\_comparison\_2026-04-21.md},
+    \item \texttt{pics/2026-04-21\_ina219\_deepsleep\_betterserialplotter.png}.
 \end{itemize}
+
+This should be presented as an additional low-power strategy rather than as
+the required adaptive-sampling comparison.
 
 \section{Communication Volume Discussion}
 
@@ -553,10 +592,14 @@ That means:
     \item but it does not automatically reduce the MQTT message size very much.
 \end{itemize}
 
-This is exactly what the saved payload summaries show:
+This is exactly what the saved payload summaries and the final
+communication-volume comparison show:
 
 \begin{itemize}
     \item payload sizes remain around \texttt{444} to \texttt{454} bytes depending on the profile.
+    \item fixed \texttt{50 Hz} represented \texttt{1250} samples across five aggregate windows,
+    \item adaptive \texttt{40 Hz} represented \texttt{1000} samples across five aggregate windows,
+    \item both modes sent five aggregate \texttt{MQTT} messages, so total aggregate payload stayed \texttt{2270 B}.
 \end{itemize}
 
 So the communication-volume section in the final report should explain that:
@@ -565,6 +608,8 @@ So the communication-volume section in the final report should explain that:
     \item the main gain from adaptive sampling in this implementation is local efficiency,
     \item the network payload count per window is mostly unchanged.
 \end{itemize}
+
+Evidence: \url{results/summaries/communication_volume_comparison_2026-04-21.md}.
 
 \section{Build And Resource Status}
 
@@ -584,14 +629,14 @@ Current build snapshot:
 \hline
 \textbf{Resource} & \textbf{Usage} \\
 \hline
-RAM & \texttt{38520 B} (\texttt{11.8\%}) \\
+RAM & \texttt{38120 B} (\texttt{11.6\%}) \\
 \hline
-Flash & \texttt{973469 B} (\texttt{92.8\%}) \\
+Flash & \texttt{827875 B} (\texttt{24.8\%}) \\
 \hline
 \end{tabular}
 \end{center}
 
-This is still acceptable, but flash headroom is now limited.
+This leaves comfortable flash headroom for the workshop build.
 
 \section{Remaining Work}
 
@@ -602,15 +647,13 @@ The remaining work before final submission is:
 \hline
 \textbf{Item} & \textbf{Status} & \textbf{Notes} \\
 \hline
-\texttt{LoRaWAN/TTN} live proof & pending & must be done on campus or under real gateway coverage \\
+\texttt{LoRaWAN/TTN} live proof & complete & serial and TTN screenshots are saved from the integrated main app \\
 \hline
-Energy measurements & pending & deferred until a cleaner two-board setup is available \\
+Energy measurements & complete & INA219 baseline/adaptive runs are saved and compared \\
 \hline
 Secure MQTT live TLS proof & pending & firmware support exists, but no saved live TLS run yet \\
 \hline
-Prompt log curation & pending & intentionally left for later \\
-\hline
-Final short report & pending & this detailed report will make that much easier \\
+Final short report & complete & submission snapshot and evidence matrix now capture the current state \\
 \hline
 \end{tabularx}
 \end{center}
@@ -630,20 +673,19 @@ The most important completed achievements are:
     \item correct per-window aggregate computation,
     \item full home-network \texttt{MQTT/WiFi} validation on hardware,
     \item real latency measurements based on synchronized timestamps,
-    \item three validated signal profiles including anomaly-aware evidence.
+    \item three validated signal profiles including anomaly-aware evidence,
+    \item completed communication-volume comparison,
+    \item completed Z-score and Hampel anomaly-filter evaluation.
 \end{itemize}
 
 The most important missing items are now concentrated and clear:
 
 \begin{itemize}
-    \item real \texttt{TTN} uplink evidence,
-    \item energy comparison measurements,
     \item one secure \texttt{MQTTS} validation run.
 \end{itemize}
 
 This means the project is already in a strong state for the workshop: the core
-pipeline works, the edge path is proven, and the remaining work is focused on
-final measurement and cloud validation rather than on missing core
-functionality.
+pipeline works, the edge and cloud paths are proven, and the remaining work is
+focused on optional secure-MQTT proof rather than on missing core functionality.
 
 \end{document}

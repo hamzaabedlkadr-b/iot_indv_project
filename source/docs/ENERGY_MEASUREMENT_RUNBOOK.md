@@ -15,6 +15,8 @@ Compare:
 
 For this repository, that is the correct graded energy test.
 
+This matches the strongest pattern from the instructor-shared reference repositories: run the real signal-processing and communication workload on a device under test, measure current / power with an external monitor such as `INA219`, and compare fixed oversampling against the adaptive version under the same conditions.
+
 Do this with:
 
 - the same DUT board
@@ -38,6 +40,31 @@ Use:
 
 - [`INA219_ENERGY_SETUP.md`](./INA219_ENERGY_SETUP.md)
 - [`../firmware/ina219_power_monitor/README.md`](../firmware/ina219_power_monitor/README.md)
+- [`../results/reference_repo_power_conditions_2026-04-21.md`](../results/reference_repo_power_conditions_2026-04-21.md)
+
+## Reference-Repo Matching Conditions
+
+To stay aligned with the class examples, run the DUT under these exact conditions:
+
+| Condition | Baseline run | Adaptive run |
+| --- | --- | --- |
+| DUT firmware | main `esp32_node` app | same main `esp32_node` app |
+| Signal profile | `clean_reference` | `clean_reference` |
+| Communication path | `MQTT_ONLY` over WiFi | `MQTT_ONLY` over WiFi |
+| Initial sampling rate | `50 Hz` | `50 Hz` |
+| Adaptive sampling | disabled | enabled |
+| Expected steady rate | `50 Hz` | `40 Hz` |
+| Window duration | same project window | same project window |
+| Run duration | `120 s` preferred | `120 s` preferred |
+| Monitor | same `INA219` setup | same `INA219` setup |
+| DUT USB cable | disconnected during measurement | disconnected during measurement |
+
+Save both runs even if the measured power difference is small. Some reference repos also observed that continuous FreeRTOS and WiFi activity can dominate the energy profile; that is an acceptable finding as long as the comparison is honest.
+
+Optional extra run:
+
+- add a deep-sleep cycle measurement if the DUT can wake, connect, publish, and sleep reliably
+- present it as an additional low-power strategy, not as a replacement for fixed-vs-adaptive sampling
 
 ## Firmware Switches To Use
 
@@ -140,6 +167,7 @@ For each run, record:
 - communication mode
 - signal profile
 - average power or total energy from the meter
+- peak current and peak power from WiFi/MQTT activity
 - average `sampling_frequency_hz`
 - average `listener_latency_us`
 - total payload bytes from the summary
@@ -153,7 +181,23 @@ From the new `INA219` scripts, the most useful fields to keep are:
 
 ## Final Comparison Table
 
-Copy the results into a table like this:
+The final captured results are saved in:
+
+- [`../results/summaries/ina219_baseline_2026-04-21.md`](../results/summaries/ina219_baseline_2026-04-21.md)
+- [`../results/summaries/ina219_adaptive_2026-04-21.md`](../results/summaries/ina219_adaptive_2026-04-21.md)
+- [`../results/summaries/ina219_comparison_2026-04-21.md`](../results/summaries/ina219_comparison_2026-04-21.md)
+- [`../results/summaries/ina219_deepsleep_2026-04-21.md`](../results/summaries/ina219_deepsleep_2026-04-21.md)
+- [`../results/summaries/ina219_three_mode_comparison_2026-04-21.md`](../results/summaries/ina219_three_mode_comparison_2026-04-21.md)
+
+Summary:
+
+| Metric | Baseline `50 Hz` | Adaptive `40 Hz` | Adaptive + deep sleep |
+| --- | ---: | ---: | ---: |
+| Average power | `553.0000 mW` | `552.6775 mW` | `410.8682 mW` |
+| Integrated energy | `18.433238 mWh` | `18.422466 mWh` | `13.632451 mWh` |
+| Delta vs baseline | reference | `-0.06%` | `-26.04%` |
+
+For future reruns, copy fresh results into a table like this:
 
 | Metric | Baseline | Adaptive | Notes |
 | --- | --- | --- | --- |
@@ -180,14 +224,15 @@ The expected interpretation for this project is:
 - network volume may not change much because both modes still send one aggregate per window
 - any measured energy improvement should therefore be attributed mainly to local computation and sampling activity, not a large drop in MQTT payload count
 - if the measured energy difference is small, that is still a valid result, as long as the setup and comparison are honest and identical across both runs
+- if WiFi dominates the power profile, explain that clearly; the reference repos also show WiFi connection / transmission spikes as the largest visible power events
 
 ## Evidence To Keep
 
-- one photo of the measurement setup
-- one baseline meter screenshot or photo
-- one adaptive meter screenshot or photo
-- one summary screenshot showing the baseline numbers
-- one summary screenshot showing the adaptive numbers
+- one photo of the measurement setup: [`../pics/hardware.png`](../pics/hardware.png)
+- one adaptive meter screenshot or photo: [`../pics/2026-04-21_ina219_adaptive_betterserialplotter.png`](../pics/2026-04-21_ina219_adaptive_betterserialplotter.png)
+- one deep-sleep meter screenshot or photo: [`../pics/2026-04-21_ina219_deepsleep_betterserialplotter.png`](../pics/2026-04-21_ina219_deepsleep_betterserialplotter.png)
+- one summary showing the baseline/adaptive numbers: [`../results/summaries/ina219_comparison_2026-04-21.md`](../results/summaries/ina219_comparison_2026-04-21.md)
+- one summary showing the optional deep-sleep result: [`../results/summaries/ina219_three_mode_comparison_2026-04-21.md`](../results/summaries/ina219_three_mode_comparison_2026-04-21.md)
 
 The screenshot checklist already reserves these filenames:
 
@@ -195,6 +240,6 @@ The screenshot checklist already reserves these filenames:
 - `energy_baseline_run.png`
 - `energy_adaptive_run.png`
 
-## If No Meter Is Available
+## If No Meter Is Available In A Future Rerun
 
-If direct power measurement is impossible, keep the runbook and note the limitation explicitly in the final report. A direct meter is still the preferred method for the graded energy section.
+If direct power measurement is impossible in a future rerun, keep the runbook and note the limitation explicitly in the final report. For the current submission, direct `INA219` measurements are already saved.

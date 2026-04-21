@@ -1,0 +1,14 @@
+{
+  "label": "baseline_50hz",
+  "sample_count": 1166,
+  "duration_s": 119.995,
+  "avg_bus_voltage_V": 5.012171526586621,
+  "avg_load_voltage_V": 5.00116140651801,
+  "avg_current_mA": 110.49528301886792,
+  "avg_power_mW": 553.0,
+  "max_current_mA": 174.1,
+  "max_power_mW": 873.0,
+  "min_power_mW": 503.0,
+  "energy_mWh": 18.4332376388889,
+  "energy_mJ": 66359.65550000004
+}

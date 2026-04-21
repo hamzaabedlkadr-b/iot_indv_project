@@ -1,6 +1,6 @@
 # Current Progress Report
 
-Date: `2026-04-20`
+Date: `2026-04-21`
 
 This report summarizes the project state up to the current checkpoint. It is meant to be the readable, up-to-date companion to the older historical report in [`PHASE1_REPORT.tex`](./PHASE1_REPORT.tex), which still documents Phases `1` to `7` in depth.
 
@@ -30,10 +30,8 @@ The main local validation milestone is complete:
 - three signal profiles have been validated on real hardware
 - a `BetterSerialPlotter` view has been captured for live signal-processing visualization
 
-The project is not fully finished yet. The remaining work is:
+The project is close to final-submission ready. The remaining work is:
 
-- energy measurements using a cleaner `INA219` setup when two Heltec boards are available
-- one fixed-rate baseline run to finish the direct communication-volume comparison row from the same controlled setup
 - one live `MQTTS` validation run if a TLS-capable broker is available
 
 ## 2. Current Phase Status
@@ -43,13 +41,13 @@ The project is not fully finished yet. The remaining work is:
 | `1` | Environment setup | Complete | Board, PlatformIO, serial, and broker environment were validated |
 | `2` | Firmware skeleton | Complete | Modular FreeRTOS structure and shared data types are in place |
 | `3` | Virtual sensor | Complete | Required sinusoidal signal is generated in firmware |
-| `4` | Maximum sampling frequency | Complete | Strict benchmark performed on the real board |
+| `4` | Maximum sampling frequency | Complete | Raw class-style benchmark measured `199,126.59 Hz`; strict full-pipeline baseline remains `50 Hz` |
 | `5` | Frequency analysis | Complete | Dominant frequency detection implemented and validated |
 | `6` | Adaptive sampling | Complete | Runtime update from `50 Hz` to `40 Hz` validated |
 | `7` | Aggregate computation | Complete | Window averages are computed and passed downstream |
 | `8` | MQTT over WiFi | Complete | End-to-end home-network validation completed on hardware |
 | `9` | LoRaWAN + TTN | Complete | Integrated main-app LoRaWAN validation succeeded on real hardware near working gateway coverage |
-| `10` | Performance measurements | Partial | Latency and payload-size evidence exist; energy is still pending |
+| `10` | Performance measurements | Mostly complete | Latency, payload-size, communication-volume, anomaly-filter, and INA219 energy evidence exist; only secure-MQTT and final packaging remain |
 | `11` | Optional physical sensor / extras | Optional | Not required for the core project |
 | `12` | Final packaging and write-up | In progress | README, evidence map, and the latest LoRaWAN screenshots are now curated; final short write-up remains |
 
@@ -119,7 +117,29 @@ The selected profile is carried through the aggregate object and the MQTT payloa
 
 ## 6. Maximum Sampling Frequency Benchmark
 
-The strict benchmark from Phase `4` tested multiple target rates and classified a rate as stable only if timing stayed clean under the project rule.
+There are now two benchmark results, because they answer two different questions.
+
+### Raw Class-Style Benchmark
+
+The latest raw benchmark is the number that should be compared with the reference class repositories that report simple-loop or raw-throughput sampling results:
+
+```text
+Raw benchmark result | generated=199126 min_dt=3.0us max_dt=53.0us achieved=199126.59Hz stable=yes duration=1.00s
+```
+
+Evidence:
+
+- [`../pics/Sampling_frequency.png`](../pics/Sampling_frequency.png)
+
+Interpretation:
+
+- the board can generate the virtual samples at about `199.1 kHz` in the raw benchmark path
+- this benchmark intentionally removes the full communication and processing pipeline
+- it is useful for the rubric's maximum-frequency discussion because it matches the style used by several class examples
+
+### Strict Full-Pipeline Operating Benchmark
+
+The strict benchmark from Phase `4` tested multiple target rates with the complete application path and classified a rate as stable only if timing stayed clean under the project rule.
 
 ### Measured Result Table
 
@@ -134,14 +154,15 @@ The strict benchmark from Phase `4` tested multiple target rates and classified 
 
 ### Interpretation
 
-The important conclusion is:
+The important conclusion for the strict full-pipeline mode is:
 
-- the board can technically generate and consume data above `50 Hz`
-- but under the current strict stability rule, the highest clean operating point is `50 Hz`
+- the board can technically generate data far above `50 Hz`
+- but under the current strict full-pipeline stability rule, the highest clean operating point is `50 Hz`
 
 This is why the project uses:
 
-- `50 Hz` as the baseline oversampling reference
+- `199,126.59 Hz` as the raw class-style maximum sampling benchmark
+- `50 Hz` as the conservative full-pipeline oversampling baseline
 - `40 Hz` as the first stable adaptive rate for the current signal
 
 ## 7. FFT And Adaptive Sampling
@@ -285,6 +306,12 @@ This is useful for the final workshop because it shows:
 - anomaly injection is real, not just described
 - the project already covers the `3 signal` bonus direction
 
+The extended anomaly-filter bonus is now also supported by a deterministic `Z-score` versus `Hampel` evaluation:
+
+- [`../results/summaries/anomaly_filter_evaluation_2026-04-21.md`](../results/summaries/anomaly_filter_evaluation_2026-04-21.md)
+- [`../results/summaries/anomaly_filter_metrics_2026-04-21.csv`](../results/summaries/anomaly_filter_metrics_2026-04-21.csv)
+- [`../results/summaries/anomaly_filter_window_tradeoff_2026-04-21.csv`](../results/summaries/anomaly_filter_window_tradeoff_2026-04-21.csv)
+
 ## 11. BetterSerialPlotter Validation
 
 The project also includes a simplified serial stream for `BetterSerialPlotter`.
@@ -345,24 +372,39 @@ So the honest current status is:
 
 ## 14. Energy Measurement Status
 
-Energy is a required grading item, but the cleanest measurement setup needs two boards:
+Energy was measured with the same two-board `INA219` setup used in the reference-style runbook:
 
-- one board under test
-- one board or monitor path reading the `INA219`
+- one Heltec DUT running the main FreeRTOS firmware
+- one Heltec monitor reading the `INA219`
+- DUT powered only through the `INA219` high-side path
+- same WiFi network, `MQTT_ONLY` mode, and `clean_reference` profile for both runs
 
-Because only one Heltec is currently available, the project keeps the energy section prepared but deferred.
+The saved comparison is:
 
-What has already been done:
+| Metric | Baseline `50 Hz` | Adaptive `40 Hz` | Delta |
+| --- | --- | --- | --- |
+| Average current | `110.4953 mA` | `110.6984 mA` | `+0.18%` |
+| Average power | `553.0000 mW` | `552.6775 mW` | `-0.06%` |
+| Integrated energy | `18.433238 mWh` | `18.422466 mWh` | `-0.06%` |
+| Peak power | `873.0000 mW` | `793.0000 mW` | `-9.16%` |
 
-- the firmware now has a baseline-versus-adaptive switch
-- the measurement runbook has been written
-- the `INA219` setup for the Heltec V3 has been documented
+Evidence:
 
-What is still missing:
+- [`../results/summaries/ina219_baseline_2026-04-21.md`](../results/summaries/ina219_baseline_2026-04-21.md)
+- [`../results/summaries/ina219_adaptive_2026-04-21.md`](../results/summaries/ina219_adaptive_2026-04-21.md)
+- [`../results/summaries/ina219_comparison_2026-04-21.md`](../results/summaries/ina219_comparison_2026-04-21.md)
+- [`../pics/hardware.png`](../pics/hardware.png)
+- [`../pics/2026-04-21_ina219_adaptive_betterserialplotter.png`](../pics/2026-04-21_ina219_adaptive_betterserialplotter.png)
 
-- real measured power or energy values
-- screenshots of the measurement setup
-- final baseline-versus-adaptive comparison table
+The honest interpretation is that adaptive sampling reduces the sample-processing rate, but WiFi, display, MQTT, and always-on FreeRTOS activity dominate this board's electrical profile. Therefore, the measured average energy improvement is small, while the peak power is lower in the adaptive run.
+
+An optional deep-sleep experiment was also captured. It runs the adaptive pipeline, then enters timed deep sleep cycles. This reduced integrated energy to `13.632451 mWh` over `119.480 s`, about `26.04%` lower than the fixed `50 Hz` awake baseline. It should be presented as an extra low-power strategy rather than as the required adaptive-sampling comparison.
+
+Evidence:
+
+- [`../results/summaries/ina219_deepsleep_2026-04-21.md`](../results/summaries/ina219_deepsleep_2026-04-21.md)
+- [`../results/summaries/ina219_three_mode_comparison_2026-04-21.md`](../results/summaries/ina219_three_mode_comparison_2026-04-21.md)
+- [`../pics/2026-04-21_ina219_deepsleep_betterserialplotter.png`](../pics/2026-04-21_ina219_deepsleep_betterserialplotter.png)
 
 ## 15. Communication Volume Discussion
 
@@ -373,14 +415,21 @@ That means:
 - adaptive sampling reduces local sampling and processing work
 - but it does not automatically reduce the MQTT message size very much
 
-This is exactly what the saved payload summaries show:
+This is exactly what the saved payload summaries and the final communication-volume comparison show:
 
 - payload sizes remain around `444` to `454` bytes depending on the profile
+- fixed `50 Hz` represented `1250` samples over five aggregate windows
+- adaptive `40 Hz` represented `1000` samples over five aggregate windows
+- both modes send five aggregate MQTT messages, so total aggregate payload remains `2270 B`
 
-So the communication-volume section in the final report should explain that:
+So the communication-volume section in the final report explains that:
 
 - the main gain from adaptive sampling in this implementation is local efficiency
 - the network payload count per window is mostly unchanged
+
+Evidence:
+
+- [`../results/summaries/communication_volume_comparison_2026-04-21.md`](../results/summaries/communication_volume_comparison_2026-04-21.md)
 
 ## 16. Build And Resource Status
 
@@ -394,16 +443,19 @@ Current build snapshot:
 
 | Resource | Usage |
 | --- | --- |
-| RAM | `38520 B` (`11.8%`) |
-| Flash | `973469 B` (`92.8%`) |
+| RAM | `38120 B` (`11.6%`) |
+| Flash | `827875 B` (`24.8%`) |
 
-This is still acceptable, but flash headroom is now limited.
+This leaves comfortable flash headroom for the workshop build.
 
 ## 17. Evidence Available Right Now
 
 Useful current evidence files include:
 
+- [`../results/final_evidence_index_2026-04-21.md`](../results/final_evidence_index_2026-04-21.md)
+- [`../results/wifi_mqtt_evidence_2026-04-21.md`](../results/wifi_mqtt_evidence_2026-04-21.md)
 - [`PHASE1_REPORT.tex`](./PHASE1_REPORT.tex)
+- [`../pics/Sampling_frequency.png`](../pics/Sampling_frequency.png)
 - [`../results/runtime_notes_2026-04-17.md`](../results/runtime_notes_2026-04-17.md)
 - [`../results/mqtt_evidence_2026-04-18.md`](../results/mqtt_evidence_2026-04-18.md)
 - [`../results/lorawan_evidence_2026-04-20.md`](../results/lorawan_evidence_2026-04-20.md)
@@ -419,9 +471,8 @@ The remaining work before the final submission is:
 
 | Item | Status | Notes |
 | --- | --- | --- |
-| Energy measurements and fixed-rate baseline comparison | pending | deferred until a cleaner two-board setup is available; the same run should finish the direct communication-volume comparison |
+| Energy measurements and fixed-rate baseline comparison | complete | INA219 baseline/adaptive runs are saved and compared |
 | Secure MQTT live TLS proof | pending | firmware support exists, but no saved live TLS run yet |
-| Prompt log curation | pending | intentionally left for later |
 | Final short report | complete | [`SUBMISSION_SNAPSHOT.md`](./SUBMISSION_SNAPSHOT.md) now captures the honest submission-ready state |
 
 ## 19. Conclusion
@@ -431,17 +482,18 @@ At this checkpoint, the project has moved well beyond the early scaffolding phas
 The most important completed achievements are:
 
 - stable virtual-signal generation on the real board
-- measured maximum stable sampling benchmark
+- measured raw maximum sampling benchmark and strict full-pipeline baseline
 - correct dominant-frequency detection
 - working adaptive-sampling transition from `50 Hz` to `40 Hz`
 - correct per-window aggregate computation
 - full home-network `MQTT/WiFi` validation on hardware
 - real latency measurements based on synchronized timestamps
 - three validated signal profiles including anomaly-aware evidence
+- a completed communication-volume comparison
+- a completed Z-score/Hampel anomaly-filter evaluation
 
-The most important remaining items are now concentrated and clear:
+The most important remaining item is now concentrated and clear:
 
-- energy comparison measurements and the matching fixed-rate baseline comparison
 - one secure `MQTTS` validation run
 
-This means the project is already in a strong state for the workshop: the core pipeline works, both communication paths have been proven on hardware, and the remaining work is focused on final measurement and evidence packaging rather than on missing core functionality.
+This means the project is already in a strong state for the workshop: the core pipeline works, both communication paths have been proven on hardware, and the remaining work is focused on optional secure-MQTT proof rather than on missing core functionality.

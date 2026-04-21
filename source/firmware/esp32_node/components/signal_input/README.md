@@ -6,6 +6,7 @@ Current modes:
 
 - `virtual_signal` is the main path used for the assignment pipeline
 - `sampling_benchmark` is used to measure the highest stable local sampling rate
+- `raw_sampling_benchmark` is used to measure class-repo-style raw synthetic sample throughput
 - `hc_sr04_mode` remains an optional extension hook
 
 Current responsibilities:

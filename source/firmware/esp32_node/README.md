@@ -80,6 +80,15 @@ The sampling policy can now be switched in [`include/project_config.h`](./includ
 
 This makes the later energy comparison much easier because the same firmware pipeline can be reused for both runs.
 
+## Benchmark Modes
+
+The firmware now supports two different benchmark styles:
+
+- `PROJECT_ENABLE_SAMPLING_BENCHMARK = 1U`: strict full-pipeline benchmark for the highest clean stable operating rate
+- `PROJECT_ENABLE_RAW_SAMPLING_BENCHMARK = 1U`: raw synthetic sample throughput benchmark, closer to the simpler class-repo "max frequency" style
+
+Use the raw benchmark when you want a large theoretical throughput number. The latest saved raw result is `199,126.59 Hz`. Keep the strict benchmark when you want the more conservative full-pipeline result used for the `50 Hz -> 40 Hz` adaptive run.
+
 ## BetterSerialPlotter
 
 The firmware can also emit a clean numeric serial stream for live plotting with BetterSerialPlotter.

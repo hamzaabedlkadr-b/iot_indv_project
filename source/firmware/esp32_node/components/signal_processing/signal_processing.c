@@ -15,6 +15,12 @@
 static const char *TAG = "signal_processing";
 static float s_window_buffer[PROJECT_SIGNAL_WINDOW_MAX_SAMPLES];
 
+static bool benchmark_mode_uses_processing_drain(project_mode_t mode)
+{
+    return mode == PROJECT_MODE_SAMPLING_BENCHMARK ||
+           mode == PROJECT_MODE_RAW_SAMPLING_BENCHMARK;
+}
+
 typedef struct {
     uint32_t bin_index;
     float frequency_hz;
@@ -158,7 +164,7 @@ esp_err_t signal_processing_init(project_context_t *ctx)
     }
 
     xEventGroupSetBits(ctx->system_events, PROJECT_EVENT_SIGNAL_PROCESSING_READY);
-    if (ctx->mode == PROJECT_MODE_SAMPLING_BENCHMARK) {
+    if (benchmark_mode_uses_processing_drain(ctx->mode)) {
         ESP_LOGI(TAG, "Signal processing module ready in benchmark drain mode");
     } else {
         ESP_LOGI(TAG,
@@ -175,7 +181,7 @@ void signal_processing_task(void *pvParameters)
     project_context_t *ctx = (project_context_t *)pvParameters;
     raw_sample_t sample;
 
-    if (ctx->mode == PROJECT_MODE_SAMPLING_BENCHMARK) {
+    if (benchmark_mode_uses_processing_drain(ctx->mode)) {
         uint64_t last_report_us = (uint64_t)esp_timer_get_time();
 
         for (;;) {

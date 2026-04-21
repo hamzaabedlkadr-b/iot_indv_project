@@ -8,14 +8,14 @@ This checklist saves the remaining live tests for the day when the Heltec board 
 - edge-side `MQTT` listener setup
 - `TTN` payload decoder preparation
 - measurement templates and analysis scripts
-- final report structure and prompt-log templates
+- final report structure and evidence links
 
 ## What Still Needs The Board
 
 - fresh serial log capture during runtime if a newer evidence bundle is needed
 - optional repeat `MQTT/WiFi` or `LoRaWAN` publishing if configuration changes or newer screenshots are needed
 - benchmark reruns if configuration changes
-- final energy comparison measurements
+- optional repeat energy comparison measurements if hardware conditions change
 
 ## Home Preparation Checklist
 
@@ -101,5 +101,4 @@ Use this when the board is already running near a working `LoRaWAN` gateway and 
 ## Final Deferred Items
 
 - optional refresh of the saved Phase 8 `MQTT` evidence bundle
-- final energy comparison measurements
 - optional live `MQTTS` proof if a secure broker is available

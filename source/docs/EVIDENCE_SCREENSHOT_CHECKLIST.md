@@ -59,19 +59,23 @@ Suggested caption:
 
 What to capture:
 
-- serial output or benchmark result showing the measured maximum stable sampling frequency
+- serial output or benchmark result showing the measured raw maximum sampling frequency
 
 Why it matters:
 
 - directly supports the grading item about maximum sampling frequency
 
+Already captured:
+
+- `../pics/Sampling_frequency.png`
+
 Suggested filename:
 
-- `max_sampling_frequency_result.png`
+- `max_sampling_frequency_result.png` or keep the existing `Sampling_frequency.png`
 
 Suggested caption:
 
-- `Measured maximum stable sampling frequency on the Heltec board.`
+- `Raw maximum sampling benchmark on the Heltec board, measured separately from the stricter full-pipeline operating baseline.`
 
 ### 3. FFT Result And Adaptive Sampling Update
 
@@ -237,6 +241,10 @@ What to capture:
 
 - a photo of the real hardware setup used for power measurement
 
+Already captured:
+
+- `../pics/hardware.png`
+
 Why it matters:
 
 - makes the energy results more believable and easier to explain
@@ -256,6 +264,16 @@ What to capture:
 - at least one graph for baseline / over-sampling
 - at least one graph for adaptive sampling
 - at least one graph for deep sleep or low-power behavior if used
+
+Already captured:
+
+- `../pics/2026-04-21_ina219_adaptive_betterserialplotter.png`
+- `../pics/2026-04-21_ina219_deepsleep_betterserialplotter.png`
+
+Saved numeric evidence:
+
+- `../results/summaries/ina219_comparison_2026-04-21.md`
+- `../results/summaries/ina219_three_mode_comparison_2026-04-21.md`
 
 Why it matters:
 

@@ -20,6 +20,7 @@ source/docs/*.out
 source/docs/*.log
 source/edge_server/mqtt_listener/logs/
 source/results/summaries/*_live.txt
+!source/results/summaries/mqtt_listener_2026-04-18_live.txt
 source/test_codes/
 source/firmware/esp32_node/_heltec_objdump/
 source/firmware/esp32_node/lorawan_*.log

@@ -10,31 +10,31 @@ Status legend:
 
 | Rubric item | Points | Current status | Best current evidence | What still needs to happen |
 | --- | --- | --- | --- | --- |
-| Compute correctly the max frequency of the input signal | `15` | Validated | [`PHASE1_REPORT.tex`](./PHASE1_REPORT.tex) documents the strict stable point at `50 Hz` and instability above it | Capture or keep one screenshot of the benchmark table / serial result for the workshop |
-| Correctly compute optimal frequency | `15` | Validated | [`PHASE1_REPORT.tex`](./PHASE1_REPORT.tex) and [`../pics/2026-04-18_better_serial_plotter_live_view.png`](../pics/2026-04-18_better_serial_plotter_live_view.png) show the `5 Hz -> 40 Hz` adaptive result | Keep one clean screenshot of the adaptive update line or plotter view |
+| Compute correctly the max frequency of the input signal | `15` | Validated | [`../pics/Sampling_frequency.png`](../pics/Sampling_frequency.png) shows the raw benchmark at `199,126.59 Hz`; [`CURRENT_PROGRESS_REPORT.md`](./CURRENT_PROGRESS_REPORT.md) explains why `50 Hz` is still used as the strict full-pipeline baseline | Keep the raw benchmark screenshot and be ready to explain the difference between raw throughput and full-pipeline stability |
+| Correctly compute optimal frequency | `15` | Validated | [`PHASE1_REPORT.tex`](./PHASE1_REPORT.tex), [`../pics/2026-04-18_better_serial_plotter_live_view.png`](../pics/2026-04-18_better_serial_plotter_live_view.png), and [`../results/wifi_mqtt_evidence_2026-04-21.md`](../results/wifi_mqtt_evidence_2026-04-21.md) show the `5 Hz -> 40 Hz` adaptive result | Keep one clean screenshot of the adaptive update line or plotter view |
 | Compute correctly the average function over window | `10` | Validated | [`../results/runtime_notes_2026-04-17.md`](../results/runtime_notes_2026-04-17.md), MQTT payload summaries, and aggregate logs | Keep one screenshot showing `average_value`, `sample_count`, and `window_id` together |
-| Evaluate correctly the saving in energy | `10` | Pending | [`ENERGY_MEASUREMENT_RUNBOOK.md`](./ENERGY_MEASUREMENT_RUNBOOK.md) and [`MEASUREMENT_PLAN.md`](./MEASUREMENT_PLAN.md) define the method | Run the fixed baseline and adaptive measurements with a USB power meter or equivalent |
-| Measure correctly the volume of data transmitted over the network | `5` | Partial | [`../results/summaries/mqtt_summary_2026-04-18_listener.md`](../results/summaries/mqtt_summary_2026-04-18_listener.md) gives current payload size; profile summaries give per-run bytes | Complete the baseline-vs-adaptive comparison table and explain that one aggregate per window keeps payload volume nearly constant |
+| Evaluate correctly the saving in energy | `10` | Validated | [`../results/summaries/ina219_comparison_2026-04-21.md`](../results/summaries/ina219_comparison_2026-04-21.md), [`../results/summaries/ina219_three_mode_comparison_2026-04-21.md`](../results/summaries/ina219_three_mode_comparison_2026-04-21.md), [`../pics/hardware.png`](../pics/hardware.png), and the `INA219` plotter screenshots | Explain that WiFi/display/FreeRTOS activity dominated the awake adaptive result (`-0.06%`), while optional deep sleep reduced energy by `-26.04%` |
+| Measure correctly the volume of data transmitted over the network | `5` | Validated | [`../results/summaries/communication_volume_comparison_2026-04-21.md`](../results/summaries/communication_volume_comparison_2026-04-21.md) compares fixed `50 Hz` against adaptive `40 Hz`; [`../results/summaries/mqtt_summary_2026-04-18_listener.md`](../results/summaries/mqtt_summary_2026-04-18_listener.md) gives the measured adaptive payload bytes | Explain that represented samples drop by `20%`, while MQTT bytes stay flat because the design sends one aggregate per window |
 | Measure correctly the end-to-end latency | `5` | Validated | [`../results/summaries/mqtt_summary_2026-04-18_listener.md`](../results/summaries/mqtt_summary_2026-04-18_listener.md) and [`../results/mqtt_evidence_2026-04-18.md`](../results/mqtt_evidence_2026-04-18.md) | Take or reuse one screenshot of the saved summary |
 | Transmit the result to the MQTT server in a secure way | `10` | Partial | [`SECURE_MQTT_SETUP.md`](./SECURE_MQTT_SETUP.md) and the updated MQTT client support `mqtts://`, certificate verification, and optional credentials | Validate the TLS path against a real secure broker and save one proof run |
 | Quality of the FreeRTOS code | `5` | Validated | Modular task pipeline under [`../firmware/esp32_node/`](../firmware/esp32_node/), queue separation, comments, and component READMEs | Be ready to explain task ownership, queues, and timing decisions in the workshop |
-| Quality of presentation of project in the GitHub repository | `5` | Validated | [`../../README.md`](../../README.md), [`../README.md`](../README.md), [`../results/lorawan_evidence_2026-04-20.md`](../results/lorawan_evidence_2026-04-20.md), [`../results/mqtt_evidence_2026-04-18.md`](../results/mqtt_evidence_2026-04-18.md) | Keep the README tables and screenshot links synchronized when the deferred energy and secure-MQTT results are added |
-| Consider three different input signals | `20` | Validated | [`../results/summaries/mqtt_summary_2026-04-17_clean_profile_synced.md`](../results/summaries/mqtt_summary_2026-04-17_clean_profile_synced.md), [`../results/summaries/mqtt_summary_2026-04-17_noisy_profile_synced.md`](../results/summaries/mqtt_summary_2026-04-17_noisy_profile_synced.md), [`../results/summaries/mqtt_summary_2026-04-17_anomaly_profile_synced.md`](../results/summaries/mqtt_summary_2026-04-17_anomaly_profile_synced.md) | Capture one screenshot per profile or a combined comparison table |
+| Quality of presentation of project in the GitHub repository | `5` | Validated | [`../../README.md`](../../README.md), [`../README.md`](../README.md), [`../results/final_evidence_index_2026-04-21.md`](../results/final_evidence_index_2026-04-21.md), [`../results/lorawan_evidence_2026-04-20.md`](../results/lorawan_evidence_2026-04-20.md), [`../results/wifi_mqtt_evidence_2026-04-21.md`](../results/wifi_mqtt_evidence_2026-04-21.md), and the `INA219` evidence bundle | Keep the README tables and screenshot links synchronized if secure-MQTT evidence is added later |
+| Consider three different input signals | `20` | Validated | [`../results/final_evidence_index_2026-04-21.md`](../results/final_evidence_index_2026-04-21.md), [`../results/summaries/signal_profile_comparison_2026-04-18.txt`](../results/summaries/signal_profile_comparison_2026-04-18.txt), [`../results/summaries/anomaly_filter_evaluation_2026-04-21.md`](../results/summaries/anomaly_filter_evaluation_2026-04-21.md), [`../results/screenshots/signal_profile_comparison_2026-04-18.png`](../results/screenshots/signal_profile_comparison_2026-04-18.png), and the three synced profile summaries | Show both the three-profile MQTT table and the Z-score/Hampel anomaly-filter table |
 
 ## Most Important Missing Proofs
 
 If time is short, the highest-value missing items are:
 
-1. `Energy` comparison screenshots and numbers
-2. one fixed-rate baseline run to finish the direct communication-volume comparison row
-3. `Secure MQTT` validation if a TLS-capable broker is available
+1. `Secure MQTT` validation if a TLS-capable broker is available
+2. one final screenshot pass before publishing the repository
 
 ## Recommended Workshop Order
 
 1. Show the architecture and signal profiles from the main README.
-2. Show the `50 Hz` maximum stable benchmark result.
+2. Show the raw `199,126.59 Hz` maximum sampling benchmark, then explain that `50 Hz` is the conservative full-pipeline baseline.
 3. Show the adaptive update to `40 Hz`.
 4. Show the aggregate and MQTT listener evidence.
 5. Show the LoRa serial proof and `TTN` screenshots from `2026-04-20`.
-6. Show the three signal-profile summaries.
-7. Close with the deferred energy and secure-MQTT items, or show them once those final artifacts are collected.
+6. Show the three signal-profile summaries and the anomaly-filter evaluation.
+7. Show the communication-volume comparison.
+8. Close with the INA219 energy comparison and the remaining secure-MQTT limitation.
