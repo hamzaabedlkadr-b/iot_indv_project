@@ -11,6 +11,7 @@ This project builds an IoT node that generates a virtual sensor signal, samples 
 - [System Architecture](#system-architecture)
 - [Design Rationale](#design-rationale)
 - [Code Organization](#code-organization)
+- [Important Functions](#important-functions)
 - [Implementation Details](#implementation-details)
 - [Performance Evaluation](#performance-evaluation)
 - [Evidence Gallery](#evidence-gallery)
@@ -197,6 +198,75 @@ sample_queue -> fft_queue -> adaptive update
 ```
 
 `app_main()` creates the queues, starts the tasks, and then stays alive as a supervisor. It logs queue depth, event bits, sample counts, window counts, MQTT/LoRa counters, current sampling rate, dominant frequency, and latest average. That is why the serial logs are useful for proving the runtime behavior.
+
+## Important Functions
+
+This section maps the main assignment requirements to the exact functions in the code. It is useful during the presentation when asked "where did you implement this?"
+
+### Main ESP32 Firmware
+
+| Requirement / feature | Function | Goal |
+| --- | --- | --- |
+| FreeRTOS startup | [`app_main()`](./source/firmware/esp32_node/main/app_main.c#L223) | Boots the firmware, initializes every module, creates all FreeRTOS tasks, then runs the supervisor loop. |
+| Shared queues and state | [`project_context_create()`](./source/firmware/esp32_node/main/app_main.c#L176) | Creates `sample_queue`, `fft_queue`, MQTT/LoRaWAN aggregate queues, event bits, counters, and the initial sampling frequency. |
+| Supervisor heartbeat | [`log_queue_status()`](./source/firmware/esp32_node/main/app_main.c#L210) | Prints queue depth and task health so the live serial log proves the system is running correctly. |
+| Optional deep sleep | [`project_enter_deep_sleep()`](./source/firmware/esp32_node/main/app_main.c#L142) | Stops WiFi and enters timed deep sleep for the energy-saving experiment. |
+| Base input signal | [`generate_base_signal()`](./source/firmware/esp32_node/components/signal_input/signal_input.c#L81) | Generates `2*sin(2*pi*3*t) + 4*sin(2*pi*5*t)`, the required assignment signal. |
+| Noisy/anomaly signals | [`generate_profiled_signal()`](./source/firmware/esp32_node/components/signal_input/signal_input.c#L93) | Adds Gaussian noise and optional injected spikes for the bonus signal profiles. |
+| Runtime sampling | [`run_virtual_sensor_mode()`](./source/firmware/esp32_node/components/signal_input/signal_input.c#L294) | Generates samples at the current adaptive rate and pushes them into `sample_queue`. |
+| Sampling period update | [`current_virtual_sampling_frequency_hz()`](./source/firmware/esp32_node/components/signal_input/signal_input.c#L151) | Reads the latest `ctx->adaptive.current_sampling_frequency_hz`, so the input task really changes from `50 Hz` to `40 Hz`. |
+| Maximum sampling benchmark | [`run_raw_sampling_benchmark_mode()`](./source/firmware/esp32_node/components/signal_input/signal_input.c#L480) | Measures the raw maximum synthetic sample-generation rate, reported as `199,126.59 Hz`. |
+| Stable staged benchmark | [`run_sampling_benchmark_mode()`](./source/firmware/esp32_node/components/signal_input/signal_input.c#L372) | Tests practical rates such as `50`, `100`, `200`, `250`, `500`, and `1000 Hz` with queue/timing checks. |
+| Window size | [`compute_window_sample_count()`](./source/firmware/esp32_node/components/signal_processing/signal_processing.c#L126) | Converts a sampling frequency into a `5 s` window length, for example `40 Hz * 5 s = 200 samples`. |
+| Frequency-bin magnitude | [`compute_dft_bin_magnitude()`](./source/firmware/esp32_node/components/signal_processing/signal_processing.c#L61) | Computes the magnitude of one DFT/FFT-style frequency bin after removing the average/DC offset. |
+| Dominant frequency detection | [`analyse_window_spectrum()`](./source/firmware/esp32_node/components/signal_processing/signal_processing.c#L83) | Scans the spectral bins, finds the largest magnitude, and stores it as `result->dominant_frequency_hz`. |
+| Average aggregate | [`signal_processing_task()`](./source/firmware/esp32_node/components/signal_processing/signal_processing.c#L179) | Builds each `5 s` window, computes the average, computes the spectrum, and creates the aggregate result. |
+| Send FFT result to controller | [`xQueueSend(ctx->fft_queue, &result, 0)`](./source/firmware/esp32_node/components/signal_processing/signal_processing.c#L340) | Sends the detected dominant frequency from processing to the adaptive control task. |
+| Send aggregate to MQTT/LoRaWAN | [`fan_out_aggregate_result()`](./source/firmware/esp32_node/components/signal_processing/signal_processing.c#L141) | Sends the same aggregate result to both communication paths without blocking the signal-processing task. |
+| Adaptive frequency formula | [`select_adaptive_sampling_frequency()`](./source/firmware/esp32_node/components/sampling_control/sampling_control.c#L35) | Implements `new_fs = dominant_frequency * PROJECT_ADAPTIVE_OVERSAMPLING_FACTOR`, then rounds/clamps the result. |
+| Apply adaptive frequency | [`sampling_control_task()`](./source/firmware/esp32_node/components/sampling_control/sampling_control.c#L76) | Reads `fft_queue`; for the `5 Hz` dominant signal it updates the active sampling rate from `50 Hz` to `40 Hz`. |
+| WiFi + MQTT startup | [`comm_mqtt_start_network()`](./source/firmware/esp32_node/components/comm_mqtt/comm_mqtt.c#L230) | Starts NVS, TCP/IP, WiFi station mode, MQTT/MQTTS client, TLS settings, and event handlers. |
+| WiFi connection events | [`wifi_event_handler()`](./source/firmware/esp32_node/components/comm_mqtt/comm_mqtt.c#L134) | Handles WiFi connect/disconnect, retry logic, IP acquisition, and starts MQTT after WiFi is ready. |
+| MQTT JSON payload | [`build_mqtt_message()`](./source/firmware/esp32_node/components/comm_mqtt/comm_mqtt.c#L325) | Serializes one aggregate window as JSON, including timing fields for latency analysis. |
+| MQTT publish retry | [`publish_pending_messages()`](./source/firmware/esp32_node/components/comm_mqtt/comm_mqtt.c#L383) | Publishes queued aggregate messages and keeps them queued if the broker is temporarily unavailable. |
+| MQTT task | [`comm_mqtt_task()`](./source/firmware/esp32_node/components/comm_mqtt/comm_mqtt.c#L466) | Converts aggregate results into MQTT payloads and publishes them to the edge broker. |
+| LoRaWAN 10-byte payload | [`build_lorawan_message()`](./source/firmware/esp32_node/components/comm_lorawan/comm_lorawan.cpp#L158) | Packs `window_id`, `sample_count`, sampling rate, dominant frequency, and average into a compact TTN payload. |
+| LoRaWAN radio submit | [`lorawan_submit_next_message()`](./source/firmware/esp32_node/components/comm_lorawan/comm_lorawan.cpp#L318) | Copies the compact payload into the Heltec LoRaWAN app buffer and queues an uplink. |
+| LoRaWAN state machine | [`lorawan_step_state_machine()`](./source/firmware/esp32_node/components/comm_lorawan/comm_lorawan.cpp#L355) | Drives the Heltec LoRaWAN join/send/cycle/sleep states. |
+| LoRaWAN task | [`comm_lorawan_task()`](./source/firmware/esp32_node/components/comm_lorawan/comm_lorawan.cpp#L450) | Receives aggregates, prepares payloads, services the radio stack, and logs TTN join/send status. |
+| BetterSerialPlotter rows | [`emit_better_serial_plotter_row()`](./source/firmware/esp32_node/components/metrics/metrics.c#L20) | Emits clean numeric rows for visualizing sampling frequency, dominant frequency, average, and counters. |
+| Metrics heartbeat | [`metrics_task()`](./source/firmware/esp32_node/components/metrics/metrics.c#L67) | Logs timing, latest FFT/aggregate, MQTT sent count, LoRaWAN prepared/sent count, and latency-related values. |
+
+For the adaptive sampling rubric item specifically, the chain is:
+
+```text
+signal_processing_task()
+  -> analyse_window_spectrum()
+  -> result.dominant_frequency_hz = 5.00
+  -> xQueueSend(ctx->fft_queue, &result, 0)
+  -> sampling_control_task()
+  -> select_adaptive_sampling_frequency(5.00)
+  -> 5.00 * 8 = 40.0 Hz
+  -> ctx->adaptive.current_sampling_frequency_hz = 40.0
+  -> signal_input_task uses the new sample period
+```
+
+### Support Scripts And Measurement Tools
+
+| Evidence / tool | Function | Goal |
+| --- | --- | --- |
+| INA219 initialization | [`try_initialize_ina219()`](./source/firmware/ina219_power_monitor/src/main.cpp#L43) | Detects the INA219 on I2C and applies the selected calibration. |
+| INA219 measurement loop | [`loop()`](./source/firmware/ina219_power_monitor/src/main.cpp#L112) | Prints elapsed time, voltage, current, and power for BetterSerialPlotter and log analysis. |
+| INA219 energy integration | [`integrate_energy_mwh()`](./source/results/analyze_ina219_log.py#L50) | Integrates power over time to compute total energy used in `mWh`. |
+| INA219 summary | [`build_summary()`](./source/results/analyze_ina219_log.py#L62) | Builds average power/current and total energy summaries from raw monitor logs. |
+| Energy comparison | [`build_markdown()`](./source/results/compare_ina219_runs.py#L24) | Produces the baseline-vs-adaptive energy comparison table. |
+| MQTT listener record | [`build_record()`](./source/edge_server/mqtt_listener/listen_aggregates.py#L80) | Parses each received MQTT JSON payload and calculates listener/end-to-end latency when timestamps are synchronized. |
+| MQTT listener main loop | [`main()`](./source/edge_server/mqtt_listener/listen_aggregates.py#L194) | Connects to a broker, subscribes to the aggregate topic, and writes CSV/JSONL evidence files. |
+| TTN payload decoder | [`decodeUplink()`](./source/cloud/ttn_payloads/ttn_decoder.js#L10) | Decodes the `10-byte` LoRaWAN payload inside TTN Live Data. |
+| Anomaly Z-score filter | [`zscore_filter()`](./source/results/anomaly_filter_evaluation.py#L92) | Flags injected spikes using global mean and standard deviation. |
+| Anomaly Hampel filter | [`hampel_filter()`](./source/results/anomaly_filter_evaluation.py#L108) | Flags injected spikes using a median/MAD local window, which is more robust for high spike contamination. |
+| Anomaly FFT comparison | [`dft_dominant_frequency()`](./source/results/anomaly_filter_evaluation.py#L124) | Measures how anomaly contamination changes the estimated dominant frequency before and after filtering. |
+| Plot generation | [`plot_final_results.py`](./source/results/plot_final_results.py) | Produces the final energy, communication, latency, and anomaly plots used in the README. |
 
 ## Implementation Details
 
