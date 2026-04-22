@@ -287,14 +287,136 @@ The raw benchmark is the number used for comparison with the class reference rep
 
 ![Live adaptive sampling proof](./source/pics/2026-04-18_better_serial_plotter_live_view.png)
 
-The firmware computes the frequency spectrum for each window and detects the dominant component:
+There are three different "frequency" ideas in this project. They should not be mixed:
+
+| Name | Value in this project | Meaning |
+| --- | --- | --- |
+| Signal frequencies | `3 Hz` and `5 Hz` | The mathematical input signal contains these two sine components. |
+| Maximum signal frequency | `5 Hz` | The highest real frequency present in the input signal. This is what the FFT should detect. |
+| Sampling frequency `fs` | starts at `50 Hz`, adapts to `40 Hz` | How many samples per second the ESP32 takes from the virtual sensor. |
+| Raw hardware benchmark | `199,126.59 Hz` | How fast the board can generate synthetic samples in a special benchmark mode. This is not the operating `fs`. |
+
+The input signal is defined in code as:
+
+```c
+static float generate_base_signal(float time_seconds)
+{
+    const float term_1 =
+        PROJECT_SIGNAL_TERM1_AMPLITUDE *
+        sinf(PROJECT_TWO_PI_F * PROJECT_SIGNAL_TERM1_FREQUENCY_HZ * time_seconds);
+    const float term_2 =
+        PROJECT_SIGNAL_TERM2_AMPLITUDE *
+        sinf(PROJECT_TWO_PI_F * PROJECT_SIGNAL_TERM2_FREQUENCY_HZ * time_seconds);
+
+    return term_1 + term_2;
+}
+```
+
+Configuration values:
+
+```c
+#define PROJECT_SIGNAL_TERM1_AMPLITUDE 2.0f
+#define PROJECT_SIGNAL_TERM1_FREQUENCY_HZ 3.0f
+#define PROJECT_SIGNAL_TERM2_AMPLITUDE 4.0f
+#define PROJECT_SIGNAL_TERM2_FREQUENCY_HZ 5.0f
+```
+
+So the signal is:
+
+```text
+s(t) = 2*sin(2*pi*3*t) + 4*sin(2*pi*5*t)
+```
+
+The `5 Hz` component has the larger amplitude (`4`), so the FFT/DFT should report `5 Hz` as the dominant frequency.
+
+The firmware computes the spectrum for each completed `5 s` window. For each frequency bin, it converts the bin index into a frequency and computes that bin magnitude:
+
+```c
+const float frequency_hz =
+    ((float)bin_index * sampling_frequency_hz) / (float)sample_count;
+const float magnitude =
+    compute_dft_bin_magnitude(samples, sample_count, bin_index, sample_mean);
+
+if (magnitude > result->peak_magnitude) {
+    result->peak_magnitude = magnitude;
+    result->dominant_frequency_hz = frequency_hz;
+}
+```
+
+This is implemented in [`analyse_window_spectrum()`](./source/firmware/esp32_node/components/signal_processing/signal_processing.c#L83). The actual bin magnitude is computed in [`compute_dft_bin_magnitude()`](./source/firmware/esp32_node/components/signal_processing/signal_processing.c#L61), which removes the window average first so the DC offset does not dominate the spectral result.
+
+After the spectrum is computed, the processing task sends the result to the control task:
+
+```c
+xQueueSend(ctx->fft_queue, &result, 0)
+```
+
+That happens in [`signal_processing_task()`](./source/firmware/esp32_node/components/signal_processing/signal_processing.c#L340).
+
+The adaptive controller then computes the new sampling frequency:
+
+```c
+float proposed_frequency_hz =
+    dominant_frequency_hz * PROJECT_ADAPTIVE_OVERSAMPLING_FACTOR;
+```
+
+Configuration values:
+
+```c
+#define PROJECT_INITIAL_SAMPLING_FREQUENCY_HZ 50.0f
+#define PROJECT_ADAPTIVE_OVERSAMPLING_FACTOR 8.0f
+#define PROJECT_ADAPTIVE_MIN_SAMPLING_FREQUENCY_HZ 20.0f
+#define PROJECT_ADAPTIVE_MAX_SAMPLING_FREQUENCY_HZ 50.0f
+#define PROJECT_ADAPTIVE_RATE_STEP_HZ 5.0f
+```
+
+So for the detected `5 Hz` dominant signal:
 
 ```text
 dominant_frequency_hz = 5.00
-adaptive_rate = 5.00 * 8 = 40.0 Hz
+new_fs = 5.00 * 8 = 40.0 Hz
 ```
 
-The board starts at `50 Hz`, then changes to `40 Hz` after the first window.
+The exact adaptive calculation is in [`select_adaptive_sampling_frequency()`](./source/firmware/esp32_node/components/sampling_control/sampling_control.c#L35). The control task applies the new value here:
+
+```c
+ctx->adaptive.current_sampling_frequency_hz = requested_frequency_hz;
+```
+
+That is in [`sampling_control_task()`](./source/firmware/esp32_node/components/sampling_control/sampling_control.c#L76).
+
+The input task reads this shared value every sampling cycle:
+
+```c
+const float active_frequency_hz = current_virtual_sampling_frequency_hz(ctx);
+const uint64_t period_us = (uint64_t)((1000000.0f / active_frequency_hz) + 0.5f);
+```
+
+So after the first FFT window, the board changes from:
+
+```text
+50 Hz baseline -> 40 Hz adaptive
+```
+
+Why not use `10 Hz`, as in the assignment example? `10 Hz` is the Nyquist minimum for a `5 Hz` signal (`2 * 5 Hz`). In this implementation I intentionally used an `8x` oversampling policy instead of the theoretical `2x` minimum because the ESP32 is running FreeRTOS tasks, queues, FFT windows, WiFi/MQTT, LoRaWAN support, metrics, and display logging. `40 Hz` keeps a safety margin, gives cleaner FFT windows, and still reduces represented samples from `250` samples/window to `200` samples/window.
+
+Window sample counts:
+
+| Mode | Sampling frequency | Window duration | Samples per window |
+| --- | --- | --- | --- |
+| Baseline | `50 Hz` | `5 s` | `250` |
+| Adaptive | `40 Hz` | `5 s` | `200` |
+
+Presentation answer:
+
+```text
+The input contains 3 Hz and 5 Hz. The processing task computes DFT/FFT-style
+bin magnitudes for each 5 s window and chooses the largest magnitude as the
+dominant frequency. Because the 5 Hz component has amplitude 4, it is dominant.
+The FFT result is sent through fft_queue to sampling_control_task. The control
+task applies new_fs = dominant * 8, so 5 Hz becomes 40 Hz. The input task then
+uses this new sampling period for the next samples.
+```
 
 ### 3. Aggregate Function
 
