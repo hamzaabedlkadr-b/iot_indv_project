@@ -75,7 +75,7 @@ virtual signal
 
 ![System architecture overview](./source/pics/architecture_pipeline_overview.png)
 
-![FreeRTOS task pipeline](./source/pics/freertos_task_pipeline.svg)
+![Simplified FreeRTOS task pipeline](./source/pics/freertos_task_pipeline.svg?v=db4c987)
 
 Hardware used:
 
