@@ -98,6 +98,8 @@ Main artifact:
 
 ## Core Results
 
+The final static result plots are indexed in [`results/summaries/result_plot_index_2026-04-22.md`](./results/summaries/result_plot_index_2026-04-22.md).
+
 ### 1. Maximum Sampling Frequency
 
 The latest class-style raw benchmark measured the sample-generation throughput without the full MQTT/LoRa/display pipeline:

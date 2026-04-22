@@ -82,6 +82,7 @@ Key values:
 Use this table for the network-volume rubric item:
 
 - [`summaries/communication_volume_comparison_2026-04-21.md`](./summaries/communication_volume_comparison_2026-04-21.md)
+- [`../pics/result_communication_volume_2026-04-22.png`](../pics/result_communication_volume_2026-04-22.png)
 
 Key values for the five-window comparison:
 
@@ -116,6 +117,10 @@ Use these screenshots for the README and workshop story:
 - [`../pics/architecture_pipeline_overview.png`](../pics/architecture_pipeline_overview.png)
 - [`../pics/2026-04-18_better_serial_plotter_live_view.png`](../pics/2026-04-18_better_serial_plotter_live_view.png)
 - [`../pics/Sampling_frequency.png`](../pics/Sampling_frequency.png)
+- [`../pics/result_energy_comparison_2026-04-22.png`](../pics/result_energy_comparison_2026-04-22.png)
+- [`../pics/result_communication_volume_2026-04-22.png`](../pics/result_communication_volume_2026-04-22.png)
+- [`../pics/result_mqtt_latency_2026-04-22.png`](../pics/result_mqtt_latency_2026-04-22.png)
+- [`../pics/result_anomaly_filters_2026-04-22.png`](../pics/result_anomaly_filters_2026-04-22.png)
 
 ## Energy / INA219 Proof
 
@@ -128,6 +133,8 @@ Use these files for the energy-saving rubric item:
 - [`summaries/ina219_comparison_2026-04-21.md`](./summaries/ina219_comparison_2026-04-21.md)
 - [`summaries/ina219_deepsleep_2026-04-21.md`](./summaries/ina219_deepsleep_2026-04-21.md)
 - [`summaries/ina219_three_mode_comparison_2026-04-21.md`](./summaries/ina219_three_mode_comparison_2026-04-21.md)
+- [`summaries/result_plot_index_2026-04-22.md`](./summaries/result_plot_index_2026-04-22.md)
+- [`../pics/result_energy_comparison_2026-04-22.png`](../pics/result_energy_comparison_2026-04-22.png)
 - [`../pics/hardware.png`](../pics/hardware.png)
 - [`../pics/2026-04-21_ina219_adaptive_betterserialplotter.png`](../pics/2026-04-21_ina219_adaptive_betterserialplotter.png)
 - [`../pics/2026-04-21_ina219_deepsleep_betterserialplotter.png`](../pics/2026-04-21_ina219_deepsleep_betterserialplotter.png)

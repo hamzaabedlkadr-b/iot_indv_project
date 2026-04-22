@@ -8,6 +8,7 @@ Available offline tooling:
 - [`compare_communication_volume.py`](./compare_communication_volume.py) generates the fixed-baseline versus adaptive network-volume comparison
 - [`anomaly_filter_evaluation.py`](./anomaly_filter_evaluation.py) generates the `Z-score` and `Hampel` anomaly-filter bonus metrics
 - [`plot_input_signal_profiles.py`](./plot_input_signal_profiles.py) regenerates the input-signal plots and sample `CSV`
+- [`plot_final_results.py`](./plot_final_results.py) regenerates the final result plots from saved measurement summaries
 - [`convert_mosquitto_log_to_csv.py`](./convert_mosquitto_log_to_csv.py) converts timestamped `mosquitto_sub` captures into the same `CSV` format
 - [`measurement_summary_template.md`](./measurement_summary_template.md) provides a report-ready structure for the required metrics
 
@@ -72,6 +73,14 @@ Reference artifacts for the input-signal and anomaly-filter bonus:
 - `summaries/anomaly_filter_evaluation_2026-04-21.json`
 - `summaries/anomaly_filter_metrics_2026-04-21.csv`
 - `summaries/anomaly_filter_window_tradeoff_2026-04-21.csv`
+
+Reference artifacts for final result plots:
+
+- `summaries/result_plot_index_2026-04-22.md`
+- `../pics/result_energy_comparison_2026-04-22.png`
+- `../pics/result_communication_volume_2026-04-22.png`
+- `../pics/result_mqtt_latency_2026-04-22.png`
+- `../pics/result_anomaly_filters_2026-04-22.png`
 
 Reference artifacts from the integrated `LoRaWAN + TTN` validation run on `2026-04-20`:
 

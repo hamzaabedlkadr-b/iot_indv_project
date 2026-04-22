@@ -111,6 +111,14 @@ Static waveform evidence is saved for the report:
 - [`../pics/input_signal_profiles_2026-04-22.png`](../pics/input_signal_profiles_2026-04-22.png)
 - [`../results/summaries/input_signal_samples_2026-04-22.csv`](../results/summaries/input_signal_samples_2026-04-22.csv)
 
+Static result plots are also saved for the final report:
+
+- [`../pics/result_energy_comparison_2026-04-22.png`](../pics/result_energy_comparison_2026-04-22.png)
+- [`../pics/result_communication_volume_2026-04-22.png`](../pics/result_communication_volume_2026-04-22.png)
+- [`../pics/result_mqtt_latency_2026-04-22.png`](../pics/result_mqtt_latency_2026-04-22.png)
+- [`../pics/result_anomaly_filters_2026-04-22.png`](../pics/result_anomaly_filters_2026-04-22.png)
+- [`../results/summaries/result_plot_index_2026-04-22.md`](../results/summaries/result_plot_index_2026-04-22.md)
+
 The current implementation uses three profiles:
 
 | Profile | Purpose | Notes |

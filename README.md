@@ -191,6 +191,8 @@ The final INA219 measurement compares fixed baseline and adaptive mode using the
 | Integrated energy | `18.433238 mWh` | `18.422466 mWh` | `13.632451 mWh` |
 | Delta vs baseline | reference | `-0.06%` | `-26.04%` |
 
+![Energy comparison plot](./source/pics/result_energy_comparison_2026-04-22.png)
+
 Interpretation:
 
 - Adaptive sampling reduced the local sample-processing rate from `50 Hz` to `40 Hz`.
@@ -204,6 +206,8 @@ Interpretation:
 | Fixed baseline | `50 Hz` | `1250` | `5` | `2270 B` |
 | Adaptive | `40 Hz` | `1000` | `5` | `2270 B` |
 
+![Communication volume plot](./source/pics/result_communication_volume_2026-04-22.png)
+
 The represented local samples drop by `20%`, while MQTT bytes remain effectively constant because the system sends one aggregate per window.
 
 ### End-To-End Latency
@@ -215,6 +219,8 @@ The saved clean MQTT listener run recorded:
 | listener latency | `1,234,421.6 us` |
 | end-to-end latency | `1,587,868.6 us` |
 | edge delay | `353,447.0 us` |
+
+![MQTT latency plot](./source/pics/result_mqtt_latency_2026-04-22.png)
 
 Evidence:
 
@@ -238,6 +244,8 @@ Main artifact:
 
 - [`source/results/summaries/anomaly_filter_evaluation_2026-04-21.md`](./source/results/summaries/anomaly_filter_evaluation_2026-04-21.md)
 
+![Anomaly filter plot](./source/pics/result_anomaly_filters_2026-04-22.png)
+
 ## Evidence Gallery
 
 | Clean Input Signal | Three Signal Profiles |
@@ -254,6 +262,11 @@ Main artifact:
 | --- | --- | --- | --- |
 | ![BetterSerialPlotter INA219 adaptive power trace.](./source/pics/2026-04-21_ina219_adaptive_betterserialplotter.png) | ![BetterSerialPlotter INA219 deep-sleep power trace.](./source/pics/2026-04-21_ina219_deepsleep_betterserialplotter.png) | ![TTN decoded uplink details showing payload metadata.](./source/pics/2026-04-20_ttn_uplink_decoded.png) | ![TTN device overview showing recent activity for the Heltec node.](./source/pics/2026-04-20_ttn_device_overview.png) |
 | Adaptive awake power run. | Optional deep-sleep power run. | Decoded TTN uplink metadata. | Device activity after main-app integration. |
+
+| Energy Result Plot | Communication Plot | MQTT Latency Plot | Anomaly Filter Plot |
+| --- | --- | --- | --- |
+| ![Static energy-result plot from INA219 summaries.](./source/pics/result_energy_comparison_2026-04-22.png) | ![Static communication-volume plot comparing fixed and adaptive modes.](./source/pics/result_communication_volume_2026-04-22.png) | ![Static MQTT latency plot from listener summaries.](./source/pics/result_mqtt_latency_2026-04-22.png) | ![Static anomaly-filter result plot comparing Z-score and Hampel filters.](./source/pics/result_anomaly_filters_2026-04-22.png) |
+| Baseline vs adaptive vs deep sleep. | Local samples and aggregate bytes. | Average and p95 latency. | Detection and error reduction. |
 
 ## Setup And Run
 
