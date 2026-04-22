@@ -201,7 +201,35 @@ The important idea is that MQTT is used only after local processing is complete.
 
 ### 5. LoRaWAN + TTN
 
-The same aggregate is packed into a compact `10-byte` LoRaWAN payload and sent on `FPort 1`. The integrated main app was validated with a real TTN uplink and saved screenshots from the TTN console.
+![LoRaWAN TTN communication flow](./source/pics/lorawan_ttn_flow.svg)
+
+LoRaWAN is the cloud communication path. It is different from MQTT because it is low-power, long-range, and bandwidth-limited, so the firmware does not send a full JSON object. Instead, the same aggregate produced by the local pipeline is compressed into a compact `10-byte` binary payload and sent on `FPort 1`.
+
+The current payload layout is:
+
+| Bytes | Field | Encoding | Example meaning |
+| --- | --- | --- | --- |
+| `0-1` | `window_id` | unsigned 16-bit big-endian | which aggregate window was sent |
+| `2-3` | `sample_count` | unsigned 16-bit big-endian | usually `200` after adapting to `40 Hz` for `5 s` |
+| `4-5` | `sampling_frequency_hz * 10` | unsigned 16-bit big-endian | `40.0 Hz` becomes `400` |
+| `6-7` | `dominant_frequency_hz * 100` | unsigned 16-bit big-endian | `5.00 Hz` becomes `500` |
+| `8-9` | `average_value * 1000` | signed 16-bit big-endian | preserves the window average compactly |
+
+The integrated main app was validated with a real TTN uplink and saved screenshots from the TTN console. The proof chain is:
+
+1. The firmware prepares the LoRaWAN aggregate and logs `payload_hex`.
+2. The Heltec LoRaWAN stack joins TTN with OTAA and logs `joined=1`.
+3. The radio queues the uplink and logs `Event : Tx Done`.
+4. TTN Live Data shows the uplink on the cloud side.
+5. The TTN payload decoder reconstructs the aggregate fields from the `10-byte` payload.
+
+Key evidence:
+
+- [`source/results/lorawan_evidence_2026-04-20.md`](./source/results/lorawan_evidence_2026-04-20.md)
+- [`source/cloud/ttn_payloads/README.md`](./source/cloud/ttn_payloads/README.md)
+- [`source/cloud/ttn_payloads/ttn_decoder.js`](./source/cloud/ttn_payloads/ttn_decoder.js)
+- [`source/pics/2026-04-20_serial_lorawan_join_tx.png`](./source/pics/2026-04-20_serial_lorawan_join_tx.png)
+- [`source/pics/2026-04-20_ttn_live_data_uplink.png`](./source/pics/2026-04-20_ttn_live_data_uplink.png)
 
 ### 6. Signal Profiles
 
@@ -452,6 +480,10 @@ Main evidence map:
 | Why include deep sleep if adaptive awake savings are small? | Deep sleep shows what is required for meaningful battery savings. It is reported separately because it changes the duty cycle, while the main adaptive comparison keeps the board awake. |
 | How is MQTT secure? | The secure run used `MQTTS` on port `8883`, the listener required TLS verification, and the ESP32 log showed certificate validation through the ESP-IDF certificate bundle. |
 | How is LoRaWAN proven? | The repo includes serial logs/screenshots showing join and transmit activity plus TTN Live Data and decoded uplink screenshots for the same Heltec node. |
+| Why does LoRaWAN use only 10 bytes? | LoRaWAN has small payloads and duty-cycle limits, so the firmware sends only the important aggregate fields in binary form instead of sending a long JSON message. |
+| What is `FPort 1`? | It is the application port used by TTN to route/decode the payload. Our TTN decoder expects the `10-byte` aggregate payload on `FPort 1`. |
+| What does `joined=1` prove? | It proves the node completed the LoRaWAN OTAA join and is allowed to send uplinks to the TTN network. |
+| What does `Tx Done` prove? | It proves the Heltec radio stack accepted and transmitted an uplink packet. The TTN screenshots then prove that the cloud received it. |
 | What should be shown first in class? | Show the README coverage table, then raw max frequency, adaptive FFT result, MQTT/secure MQTT evidence, TTN evidence, energy/communication/latency plots, and finally the anomaly-filter bonus. |
 
 ## Submission Notes

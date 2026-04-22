@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="540" viewBox="0 0 1280 540" role="img" aria-labelledby="title desc">
+  <title id="title">LoRaWAN and TTN cloud communication flow</title>
+  <desc id="desc">Diagram showing ESP32 aggregate creation, compact LoRaWAN payload packing, radio transmission, gateway reception, TTN application, decoder, and live-data proof.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#09111d"/>
+      <stop offset="100%" stop-color="#18263a"/>
+    </linearGradient>
+    <linearGradient id="node" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#14385a"/>
+      <stop offset="100%" stop-color="#0f2438"/>
+    </linearGradient>
+    <linearGradient id="radio" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2d5147"/>
+      <stop offset="100%" stop-color="#1a312d"/>
+    </linearGradient>
+    <linearGradient id="cloud" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3b477a"/>
+      <stop offset="100%" stop-color="#252d50"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#98e5ff"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="540" rx="32" fill="url(#bg)"/>
+  <text x="48" y="58" fill="#f7fbff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="34" font-weight="700">LoRaWAN + TTN Cloud Flow</text>
+  <text x="48" y="92" fill="#b9cadb" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="18">The same 5-second aggregate is compressed into 10 bytes and sent to TTN on FPort 1.</text>
+
+  <g filter="url(#shadow)">
+    <rect x="44" y="142" width="220" height="230" rx="22" fill="url(#node)" stroke="#3f729a" stroke-width="2"/>
+    <text x="74" y="184" fill="#ffffff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="23" font-weight="700">Main ESP32 App</text>
+    <text x="74" y="224" fill="#dcecff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="16">FFT detects 5 Hz</text>
+    <text x="74" y="254" fill="#dcecff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="16">Adapt to 40 Hz</text>
+    <text x="74" y="284" fill="#dcecff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="16">Compute 5 s average</text>
+    <text x="74" y="314" fill="#dcecff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="16">Create aggregate</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="338" y="142" width="244" height="230" rx="22" fill="#142841" stroke="#4a7aa6" stroke-width="2"/>
+    <text x="370" y="184" fill="#ffffff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="23" font-weight="700">10-byte Payload</text>
+    <text x="370" y="221" fill="#dcecff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="15">0-1 window_id</text>
+    <text x="370" y="249" fill="#dcecff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="15">2-3 sample_count</text>
+    <text x="370" y="277" fill="#dcecff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="15">4-5 fs * 10</text>
+    <text x="370" y="305" fill="#dcecff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="15">6-7 dominant * 100</text>
+    <text x="370" y="333" fill="#dcecff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="15">8-9 average * 1000</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="660" y="142" width="220" height="230" rx="22" fill="url(#radio)" stroke="#58a88b" stroke-width="2"/>
+    <text x="698" y="184" fill="#ffffff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="23" font-weight="700">LoRa Radio</text>
+    <text x="698" y="224" fill="#e5fff3" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="16">OTAA join</text>
+    <text x="698" y="254" fill="#e5fff3" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="16">FPort 1 uplink</text>
+    <text x="698" y="284" fill="#e5fff3" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="16">Duty-cycle limited</text>
+    <text x="698" y="314" fill="#e5fff3" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="16">Serial: Tx Done</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="968" y="142" width="244" height="230" rx="22" fill="url(#cloud)" stroke="#8796e0" stroke-width="2"/>
+    <text x="1006" y="184" fill="#ffffff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="23" font-weight="700">TTN Cloud</text>
+    <text x="1006" y="224" fill="#eef0ff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="16">Gateway receives uplink</text>
+    <text x="1006" y="254" fill="#eef0ff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="16">Live Data shows event</text>
+    <text x="1006" y="284" fill="#eef0ff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="16">Decoder restores fields</text>
+    <text x="1006" y="314" fill="#eef0ff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="16">RSSI / SNR metadata</text>
+  </g>
+
+  <line x1="270" y1="257" x2="328" y2="257" stroke="#98e5ff" stroke-width="5" marker-end="url(#arrow)"/>
+  <line x1="590" y1="257" x2="650" y2="257" stroke="#98e5ff" stroke-width="5" marker-end="url(#arrow)"/>
+  <line x1="888" y1="257" x2="958" y2="257" stroke="#98e5ff" stroke-width="5" marker-end="url(#arrow)"/>
+
+  <text x="284" y="234" fill="#98e5ff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="15" font-weight="700">pack</text>
+  <text x="604" y="234" fill="#98e5ff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="15" font-weight="700">queue</text>
+  <text x="898" y="234" fill="#98e5ff" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="15" font-weight="700">gateway</text>
+
+  <rect x="74" y="420" width="1132" height="62" rx="20" fill="#101a28" stroke="#2a3d54"/>
+  <text x="104" y="446" fill="#d7e9f7" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="17">
+    Proof used in the repository: serial log shows joined=1 and Tx Done; TTN Live Data shows received uplinks, decoded payload, RSSI, and SNR.
+  </text>
+  <text x="104" y="472" fill="#92b7d0" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="15">
+    LoRaWAN is for cloud delivery, so it sends fewer bytes than MQTT and respects duty-cycle constraints.
+  </text>
+</svg>
