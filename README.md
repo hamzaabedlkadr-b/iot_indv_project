@@ -75,7 +75,55 @@ virtual signal
 
 ![System architecture overview](./source/pics/architecture_pipeline_overview.png)
 
-![Simplified FreeRTOS task pipeline](./source/pics/freertos_task_pipeline.svg?v=db4c987)
+FreeRTOS task pipeline used in the firmware:
+
+```text
+app_main()
+  creates queues, event bits, shared project_context_t
+  starts the FreeRTOS tasks below
+
+signal_input_task
+  generates virtual samples:
+  2*sin(2*pi*3*t) + 4*sin(2*pi*5*t)
+        |
+        | sample_queue
+        v
+signal_processing_task
+  builds a 5 s window
+  computes average value
+  computes DFT/FFT-style spectral bins
+  finds dominant frequency = 5 Hz
+        |
+        | fft_queue
+        v
+sampling_control_task
+  applies adaptive policy:
+  new_fs = dominant_frequency * 8
+  5 Hz * 8 = 40 Hz
+        |
+        | updates shared current_sampling_frequency_hz
+        +--------------------------------------+
+                                               |
+                                               v
+                                  signal_input_task uses 40 Hz
+
+signal_processing_task also sends the same aggregate to:
+
+  aggregate_mqtt_queue              aggregate_lorawan_queue
+        |                                      |
+        v                                      v
+  comm_mqtt_task                    comm_lorawan_task
+  JSON over MQTT/MQTTS              compact LoRaWAN payload
+        |                                      |
+        v                                      v
+  edge MQTT listener                TTN Live Data
+
+metrics_task + app_display_task
+  print heartbeats, counters, timings, latest fs, dominant frequency, and average
+
+app_main supervisor loop
+  checks queue status, event bits, communication counters, and optional deep sleep
+```
 
 Hardware used:
 
