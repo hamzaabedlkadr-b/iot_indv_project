@@ -144,6 +144,8 @@ FreeRTOS task responsibilities:
 
 The project reports two frequencies because they answer different questions.
 
+![Raw sampling frequency benchmark](./source/pics/Sampling_frequency.png)
+
 | Benchmark | Result | Meaning |
 | --- | --- | --- |
 | Raw class-style benchmark | `199,126.59 Hz` | maximum synthetic sample-generation throughput |
@@ -152,6 +154,8 @@ The project reports two frequencies because they answer different questions.
 The raw benchmark is the number used for comparison with the class reference repositories. The strict value is the safe baseline for the real adaptive pipeline.
 
 ### 2. FFT And Adaptive Sampling
+
+![Live adaptive sampling proof](./source/pics/2026-04-18_better_serial_plotter_live_view.png)
 
 The firmware computes the frequency spectrum for each window and detects the dominant component:
 
@@ -183,6 +187,8 @@ Both MQTT and LoRaWAN use this aggregate instead of sending raw samples.
 
 ![MQTT edge communication flow](./source/pics/mqtt_edge_flow.svg)
 
+![WiFi and MQTT connected on the Heltec board](./source/pics/2026-04-21_mqtt_wifi_connected.png)
+
 The ESP32 publishes JSON aggregate messages to:
 
 ```text
@@ -202,6 +208,14 @@ The important idea is that MQTT is used only after local processing is complete.
 ### 5. LoRaWAN + TTN
 
 ![LoRaWAN TTN communication flow](./source/pics/lorawan_ttn_flow.svg)
+
+| Serial Join And TX | TTN Live Data |
+| --- | --- |
+| ![Serial log showing LoRaWAN join and transmit activity.](./source/pics/2026-04-20_serial_lorawan_join_tx.png) | ![TTN Live Data showing received LoRaWAN uplinks.](./source/pics/2026-04-20_ttn_live_data_uplink.png) |
+
+| TTN Decoded Payload | TTN Device Overview |
+| --- | --- |
+| ![TTN decoded uplink payload details.](./source/pics/2026-04-20_ttn_uplink_decoded.png) | ![TTN device overview showing recent activity.](./source/pics/2026-04-20_ttn_device_overview.png) |
 
 LoRaWAN is the cloud communication path. It is different from MQTT because it is low-power, long-range, and bandwidth-limited, so the firmware does not send a full JSON object. Instead, the same aggregate produced by the local pipeline is compressed into a compact `10-byte` binary payload and sent on `FPort 1`.
 
@@ -233,6 +247,8 @@ Key evidence:
 
 ### 6. Signal Profiles
 
+![Clean input signal](./source/pics/input_signal_clean_reference_2026-04-22.png)
+
 | Profile | Description |
 | --- | --- |
 | `clean_reference` | original `3 Hz + 5 Hz` signal |
@@ -249,6 +265,8 @@ The anomaly evaluation also compares Z-score and Hampel filtering.
 
 The final INA219 measurement compares fixed baseline and adaptive mode using the same DUT, same monitor, same signal, same WiFi/MQTT workload, and same run duration.
 
+![Hardware setup for INA219 energy measurement](./source/pics/hardware.png)
+
 | Metric | Baseline `50 Hz` | Adaptive `40 Hz` | Adaptive + deep sleep |
 | --- | ---: | ---: | ---: |
 | Average power | `553.0000 mW` | `552.6775 mW` | `410.8682 mW` |
@@ -256,6 +274,10 @@ The final INA219 measurement compares fixed baseline and adaptive mode using the
 | Delta vs baseline | reference | `-0.06%` | `-26.04%` |
 
 ![Energy comparison plot](./source/pics/result_energy_comparison_2026-04-22.png)
+
+| Adaptive INA219 Trace | Deep-Sleep INA219 Trace |
+| --- | --- |
+| ![BetterSerialPlotter adaptive INA219 trace.](./source/pics/2026-04-21_ina219_adaptive_betterserialplotter.png) | ![BetterSerialPlotter deep-sleep INA219 trace.](./source/pics/2026-04-21_ina219_deepsleep_betterserialplotter.png) |
 
 Interpretation:
 
@@ -293,6 +315,10 @@ Evidence:
 ### Secure MQTT Validation
 
 The secure MQTT rubric item was validated on `2026-04-22` with the real Heltec board publishing aggregate messages over `MQTTS` to a TLS broker:
+
+| Secure Listener | Certificate Validation | ESP32 MQTT Heartbeat |
+| --- | --- | --- |
+| ![Secure MQTT listener receiving TLS messages.](./source/pics/2026-04-22_secure_mqtt_listener_tls.png) | ![ESP32 certificate validation log.](./source/pics/2026-04-22_secure_mqtt_cert_validated.png) | ![ESP32 MQTT heartbeat showing connected and sent counts.](./source/pics/2026-04-22_secure_mqtt_heltec_sent.png) |
 
 | Item | Value |
 | --- | --- |
