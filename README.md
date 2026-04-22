@@ -75,6 +75,8 @@ virtual signal
 
 ![System architecture overview](./source/pics/architecture_pipeline_overview.png)
 
+![FreeRTOS task pipeline](./source/pics/freertos_task_pipeline.svg)
+
 Hardware used:
 
 | Component | Purpose |
@@ -137,6 +139,16 @@ FreeRTOS task responsibilities:
 | `comm_lorawan` | Packs compact aggregate payloads and uses the Heltec radio stack | TTN uplink |
 | `metrics` | Tracks timing, counters, latency-related fields, and heartbeats | serial metrics logs |
 | `app_display` | Emits simple serial/display status for live observation | serial/display heartbeat |
+
+The important code idea is that tasks do not call each other directly. They communicate through FreeRTOS queues stored in the shared `project_context_t`:
+
+```text
+sample_queue -> fft_queue -> adaptive update
+             -> aggregate_mqtt_queue -> mqtt_queue -> MQTT broker
+             -> aggregate_lorawan_queue -> lorawan_queue -> TTN
+```
+
+`app_main()` creates the queues, starts the tasks, and then stays alive as a supervisor. It logs queue depth, event bits, sample counts, window counts, MQTT/LoRa counters, current sampling rate, dominant frequency, and latest average. That is why the serial logs are useful for proving the runtime behavior.
 
 ## Implementation Details
 

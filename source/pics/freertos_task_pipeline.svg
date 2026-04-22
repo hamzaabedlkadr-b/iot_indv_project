@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="920" viewBox="0 0 1500 920" role="img" aria-labelledby="title desc">
+  <title id="title">FreeRTOS task pipeline for the ESP32 adaptive sampling firmware</title>
+  <desc id="desc">Diagram showing app_main creating queues, event groups, and FreeRTOS tasks, then the flow from signal input through processing, sampling control, MQTT, LoRaWAN, metrics, display, and supervisor heartbeats.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#08101c"/>
+      <stop offset="100%" stop-color="#19263a"/>
+    </linearGradient>
+    <linearGradient id="taskBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#123a61"/>
+      <stop offset="100%" stop-color="#0d263f"/>
+    </linearGradient>
+    <linearGradient id="taskGreen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#24583d"/>
+      <stop offset="100%" stop-color="#173526"/>
+    </linearGradient>
+    <linearGradient id="taskPurple" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4c3d78"/>
+      <stop offset="100%" stop-color="#2c2548"/>
+    </linearGradient>
+    <linearGradient id="queue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#243248"/>
+      <stop offset="100%" stop-color="#151f2e"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ce4ff"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#96f0bd"/>
+    </marker>
+    <style>
+      .title { fill: #f5fbff; font: 700 34px "Segoe UI", Calibri, Arial, sans-serif; }
+      .sub { fill: #bbccdb; font: 18px "Segoe UI", Calibri, Arial, sans-serif; }
+      .cardTitle { fill: #ffffff; font: 700 20px "Segoe UI", Calibri, Arial, sans-serif; }
+      .text { fill: #dcecff; font: 15px "Segoe UI", Calibri, Arial, sans-serif; }
+      .small { fill: #a9c0d2; font: 13px "Segoe UI", Calibri, Arial, sans-serif; }
+      .queueText { fill: #c6d7e8; font: 700 14px "Segoe UI", Calibri, Arial, sans-serif; }
+      .label { fill: #9ce4ff; font: 700 13px "Segoe UI", Calibri, Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect width="1500" height="920" rx="32" fill="url(#bg)"/>
+  <text x="48" y="58" class="title">FreeRTOS Task Pipeline</text>
+  <text x="48" y="91" class="sub">Each task owns one stage. Queues pass data forward; event bits and metrics let the supervisor check health.</text>
+
+  <g filter="url(#shadow)">
+    <rect x="48" y="128" width="316" height="150" rx="20" fill="#101b2a" stroke="#405977" stroke-width="2"/>
+    <text x="78" y="170" class="cardTitle">app_main()</text>
+    <text x="78" y="203" class="text">Creates shared project_context_t</text>
+    <text x="78" y="229" class="text">Creates queues and event group</text>
+    <text x="78" y="255" class="text">Starts FreeRTOS tasks</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="422" y="128" width="316" height="150" rx="20" fill="url(#queue)" stroke="#405977" stroke-width="2"/>
+    <text x="452" y="170" class="cardTitle">Shared Context</text>
+    <text x="452" y="203" class="text">sample_queue, fft_queue</text>
+    <text x="452" y="229" class="text">aggregate_mqtt/lora queues</text>
+    <text x="452" y="255" class="text">mqtt_queue, lorawan_queue</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="794" y="128" width="316" height="150" rx="20" fill="url(#queue)" stroke="#405977" stroke-width="2"/>
+    <text x="824" y="170" class="cardTitle">Event Bits + Metrics</text>
+    <text x="824" y="203" class="text">BOOT, INPUT, PROCESSING</text>
+    <text x="824" y="229" class="text">CONTROL, MQTT, LORAWAN</text>
+    <text x="824" y="255" class="text">latest aggregate and counters</text>
+  </g>
+
+  <line x1="368" y1="203" x2="412" y2="203" stroke="#9ce4ff" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="742" y1="203" x2="784" y2="203" stroke="#9ce4ff" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="60" y="370" width="230" height="154" rx="20" fill="url(#taskBlue)" stroke="#4c7fac" stroke-width="2"/>
+    <text x="88" y="410" class="cardTitle">signal_input_task</text>
+    <text x="88" y="443" class="text">Generates virtual signal</text>
+    <text x="88" y="468" class="text">Uses current sampling Hz</text>
+    <text x="88" y="493" class="text">Marks anomaly flag</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="360" y="370" width="250" height="154" rx="20" fill="url(#taskBlue)" stroke="#4c7fac" stroke-width="2"/>
+    <text x="388" y="410" class="cardTitle">signal_processing_task</text>
+    <text x="388" y="443" class="text">Builds 5 s window</text>
+    <text x="388" y="468" class="text">Computes average + FFT</text>
+    <text x="388" y="493" class="text">Fans aggregate to MQTT/LoRa</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="690" y="370" width="230" height="154" rx="20" fill="url(#taskGreen)" stroke="#65a984" stroke-width="2"/>
+    <text x="718" y="410" class="cardTitle">sampling_control_task</text>
+    <text x="718" y="443" class="text">Reads FFT result</text>
+    <text x="718" y="468" class="text">dominant * 8 policy</text>
+    <text x="718" y="493" class="text">Updates sampling Hz</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1010" y="320" width="230" height="154" rx="20" fill="url(#taskPurple)" stroke="#8a78d4" stroke-width="2"/>
+    <text x="1038" y="360" class="cardTitle">comm_mqtt_task</text>
+    <text x="1038" y="393" class="text">Builds JSON payload</text>
+    <text x="1038" y="418" class="text">WiFi + MQTT/MQTTS</text>
+    <text x="1038" y="443" class="text">Publishes to edge broker</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1010" y="520" width="230" height="154" rx="20" fill="url(#taskPurple)" stroke="#8a78d4" stroke-width="2"/>
+    <text x="1038" y="560" class="cardTitle">comm_lorawan_task</text>
+    <text x="1038" y="593" class="text">Builds 10-byte payload</text>
+    <text x="1038" y="618" class="text">Joins TTN via OTAA</text>
+    <text x="1038" y="643" class="text">Queues radio uplink</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1280" y="318" width="170" height="156" rx="20" fill="#111d2c" stroke="#405977" stroke-width="2"/>
+    <text x="1304" y="358" class="cardTitle">Edge/Cloud</text>
+    <text x="1304" y="392" class="text">MQTT listener</text>
+    <text x="1304" y="419" class="text">TTN Live Data</text>
+    <text x="1304" y="446" class="text">CSV/JSON/MD</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="352" y="690" width="235" height="136" rx="20" fill="#182538" stroke="#405977" stroke-width="2"/>
+    <text x="380" y="730" class="cardTitle">metrics_task</text>
+    <text x="380" y="763" class="text">Counters + timing</text>
+    <text x="380" y="788" class="text">BetterSerialPlotter rows</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="645" y="690" width="235" height="136" rx="20" fill="#182538" stroke="#405977" stroke-width="2"/>
+    <text x="673" y="730" class="cardTitle">app_display_task</text>
+    <text x="673" y="763" class="text">Serial/display heartbeat</text>
+    <text x="673" y="788" class="text">Latest fs, dominant, avg</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="938" y="690" width="268" height="136" rx="20" fill="#182538" stroke="#405977" stroke-width="2"/>
+    <text x="966" y="730" class="cardTitle">app_main supervisor loop</text>
+    <text x="966" y="763" class="text">Logs queue status</text>
+    <text x="966" y="788" class="text">Can enter deep sleep mode</text>
+  </g>
+
+  <rect x="300" y="420" width="50" height="54" rx="10" fill="url(#queue)" stroke="#526b86"/>
+  <text x="310" y="451" class="queueText">Q1</text>
+  <text x="286" y="492" class="small">sample_queue</text>
+
+  <rect x="626" y="420" width="50" height="54" rx="10" fill="url(#queue)" stroke="#526b86"/>
+  <text x="636" y="451" class="queueText">Q2</text>
+  <text x="612" y="492" class="small">fft_queue</text>
+
+  <rect x="942" y="344" width="50" height="54" rx="10" fill="url(#queue)" stroke="#526b86"/>
+  <text x="952" y="375" class="queueText">Q3</text>
+  <text x="908" y="416" class="small">aggregate_mqtt</text>
+
+  <rect x="942" y="584" width="50" height="54" rx="10" fill="url(#queue)" stroke="#526b86"/>
+  <text x="952" y="615" class="queueText">Q4</text>
+  <text x="905" y="656" class="small">aggregate_lora</text>
+
+  <line x1="292" y1="447" x2="350" y2="447" stroke="#9ce4ff" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="612" y1="447" x2="680" y2="447" stroke="#96f0bd" stroke-width="4" marker-end="url(#arrowGreen)"/>
+  <path d="M 805 370 C 760 304 500 310 485 365" fill="none" stroke="#96f0bd" stroke-width="4" marker-end="url(#arrowGreen)"/>
+  <line x1="920" y1="397" x2="1000" y2="397" stroke="#9ce4ff" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="920" y1="597" x2="1000" y2="597" stroke="#9ce4ff" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="1245" y1="397" x2="1272" y2="397" stroke="#9ce4ff" stroke-width="4" marker-end="url(#arrow)"/>
+  <path d="M 1245 597 C 1300 585 1320 515 1348 480" fill="none" stroke="#9ce4ff" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <path d="M 470 525 C 470 590 470 635 470 682" fill="none" stroke="#6f88a3" stroke-width="3" stroke-dasharray="8 8" marker-end="url(#arrow)"/>
+  <path d="M 805 525 C 805 590 770 635 765 682" fill="none" stroke="#6f88a3" stroke-width="3" stroke-dasharray="8 8" marker-end="url(#arrow)"/>
+  <path d="M 1125 680 C 1125 655 1125 635 1125 682" fill="none" stroke="#6f88a3" stroke-width="3" stroke-dasharray="8 8"/>
+
+  <text x="313" y="403" class="label">raw_sample_t</text>
+  <text x="619" y="403" class="label">fft_result_t</text>
+  <text x="905" y="328" class="label">aggregate_result_t</text>
+  <text x="905" y="568" class="label">aggregate_result_t</text>
+  <text x="768" y="316" class="label">request new fs</text>
+
+  <rect x="76" y="854" width="1350" height="38" rx="14" fill="#101a28" stroke="#2a3d54"/>
+  <text x="104" y="879" fill="#d7e9f7" font-family="Segoe UI, Calibri, Arial, sans-serif" font-size="16">
+    Priority order: input task highest, processing next, control/communication middle, metrics/display lower. Supervisor stays in app_main and watches queues, counters, and event bits.
+  </text>
+</svg>
