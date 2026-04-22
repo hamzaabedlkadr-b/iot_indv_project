@@ -422,17 +422,6 @@ Window sample counts:
 | Baseline | `50 Hz` | `5 s` | `250` |
 | Adaptive | `40 Hz` | `5 s` | `200` |
 
-Presentation answer:
-
-```text
-The input contains 3 Hz and 5 Hz. The processing task computes DFT/FFT-style
-bin magnitudes for each 5 s window and chooses the largest magnitude as the
-dominant frequency. Because the 5 Hz component has amplitude 4, it is dominant.
-The FFT result is sent through fft_queue to sampling_control_task. The control
-task applies new_fs = dominant * 8, so 5 Hz becomes 40 Hz. The input task then
-uses this new sampling period for the next samples.
-```
-
 ### 3. Aggregate Function
 
 Every `5 s` window produces one aggregate object containing:
