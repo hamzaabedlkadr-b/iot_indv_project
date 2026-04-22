@@ -24,6 +24,12 @@ Important wording:
 
 Use this table for the additional points about three input signals:
 
+Visual input-signal evidence:
+
+- [`../pics/input_signal_clean_reference_2026-04-22.png`](../pics/input_signal_clean_reference_2026-04-22.png)
+- [`../pics/input_signal_profiles_2026-04-22.png`](../pics/input_signal_profiles_2026-04-22.png)
+- [`summaries/input_signal_samples_2026-04-22.csv`](./summaries/input_signal_samples_2026-04-22.csv)
+
 | Profile | Avg dominant frequency | Avg sampling frequency | Avg anomaly count | Avg payload size |
 | --- | --- | --- | --- | --- |
 | `clean_reference` | `5.000 Hz` | `40.000 Hz` | `0.000` | `446.0 B` |
@@ -105,6 +111,8 @@ Use these for cloud delivery:
 
 Use these screenshots for the README and workshop story:
 
+- [`../pics/input_signal_clean_reference_2026-04-22.png`](../pics/input_signal_clean_reference_2026-04-22.png)
+- [`../pics/input_signal_profiles_2026-04-22.png`](../pics/input_signal_profiles_2026-04-22.png)
 - [`../pics/architecture_pipeline_overview.png`](../pics/architecture_pipeline_overview.png)
 - [`../pics/2026-04-18_better_serial_plotter_live_view.png`](../pics/2026-04-18_better_serial_plotter_live_view.png)
 - [`../pics/Sampling_frequency.png`](../pics/Sampling_frequency.png)

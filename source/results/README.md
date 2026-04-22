@@ -7,6 +7,7 @@ Available offline tooling:
 - [`analyze_mqtt_results.py`](./analyze_mqtt_results.py) summarizes the `CSV` logs produced by the edge listener
 - [`compare_communication_volume.py`](./compare_communication_volume.py) generates the fixed-baseline versus adaptive network-volume comparison
 - [`anomaly_filter_evaluation.py`](./anomaly_filter_evaluation.py) generates the `Z-score` and `Hampel` anomaly-filter bonus metrics
+- [`plot_input_signal_profiles.py`](./plot_input_signal_profiles.py) regenerates the input-signal plots and sample `CSV`
 - [`convert_mosquitto_log_to_csv.py`](./convert_mosquitto_log_to_csv.py) converts timestamped `mosquitto_sub` captures into the same `CSV` format
 - [`measurement_summary_template.md`](./measurement_summary_template.md) provides a report-ready structure for the required metrics
 
@@ -62,8 +63,11 @@ Reference artifacts from the follow-up live MQTT evidence run on `2026-04-18`:
 - `mqtt_evidence_2026-04-18.md`
 - `summaries/communication_volume_comparison_2026-04-21.md`
 
-Reference artifacts for the anomaly-filter bonus:
+Reference artifacts for the input-signal and anomaly-filter bonus:
 
+- `summaries/input_signal_samples_2026-04-22.csv`
+- `../pics/input_signal_clean_reference_2026-04-22.png`
+- `../pics/input_signal_profiles_2026-04-22.png`
 - `summaries/anomaly_filter_evaluation_2026-04-21.md`
 - `summaries/anomaly_filter_evaluation_2026-04-21.json`
 - `summaries/anomaly_filter_metrics_2026-04-21.csv`

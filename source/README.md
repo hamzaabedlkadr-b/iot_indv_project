@@ -4,6 +4,8 @@ This repository contains an `ESP32 + FreeRTOS` implementation of the individual 
 
 The project is intentionally built around a `virtual sensor` so the required signal is repeatable, measurable, and easy to compare across runs. An optional real-sensor path can be added later, but the graded pipeline is the virtual-signal path.
 
+![Clean reference input signal](./pics/input_signal_clean_reference_2026-04-22.png)
+
 ## Current Status
 
 - `MQTT/WiFi` validation is complete on the real Heltec board on the home network.
@@ -56,7 +58,7 @@ The final implementation path is the modular firmware under [`firmware/esp32_nod
 | Communication volume | Baseline-vs-adaptive comparison is complete: local represented samples drop `20%`, while MQTT aggregate bytes stay effectively constant | [`results/summaries/communication_volume_comparison_2026-04-21.md`](./results/summaries/communication_volume_comparison_2026-04-21.md) | Validated |
 | Energy savings | `INA219` baseline/adaptive runs show a small awake-mode saving (`-0.06%`), while optional deep sleep reduces energy by `-26.04%` | [`results/summaries/ina219_comparison_2026-04-21.md`](./results/summaries/ina219_comparison_2026-04-21.md), [`results/summaries/ina219_three_mode_comparison_2026-04-21.md`](./results/summaries/ina219_three_mode_comparison_2026-04-21.md), [`pics/hardware.png`](./pics/hardware.png) | Measured |
 | Secure MQTT | TLS-capable `MQTTS` support with certificate verification is implemented; live TLS evidence still pending | [`docs/SECURE_MQTT_SETUP.md`](./docs/SECURE_MQTT_SETUP.md) | Partial |
-| Three input signals bonus | `clean`, `noisy`, and `anomaly` profiles were all validated on the real board over MQTT | [`results/final_evidence_index_2026-04-21.md`](./results/final_evidence_index_2026-04-21.md), [`results/summaries/signal_profile_comparison_2026-04-18.txt`](./results/summaries/signal_profile_comparison_2026-04-18.txt) | Validated |
+| Three input signals bonus | `clean`, `noisy`, and `anomaly` profiles were all validated on the real board over MQTT | [`pics/input_signal_profiles_2026-04-22.png`](./pics/input_signal_profiles_2026-04-22.png), [`results/final_evidence_index_2026-04-21.md`](./results/final_evidence_index_2026-04-21.md), [`results/summaries/signal_profile_comparison_2026-04-18.txt`](./results/summaries/signal_profile_comparison_2026-04-18.txt) | Validated |
 | Anomaly filter bonus | `Z-score` and `Hampel` filters evaluated at `p=1%, 5%, 10%`, including `TPR`, `FPR`, mean-error reduction, FFT impact, execution time, estimated filter energy, and window-size tradeoff | [`results/summaries/anomaly_filter_evaluation_2026-04-21.md`](./results/summaries/anomaly_filter_evaluation_2026-04-21.md) | Validated |
 
 ## Signal Profiles
@@ -66,6 +68,8 @@ The virtual sensor supports three profiles that are already wired through the fu
 - `clean_reference`: baseline sinusoidal input
 - `noisy_reference`: same signal with Gaussian noise
 - `anomaly_stress`: noisy signal with sparse injected spikes and non-zero `anomaly_count`
+
+![Input signal profiles](./pics/input_signal_profiles_2026-04-22.png)
 
 ### Saved Profile Comparison
 

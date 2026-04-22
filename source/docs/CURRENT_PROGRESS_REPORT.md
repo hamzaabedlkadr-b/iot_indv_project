@@ -105,6 +105,12 @@ This produces two spectral components:
 - `3 Hz`
 - `5 Hz`
 
+Static waveform evidence is saved for the report:
+
+- [`../pics/input_signal_clean_reference_2026-04-22.png`](../pics/input_signal_clean_reference_2026-04-22.png)
+- [`../pics/input_signal_profiles_2026-04-22.png`](../pics/input_signal_profiles_2026-04-22.png)
+- [`../results/summaries/input_signal_samples_2026-04-22.csv`](../results/summaries/input_signal_samples_2026-04-22.csv)
+
 The current implementation uses three profiles:
 
 | Profile | Purpose | Notes |

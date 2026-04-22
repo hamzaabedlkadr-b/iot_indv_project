@@ -24,6 +24,8 @@ The input signal follows the assignment model:
 s(t) = 2*sin(2*pi*3*t) + 4*sin(2*pi*5*t)
 ```
 
+![Clean reference input signal](./source/pics/input_signal_clean_reference_2026-04-22.png)
+
 The firmware detects the `5 Hz` dominant component and adapts the sampling rate from the fixed baseline `50 Hz` to the optimized steady-state rate `40 Hz` using an `8x` oversampling policy.
 
 Main features:
@@ -50,7 +52,7 @@ Main features:
 | Energy saving | Adaptive awake run: `-0.06%`; optional deep sleep: `-26.04%` | [`source/results/summaries/ina219_comparison_2026-04-21.md`](./source/results/summaries/ina219_comparison_2026-04-21.md) |
 | Communication volume | Represented samples drop `20%`; aggregate MQTT bytes stay flat | [`source/results/summaries/communication_volume_comparison_2026-04-21.md`](./source/results/summaries/communication_volume_comparison_2026-04-21.md) |
 | End-to-end latency | Saved synchronized MQTT listener run | [`source/results/summaries/mqtt_summary_2026-04-18_listener.md`](./source/results/summaries/mqtt_summary_2026-04-18_listener.md) |
-| Three input signals | `clean_reference`, `noisy_reference`, `anomaly_stress` | [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md) |
+| Three input signals | `clean_reference`, `noisy_reference`, `anomaly_stress` | [`source/pics/input_signal_profiles_2026-04-22.png`](./source/pics/input_signal_profiles_2026-04-22.png), [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md) |
 | Anomaly filters bonus | Z-score and Hampel evaluated at `p=1%, 5%, 10%` | [`source/results/summaries/anomaly_filter_evaluation_2026-04-21.md`](./source/results/summaries/anomaly_filter_evaluation_2026-04-21.md) |
 | Secure MQTT | Firmware supports `mqtts://`; live TLS broker proof still pending | [`source/docs/SECURE_MQTT_SETUP.md`](./source/docs/SECURE_MQTT_SETUP.md) |
 
@@ -173,6 +175,8 @@ The same aggregate is packed into a compact `10-byte` LoRaWAN payload and sent o
 | `noisy_reference` | signal plus Gaussian-like noise |
 | `anomaly_stress` | noisy signal plus sparse injected spikes |
 
+![Input signal profiles](./source/pics/input_signal_profiles_2026-04-22.png)
+
 The anomaly evaluation also compares Z-score and Hampel filtering.
 
 ## Performance Evaluation
@@ -235,6 +239,11 @@ Main artifact:
 - [`source/results/summaries/anomaly_filter_evaluation_2026-04-21.md`](./source/results/summaries/anomaly_filter_evaluation_2026-04-21.md)
 
 ## Evidence Gallery
+
+| Clean Input Signal | Three Signal Profiles |
+| --- | --- |
+| ![Clean reference input waveform generated from the assignment equation.](./source/pics/input_signal_clean_reference_2026-04-22.png) | ![Clean, noisy, and anomaly-stress input profiles used by the ESP32 firmware.](./source/pics/input_signal_profiles_2026-04-22.png) |
+| `3 Hz + 5 Hz` assignment input. | Bonus profiles before FFT and aggregation. |
 
 | Raw Sampling Benchmark | Hardware Power Setup | Adaptive Pipeline | TTN Live Uplink |
 | --- | --- | --- | --- |
