@@ -181,6 +181,8 @@ Both MQTT and LoRaWAN use this aggregate instead of sending raw samples.
 
 ### 4. MQTT Edge Server
 
+![MQTT edge communication flow](./source/pics/mqtt_edge_flow.svg)
+
 The ESP32 publishes JSON aggregate messages to:
 
 ```text
@@ -194,6 +196,8 @@ The Python edge listener records:
 - parsed latency fields
 - CSV and JSONL logs
 - Markdown summary
+
+The important idea is that MQTT is used only after local processing is complete. The ESP32 does not send every raw sample over WiFi. It sends one compact aggregate per completed window, so the nearby edge server receives the value required by the assignment while the network traffic stays small and predictable.
 
 ### 5. LoRaWAN + TTN
 
