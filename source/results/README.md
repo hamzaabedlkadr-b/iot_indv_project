@@ -19,7 +19,7 @@ Current visual evidence bundles:
 - [`lorawan_evidence_2026-04-20.md`](./lorawan_evidence_2026-04-20.md)
 - [`mqtt_evidence_2026-04-18.md`](./mqtt_evidence_2026-04-18.md)
 - [`secure_mqtt_evidence_2026-04-22.md`](./secure_mqtt_evidence_2026-04-22.md)
-- [`../docs/EVIDENCE_SCREENSHOT_CHECKLIST.md`](../docs/EVIDENCE_SCREENSHOT_CHECKLIST.md)
+- [`final_evidence_index_2026-04-21.md`](./final_evidence_index_2026-04-21.md)
 - [`screenshot_inventory_2026-04-18.md`](./screenshot_inventory_2026-04-18.md)
 
 Typical workflow after a live `MQTT` run:

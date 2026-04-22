@@ -18,14 +18,7 @@ The project is intentionally built around a `virtual sensor` so the required sig
 
 - Assignment brief: [`ASSIGNMENT_BRIEF.md`](./ASSIGNMENT_BRIEF.md)
 - Requirements and implementation framing: [`PROJECT_REQUIREMENTS.md`](./PROJECT_REQUIREMENTS.md)
-- Submission snapshot: [`docs/SUBMISSION_SNAPSHOT.md`](./docs/SUBMISSION_SNAPSHOT.md)
-- Evidence map: [`docs/GRADING_EVIDENCE_MATRIX.md`](./docs/GRADING_EVIDENCE_MATRIX.md)
 - Final evidence index: [`results/final_evidence_index_2026-04-21.md`](./results/final_evidence_index_2026-04-21.md)
-- Current detailed progress report: [`docs/CURRENT_PROGRESS_REPORT.md`](./docs/CURRENT_PROGRESS_REPORT.md)
-- Historical detailed phase report: [`docs/PHASE1_REPORT.tex`](./docs/PHASE1_REPORT.tex) and [`docs/PHASE1_REPORT.pdf`](./docs/PHASE1_REPORT.pdf)
-- Presentation strategy: [`docs/PRESENTATION_PLAYBOOK.md`](./docs/PRESENTATION_PLAYBOOK.md)
-- Screenshot checklist: [`docs/EVIDENCE_SCREENSHOT_CHECKLIST.md`](./docs/EVIDENCE_SCREENSHOT_CHECKLIST.md)
-- Power-test quickstart for helpers: [`docs/POWER_TEST_QUICKSTART_FOR_FRIEND.md`](./docs/POWER_TEST_QUICKSTART_FOR_FRIEND.md)
 - Runtime notes from the live board sessions: [`results/runtime_notes_2026-04-17.md`](./results/runtime_notes_2026-04-17.md)
 - Latest clean MQTT evidence bundle: [`results/mqtt_evidence_2026-04-18.md`](./results/mqtt_evidence_2026-04-18.md)
 - Fresh WiFi/MQTT evidence bundle after the network change: [`results/wifi_mqtt_evidence_2026-04-21.md`](./results/wifi_mqtt_evidence_2026-04-21.md)
@@ -50,15 +43,15 @@ The final implementation path is the modular firmware under [`firmware/esp32_nod
 
 | Assignment item | Current result | Main evidence | Status |
 | --- | --- | --- | --- |
-| Maximum sampling frequency | Raw class-style benchmark measured `199,126.59 Hz`; strict full-pipeline clean operating point remains `50 Hz` | [`pics/Sampling_frequency.png`](./pics/Sampling_frequency.png), [`docs/CURRENT_PROGRESS_REPORT.md`](./docs/CURRENT_PROGRESS_REPORT.md) | Measured |
-| Optimal sampling frequency | Dominant frequency `5 Hz` leads to adaptive rate change `50 Hz -> 40 Hz` | [`docs/PHASE1_REPORT.tex`](./docs/PHASE1_REPORT.tex), [`pics/2026-04-18_better_serial_plotter_live_view.png`](./pics/2026-04-18_better_serial_plotter_live_view.png) | Validated |
+| Maximum sampling frequency | Raw class-style benchmark measured `199,126.59 Hz`; strict full-pipeline clean operating point remains `50 Hz` | [`pics/Sampling_frequency.png`](./pics/Sampling_frequency.png), [`results/final_evidence_index_2026-04-21.md`](./results/final_evidence_index_2026-04-21.md) | Measured |
+| Optimal sampling frequency | Dominant frequency `5 Hz` leads to adaptive rate change `50 Hz -> 40 Hz` | [`pics/2026-04-18_better_serial_plotter_live_view.png`](./pics/2026-04-18_better_serial_plotter_live_view.png) | Validated |
 | Aggregate over a window | `5 s` window average is computed and carried through MQTT / LoRa payloads | [`results/runtime_notes_2026-04-17.md`](./results/runtime_notes_2026-04-17.md) | Validated |
 | MQTT edge delivery | Real board publishes to local broker and listener receives consecutive windows | [`results/mqtt_evidence_2026-04-18.md`](./results/mqtt_evidence_2026-04-18.md) | Validated |
 | LoRaWAN / TTN cloud delivery | Integrated main-app LoRaWAN path validated on hardware; serial evidence shows `joined=1`, radio queuing, `Tx Done`, and `TTN` uplinks on `FPort 1` | [`results/lorawan_evidence_2026-04-20.md`](./results/lorawan_evidence_2026-04-20.md), [`cloud/ttn_payloads/README.md`](./cloud/ttn_payloads/README.md) | Validated |
 | End-to-end latency | Clean home-network dataset captured from synchronized timestamps | [`results/summaries/mqtt_summary_2026-04-18_listener.md`](./results/summaries/mqtt_summary_2026-04-18_listener.md) | Validated |
 | Communication volume | Baseline-vs-adaptive comparison is complete: local represented samples drop `20%`, while MQTT aggregate bytes stay effectively constant | [`results/summaries/communication_volume_comparison_2026-04-21.md`](./results/summaries/communication_volume_comparison_2026-04-21.md) | Validated |
 | Energy savings | `INA219` baseline/adaptive runs show a small awake-mode saving (`-0.06%`), while optional deep sleep reduces energy by `-26.04%` | [`results/summaries/ina219_comparison_2026-04-21.md`](./results/summaries/ina219_comparison_2026-04-21.md), [`results/summaries/ina219_three_mode_comparison_2026-04-21.md`](./results/summaries/ina219_three_mode_comparison_2026-04-21.md), [`pics/hardware.png`](./pics/hardware.png) | Measured |
-| Secure MQTT | Live `MQTTS` run validated on `broker.emqx.io:8883`; listener required TLS verification and the ESP32 log showed certificate validation | [`results/secure_mqtt_evidence_2026-04-22.md`](./results/secure_mqtt_evidence_2026-04-22.md), [`docs/SECURE_MQTT_SETUP.md`](./docs/SECURE_MQTT_SETUP.md) | Validated |
+| Secure MQTT | Live `MQTTS` run validated on `broker.emqx.io:8883`; listener required TLS verification and the ESP32 log showed certificate validation | [`results/secure_mqtt_evidence_2026-04-22.md`](./results/secure_mqtt_evidence_2026-04-22.md), [`results/summaries/secure_mqtt_summary_final_2026-04-22.md`](./results/summaries/secure_mqtt_summary_final_2026-04-22.md) | Validated |
 | Three input signals bonus | `clean`, `noisy`, and `anomaly` profiles were all validated on the real board over MQTT | [`pics/input_signal_profiles_2026-04-22.png`](./pics/input_signal_profiles_2026-04-22.png), [`results/final_evidence_index_2026-04-21.md`](./results/final_evidence_index_2026-04-21.md), [`results/summaries/signal_profile_comparison_2026-04-18.txt`](./results/summaries/signal_profile_comparison_2026-04-18.txt) | Validated |
 | Anomaly filter bonus | `Z-score` and `Hampel` filters evaluated at `p=1%, 5%, 10%`, including `TPR`, `FPR`, mean-error reduction, FFT impact, execution time, estimated filter energy, and window-size tradeoff | [`results/summaries/anomaly_filter_evaluation_2026-04-21.md`](./results/summaries/anomaly_filter_evaluation_2026-04-21.md) | Validated |
 
@@ -196,7 +189,7 @@ Prepared artifacts:
 - [`results/lorawan_evidence_2026-04-20.md`](./results/lorawan_evidence_2026-04-20.md)
 - [`cloud/ttn_payloads/README.md`](./cloud/ttn_payloads/README.md)
 - [`cloud/ttn_payloads/ttn_decoder.js`](./cloud/ttn_payloads/ttn_decoder.js)
-- [`docs/RUNTIME_VALIDATION_CHECKLIST.md`](./docs/RUNTIME_VALIDATION_CHECKLIST.md)
+- [`results/final_evidence_index_2026-04-21.md`](./results/final_evidence_index_2026-04-21.md)
 - [`pics/2026-04-20_serial_lorawan_join_tx.png`](./pics/2026-04-20_serial_lorawan_join_tx.png)
 - [`pics/2026-04-20_serial_lorawan_payload.png`](./pics/2026-04-20_serial_lorawan_payload.png)
 - [`pics/2026-04-20_ttn_live_data_uplink.png`](./pics/2026-04-20_ttn_live_data_uplink.png)
@@ -271,7 +264,7 @@ That means baseline and adaptive runs can now be compared without removing the F
 
 Use the detailed run order in:
 
-- [`docs/ENERGY_MEASUREMENT_RUNBOOK.md`](./docs/ENERGY_MEASUREMENT_RUNBOOK.md)
+- [`firmware/ina219_power_monitor/README.md`](./firmware/ina219_power_monitor/README.md)
 
 ## Quick Run Guide
 
@@ -296,7 +289,7 @@ Typical local workflow:
 
 - [`results/README.md`](./results/README.md)
 - [`results/measurement_summary_template.md`](./results/measurement_summary_template.md)
-- [`docs/SECURE_MQTT_SETUP.md`](./docs/SECURE_MQTT_SETUP.md)
+- [`results/secure_mqtt_evidence_2026-04-22.md`](./results/secure_mqtt_evidence_2026-04-22.md)
 
 ## Presentation Checklist
 
@@ -312,7 +305,6 @@ Typical local workflow:
 firmware/esp32_node/        final ESP32 FreeRTOS implementation
 edge_server/mqtt_listener/  local MQTT listener and logger
 cloud/ttn_payloads/         TTN payload notes and decoder
-docs/                       plans, checklists, and presentation material
 results/                    captured logs, summaries, and runtime notes
 pics/                       saved workshop and README images
 ```

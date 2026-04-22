@@ -51,9 +51,9 @@ The MQTT transport now supports both:
 - plain `mqtt://` for local development
 - verified `mqtts://` for secure-broker validation
 
-The security-related switches are also in [`include/project_config.h`](./include/project_config.h), and the setup notes are in:
+The security-related switches are also in [`include/project_config.h`](./include/project_config.h), and the validated TLS evidence is summarized in:
 
-- [`../docs/SECURE_MQTT_SETUP.md`](../../docs/SECURE_MQTT_SETUP.md)
+- [`../../../README.md#4b-secure-mqtt-over-tls`](../../../README.md#4b-secure-mqtt-over-tls)
 
 ## Signal Profiles
 
@@ -95,7 +95,7 @@ The firmware can also emit a clean numeric serial stream for live plotting with 
 
 See:
 
-- [`../docs/BETTER_SERIAL_PLOTTER.md`](../../docs/BETTER_SERIAL_PLOTTER.md)
+- [`../../../README.md#betterserialplotter-evidence`](../../../README.md#betterserialplotter-evidence)
 
 ## Internal Layout
 

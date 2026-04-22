@@ -1,6 +1,6 @@
 # Runtime Notes - 2026-04-17
 
-This note is a historical snapshot from the pre-`TTN` validation stage. It is still useful for the early live `MQTT` bring-up story, but it does not describe the later integrated `LoRaWAN` proof from `2026-04-20`. For the current cloud-side status, use [`lorawan_evidence_2026-04-20.md`](./lorawan_evidence_2026-04-20.md) and [`../docs/CURRENT_PROGRESS_REPORT.md`](../docs/CURRENT_PROGRESS_REPORT.md).
+This note is a historical snapshot from the pre-`TTN` validation stage. It is still useful for the early live `MQTT` bring-up story, but it does not describe the later integrated `LoRaWAN` proof from `2026-04-20`. For the current cloud-side status, use [`lorawan_evidence_2026-04-20.md`](./lorawan_evidence_2026-04-20.md) and [`final_evidence_index_2026-04-21.md`](./final_evidence_index_2026-04-21.md).
 
 ## Session Summary
 

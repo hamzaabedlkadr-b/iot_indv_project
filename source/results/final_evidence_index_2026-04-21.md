@@ -184,4 +184,4 @@ Important wording:
 Power-test reference plan:
 
 - [`reference_repo_power_conditions_2026-04-21.md`](./reference_repo_power_conditions_2026-04-21.md)
-- [`../docs/ENERGY_MEASUREMENT_RUNBOOK.md`](../docs/ENERGY_MEASUREMENT_RUNBOOK.md)
+- [`../firmware/ina219_power_monitor/README.md`](../firmware/ina219_power_monitor/README.md)

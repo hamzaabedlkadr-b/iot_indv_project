@@ -50,7 +50,7 @@ Main features:
 
 | Requirement | Result | Evidence |
 | --- | --- | --- |
-| Maximum sampling frequency | Raw benchmark: `199,126.59 Hz`; strict full-pipeline baseline: `50 Hz` | [`source/pics/Sampling_frequency.png`](./source/pics/Sampling_frequency.png), [`source/docs/CURRENT_PROGRESS_REPORT.md`](./source/docs/CURRENT_PROGRESS_REPORT.md) |
+| Maximum sampling frequency | Raw benchmark: `199,126.59 Hz`; strict full-pipeline baseline: `50 Hz` | [`source/pics/Sampling_frequency.png`](./source/pics/Sampling_frequency.png), [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md) |
 | Optimal sampling frequency | Dominant `5 Hz`, adaptive rate `40 Hz` | [`source/pics/2026-04-18_better_serial_plotter_live_view.png`](./source/pics/2026-04-18_better_serial_plotter_live_view.png) |
 | Aggregate over window | `5 s` window average computed and propagated to MQTT and LoRaWAN | [`source/results/runtime_notes_2026-04-17.md`](./source/results/runtime_notes_2026-04-17.md) |
 | MQTT over WiFi | Real Heltec board published aggregate messages to the edge listener | [`source/results/mqtt_evidence_2026-04-18.md`](./source/results/mqtt_evidence_2026-04-18.md), [`source/results/wifi_mqtt_evidence_2026-04-21.md`](./source/results/wifi_mqtt_evidence_2026-04-21.md) |
@@ -60,7 +60,7 @@ Main features:
 | End-to-end latency | Saved synchronized MQTT listener run | [`source/results/summaries/mqtt_summary_2026-04-18_listener.md`](./source/results/summaries/mqtt_summary_2026-04-18_listener.md) |
 | Three input signals | `clean_reference`, `noisy_reference`, `anomaly_stress` | [`source/pics/input_signal_profiles_2026-04-22.png`](./source/pics/input_signal_profiles_2026-04-22.png), [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md) |
 | Anomaly filters bonus | Z-score and Hampel evaluated at `p=1%, 5%, 10%` | [`source/results/summaries/anomaly_filter_evaluation_2026-04-21.md`](./source/results/summaries/anomaly_filter_evaluation_2026-04-21.md) |
-| Secure MQTT | Real Heltec board published aggregates over `MQTTS` to `broker.emqx.io:8883`; listener used TLS with certificate verification required | [`source/results/secure_mqtt_evidence_2026-04-22.md`](./source/results/secure_mqtt_evidence_2026-04-22.md), [`source/docs/SECURE_MQTT_SETUP.md`](./source/docs/SECURE_MQTT_SETUP.md) |
+| Secure MQTT | Real Heltec board published aggregates over `MQTTS` to `broker.emqx.io:8883`; listener used TLS with certificate verification required | [`source/results/secure_mqtt_evidence_2026-04-22.md`](./source/results/secure_mqtt_evidence_2026-04-22.md), [`source/results/summaries/secure_mqtt_summary_final_2026-04-22.md`](./source/results/summaries/secure_mqtt_summary_final_2026-04-22.md) |
 
 ## System Architecture
 
@@ -163,7 +163,6 @@ source/
   test_codes/                  temporary scratch firmware used during bring-up
   edge_server/mqtt_listener/  local MQTT listener and logger
   cloud/ttn_payloads/         TTN payload decoder and notes
-  docs/                       reports, runbooks, setup notes
   results/                    saved CSV/JSON/Markdown measurements
   pics/                       screenshots and hardware photos
 ```
@@ -696,9 +695,10 @@ MQTT heartbeat | wifi=1 mqtt=1
 
 ### 7. Power Test Helper
 
-For a second person rerunning the power test, use:
+For a second person rerunning the power test, use the INA219 monitor firmware and the saved result summaries:
 
-- [`source/docs/POWER_TEST_QUICKSTART_FOR_FRIEND.md`](./source/docs/POWER_TEST_QUICKSTART_FOR_FRIEND.md)
+- [`source/firmware/ina219_power_monitor/README.md`](./source/firmware/ina219_power_monitor/README.md)
+- [`source/results/summaries/ina219_three_mode_comparison_2026-04-21.md`](./source/results/summaries/ina219_three_mode_comparison_2026-04-21.md)
 
 ## How To Reproduce Key Claims
 
@@ -747,7 +747,6 @@ Use this order during the workshop or presentation:
 Main evidence map:
 
 - [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md)
-- [`source/docs/GRADING_EVIDENCE_MATRIX.md`](./source/docs/GRADING_EVIDENCE_MATRIX.md)
 
 ## Likely Evaluation Questions
 
@@ -773,4 +772,4 @@ Main evidence map:
 - Local secrets are kept out of git through `project_config_local.h`.
 - Build outputs, PlatformIO cache, local logs, and scratch test folders are ignored.
 - The main evidence map is [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md).
-- The grading matrix is [`source/docs/GRADING_EVIDENCE_MATRIX.md`](./source/docs/GRADING_EVIDENCE_MATRIX.md).
+- The README coverage table and final evidence index map the rubric items to saved proof files.
