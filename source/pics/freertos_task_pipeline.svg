@@ -1,151 +1,122 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="980" viewBox="0 0 1500 980" role="img" aria-labelledby="title desc">
-  <title id="title">FreeRTOS task pipeline for the adaptive sampling node</title>
-  <desc id="desc">A clear top-down diagram showing app_main creating shared state, the signal input task, signal processing task, adaptive sampling control task, MQTT and LoRaWAN communication tasks, plus monitoring tasks.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1350" height="760" viewBox="0 0 1350 760" role="img" aria-labelledby="title desc">
+  <title id="title">Simplified FreeRTOS task pipeline</title>
+  <desc id="desc">Simplified diagram of the ESP32 FreeRTOS tasks: boot creates queues, input samples the signal, processing computes FFT and average, control adapts the sampling rate, communication sends aggregate values to MQTT and LoRaWAN, and monitoring records health and metrics.</desc>
 
   <defs>
-    <marker id="arrowBlue" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L14,7 L0,14 Z" fill="#2563eb"/>
+    <marker id="arrowBlue" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L13,6.5 L0,13 Z" fill="#2563eb"/>
     </marker>
-    <marker id="arrowGreen" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L14,7 L0,14 Z" fill="#16a34a"/>
+    <marker id="arrowGreen" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L13,6.5 L0,13 Z" fill="#16a34a"/>
     </marker>
-    <marker id="arrowGray" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L14,7 L0,14 Z" fill="#64748b"/>
+    <marker id="arrowGray" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L13,6.5 L0,13 Z" fill="#64748b"/>
     </marker>
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
-      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#0f172a" flood-opacity="0.18"/>
+    <filter id="shadow" x="-8%" y="-10%" width="116%" height="130%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#0f172a" flood-opacity="0.16"/>
     </filter>
     <style>
       .bg { fill: #f8fafc; }
       .title { font: 800 42px Arial, sans-serif; fill: #0f172a; }
       .subtitle { font: 22px Arial, sans-serif; fill: #334155; }
-      .section { font: 800 22px Arial, sans-serif; fill: #334155; letter-spacing: .04em; }
+      .section { font: 800 21px Arial, sans-serif; fill: #475569; letter-spacing: .05em; }
       .box { stroke-width: 3; rx: 18; filter: url(#shadow); }
       .box-title { font: 800 27px Arial, sans-serif; fill: #0f172a; }
       .box-line { font: 20px Arial, sans-serif; fill: #334155; }
-      .queue { fill: #dbeafe; stroke: #2563eb; stroke-width: 2.5; rx: 12; }
-      .queue-text { font: 700 17px Arial, sans-serif; fill: #1e3a8a; }
-      .arrow-blue { fill: none; stroke: #2563eb; stroke-width: 5; marker-end: url(#arrowBlue); }
-      .arrow-green { fill: none; stroke: #16a34a; stroke-width: 5; marker-end: url(#arrowGreen); }
+      .small { font: 18px Arial, sans-serif; fill: #475569; }
+      .arrow-blue { fill: none; stroke: #2563eb; stroke-width: 6; marker-end: url(#arrowBlue); }
+      .arrow-green { fill: none; stroke: #16a34a; stroke-width: 6; marker-end: url(#arrowGreen); }
       .arrow-gray { fill: none; stroke: #64748b; stroke-width: 4; stroke-dasharray: 10 10; marker-end: url(#arrowGray); }
-      .label-blue { font: 700 18px Arial, sans-serif; fill: #1d4ed8; }
-      .label-green { font: 800 18px Arial, sans-serif; fill: #15803d; }
-      .label-gray { font: 700 18px Arial, sans-serif; fill: #475569; }
-      .note { font: 18px Arial, sans-serif; fill: #475569; }
-      .legend-title { font: 800 22px Arial, sans-serif; fill: #0f172a; }
-      .legend-text { font: 19px Arial, sans-serif; fill: #334155; }
+      .label-blue { font: 800 18px Arial, sans-serif; fill: #1d4ed8; }
+      .label-green { font: 800 19px Arial, sans-serif; fill: #15803d; }
+      .legend { font: 19px Arial, sans-serif; fill: #334155; }
     </style>
   </defs>
 
-  <rect class="bg" width="1500" height="980"/>
+  <rect class="bg" width="1350" height="760"/>
 
-  <text x="60" y="70" class="title">FreeRTOS Task Pipeline</text>
-  <text x="60" y="108" class="subtitle">Each task owns one stage. Queues move data forward, FFT feedback changes the sampling rate, and the supervisor watches system health.</text>
+  <text x="55" y="70" class="title">FreeRTOS Task Pipeline</text>
+  <text x="55" y="108" class="subtitle">Simple view: samples flow left to right, FFT feedback changes the sampling rate, and aggregates go to MQTT or LoRaWAN.</text>
 
-  <!-- Boot / shared state -->
-  <text x="60" y="170" class="section">BOOT AND SHARED CONTEXT</text>
+  <!-- Boot -->
+  <text x="55" y="165" class="section">1. BOOT</text>
+  <rect x="55" y="185" width="300" height="105" class="box" fill="#e0f2fe" stroke="#0284c7"/>
+  <text x="85" y="230" class="box-title">app_main()</text>
+  <text x="85" y="263" class="box-line">creates queues</text>
+  <text x="85" y="286" class="box-line">starts FreeRTOS tasks</text>
 
-  <rect x="60" y="195" width="360" height="150" class="box" fill="#e0f2fe" stroke="#0284c7"/>
-  <text x="90" y="245" class="box-title">app_main()</text>
-  <text x="90" y="283" class="box-line">creates project_context_t</text>
-  <text x="90" y="313" class="box-line">creates queues + event group</text>
+  <!-- Main data path -->
+  <text x="55" y="360" class="section">2. MAIN DATA PATH</text>
 
-  <rect x="555" y="195" width="390" height="150" class="box" fill="#eef2ff" stroke="#4f46e5"/>
-  <text x="585" y="245" class="box-title">Shared context</text>
-  <text x="585" y="283" class="box-line">sample, FFT, aggregate queues</text>
-  <text x="585" y="313" class="box-line">event bits, counters, latest result</text>
+  <rect x="55" y="390" width="295" height="150" class="box" fill="#dcfce7" stroke="#16a34a"/>
+  <text x="85" y="438" class="box-title">signal_input_task</text>
+  <text x="85" y="475" class="box-line">generates signal samples</text>
+  <text x="85" y="505" class="box-line">uses current fs</text>
 
-  <path class="arrow-blue" d="M420 270 L540 270"/>
-  <text x="449" y="255" class="label-blue">starts tasks</text>
+  <rect x="475" y="390" width="315" height="150" class="box" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="505" y="438" class="box-title">signal_processing_task</text>
+  <text x="505" y="475" class="box-line">5 s window</text>
+  <text x="505" y="505" class="box-line">average + FFT</text>
 
-  <!-- Main pipeline -->
-  <text x="60" y="430" class="section">DATA PATH</text>
+  <rect x="910" y="390" width="315" height="150" class="box" fill="#fef3c7" stroke="#d97706"/>
+  <text x="940" y="438" class="box-title">sampling_control_task</text>
+  <text x="940" y="475" class="box-line">reads dominant frequency</text>
+  <text x="940" y="505" class="box-line">sets new sampling fs</text>
 
-  <rect x="60" y="465" width="330" height="175" class="box" fill="#dcfce7" stroke="#16a34a"/>
-  <text x="90" y="515" class="box-title">signal_input_task</text>
-  <text x="90" y="553" class="box-line">generates virtual sensor samples</text>
-  <text x="90" y="583" class="box-line">uses current sampling Hz</text>
-  <text x="90" y="613" class="box-line">marks synthetic anomalies</text>
+  <path class="arrow-blue" d="M350 465 L465 465"/>
+  <text x="372" y="445" class="label-blue">samples</text>
 
-  <rect x="505" y="465" width="355" height="175" class="box" fill="#dbeafe" stroke="#2563eb"/>
-  <text x="535" y="515" class="box-title">signal_processing_task</text>
-  <text x="535" y="553" class="box-line">builds each 5 s window</text>
-  <text x="535" y="583" class="box-line">computes average + FFT</text>
-  <text x="535" y="613" class="box-line">fans aggregate to MQTT/LoRa</text>
+  <path class="arrow-blue" d="M790 465 L900 465"/>
+  <text x="815" y="445" class="label-blue">FFT result</text>
 
-  <rect x="985" y="465" width="345" height="175" class="box" fill="#fef3c7" stroke="#d97706"/>
-  <text x="1015" y="515" class="box-title">sampling_control_task</text>
-  <text x="1015" y="553" class="box-line">reads dominant FFT peak</text>
-  <text x="1015" y="583" class="box-line">applies 8x policy</text>
-  <text x="1015" y="613" class="box-line">requests new sampling Hz</text>
+  <path class="arrow-green" d="M1000 385 C900 315, 235 315, 205 385"/>
+  <text x="472" y="310" class="label-green">adaptive feedback: new sampling frequency</text>
 
-  <rect x="410" y="525" width="75" height="48" class="queue"/>
-  <text x="421" y="556" class="queue-text">sample</text>
-  <path class="arrow-blue" d="M390 552 L408 552"/>
-  <path class="arrow-blue" d="M485 552 L505 552"/>
-
-  <rect x="885" y="525" width="75" height="48" class="queue"/>
-  <text x="905" y="556" class="queue-text">FFT</text>
-  <path class="arrow-blue" d="M860 552 L883 552"/>
-  <path class="arrow-blue" d="M960 552 L985 552"/>
-
-  <path class="arrow-green" d="M1070 462 C970 390, 390 385, 230 455"/>
-  <text x="605" y="390" class="label-green">adaptive feedback: new sampling frequency</text>
+  <path class="arrow-blue" d="M355 238 L465 238 L465 380"/>
+  <text x="380" y="218" class="label-blue">tasks run</text>
 
   <!-- Communication -->
-  <text x="475" y="690" class="section">COMMUNICATION OUTPUT</text>
+  <text x="475" y="610" class="section">3. COMMUNICATION OUTPUT</text>
 
-  <rect x="475" y="725" width="345" height="150" class="box" fill="#f3e8ff" stroke="#7e22ce"/>
-  <text x="505" y="775" class="box-title">comm_mqtt_task</text>
-  <text x="505" y="813" class="box-line">builds JSON aggregate</text>
-  <text x="505" y="843" class="box-line">publishes MQTT/MQTTS over WiFi</text>
+  <rect x="475" y="630" width="300" height="95" class="box" fill="#f3e8ff" stroke="#7e22ce"/>
+  <text x="505" y="668" class="box-title">comm_mqtt_task</text>
+  <text x="505" y="702" class="box-line">JSON aggregate to edge</text>
 
-  <rect x="910" y="725" width="345" height="150" class="box" fill="#ede9fe" stroke="#6d28d9"/>
-  <text x="940" y="775" class="box-title">comm_lorawan_task</text>
-  <text x="940" y="813" class="box-line">builds compact 10-byte payload</text>
-  <text x="940" y="843" class="box-line">queues TTN uplink by LoRaWAN</text>
+  <rect x="840" y="630" width="315" height="95" class="box" fill="#ede9fe" stroke="#6d28d9"/>
+  <text x="870" y="668" class="box-title">comm_lorawan_task</text>
+  <text x="870" y="702" class="box-line">10-byte payload to TTN</text>
 
-  <rect x="1285" y="725" width="170" height="150" class="box" fill="#e0f2fe" stroke="#0284c7"/>
-  <text x="1315" y="775" class="box-title">Edge/Cloud</text>
-  <text x="1315" y="813" class="box-line">MQTT listener</text>
-  <text x="1315" y="843" class="box-line">TTN Live Data</text>
+  <rect x="1195" y="630" width="120" height="95" class="box" fill="#e0f2fe" stroke="#0284c7"/>
+  <text x="1218" y="660" class="box-title">Output</text>
+  <text x="1218" y="688" class="box-line">MQTT</text>
+  <text x="1218" y="715" class="box-line">TTN</text>
 
-  <path class="arrow-blue" d="M680 640 C680 675, 650 685, 650 720"/>
-  <text x="560" y="690" class="label-blue">aggregate_mqtt_queue</text>
-  <path class="arrow-blue" d="M820 800 C880 800, 850 700, 960 700 L1275 760"/>
-  <path class="arrow-blue" d="M1255 800 L1275 825"/>
-
-  <path class="arrow-blue" d="M770 640 C930 670, 1080 685, 1080 720"/>
-  <text x="930" y="690" class="label-blue">aggregate_lorawan_queue</text>
+  <path class="arrow-blue" d="M615 542 L615 620"/>
+  <path class="arrow-blue" d="M615 590 C705 590, 900 590, 995 620"/>
+  <text x="635" y="585" class="label-blue">aggregate</text>
+  <path class="arrow-blue" d="M775 678 C890 610, 1070 615, 1185 655"/>
+  <path class="arrow-blue" d="M1155 678 L1185 700"/>
 
   <!-- Monitoring -->
-  <text x="60" y="690" class="section">MONITORING</text>
+  <text x="55" y="610" class="section">4. MONITORING</text>
 
-  <rect x="60" y="830" width="330" height="110" class="box" fill="#f1f5f9" stroke="#64748b"/>
-  <text x="90" y="875" class="box-title">metrics_task</text>
-  <text x="90" y="913" class="box-line">counters, timings, CSV rows</text>
+  <rect x="55" y="630" width="335" height="95" class="box" fill="#f1f5f9" stroke="#64748b"/>
+  <text x="85" y="668" class="box-title">metrics + display</text>
+  <text x="85" y="702" class="box-line">heartbeats, timings, counters</text>
 
-  <rect x="60" y="715" width="330" height="90" class="box" fill="#f1f5f9" stroke="#64748b"/>
-  <text x="90" y="755" class="box-title">app_display_task</text>
-  <text x="90" y="787" class="box-line">serial/display heartbeat</text>
+  <path class="arrow-gray" d="M545 542 C430 595, 400 650, 392 678"/>
 
-  <rect x="980" y="195" width="430" height="150" class="box" fill="#f1f5f9" stroke="#64748b"/>
-  <text x="1010" y="245" class="box-title">app_main supervisor loop</text>
-  <text x="1010" y="283" class="box-line">logs queue status + event bits</text>
-  <text x="1010" y="313" class="box-line">can enter deep sleep policy</text>
-
-  <path class="arrow-gray" d="M650 640 C560 750, 430 865, 392 878"/>
-  <path class="arrow-gray" d="M760 640 C610 690, 438 745, 392 760"/>
-  <path class="arrow-gray" d="M945 270 L970 270"/>
-  <text x="1035" y="376" class="label-gray">supervisor reads health state</text>
+  <!-- Key explanation -->
+  <rect x="740" y="170" width="520" height="105" fill="#ffffff" stroke="#cbd5e1" stroke-width="2.5" rx="16"/>
+  <text x="770" y="212" class="box-title">What to say in the presentation</text>
+  <text x="770" y="247" class="small">Input samples go into a queue. Processing computes average + FFT.</text>
+  <text x="770" y="274" class="small">The control task uses the FFT peak to reduce fs and save energy.</text>
 
   <!-- Legend -->
-  <rect x="1010" y="910" width="420" height="52" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" rx="14"/>
-  <text x="1030" y="943" class="legend-title">Legend:</text>
-  <path class="arrow-blue" d="M1130 936 L1185 936"/>
-  <text x="1195" y="943" class="legend-text">queue data</text>
-  <path class="arrow-green" d="M1282 936 L1335 936"/>
-  <text x="1344" y="943" class="legend-text">adaptive feedback</text>
-
-  <text x="60" y="955" class="note">Presentation shortcut: input generates samples, processing computes FFT/average, control lowers sampling from 50 Hz to 40 Hz for a 5 Hz dominant signal, communication publishes the aggregate, supervisor/metrics prove timing and health.</text>
+  <rect x="55" y="20" width="1235" height="2" fill="#e2e8f0"/>
+  <rect x="965" y="45" width="300" height="55" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" rx="12"/>
+  <path class="arrow-blue" d="M990 73 L1045 73"/>
+  <text x="1058" y="80" class="legend">data queue</text>
+  <path class="arrow-green" d="M1150 73 L1205 73"/>
+  <text x="1218" y="80" class="legend">feedback</text>
 </svg>
