@@ -156,8 +156,11 @@ These are the main design decisions and the short explanation to use if asked du
 ```text
 source/
   firmware/esp32_node/        final ESP32 FreeRTOS firmware
+  firmware/heltec_lorawan_smoke_test/
+                               small Arduino LoRaWAN smoke test
   firmware/ina219_power_monitor/
                                second-board INA219 monitor firmware
+  test_codes/                  temporary scratch firmware used during bring-up
   edge_server/mqtt_listener/  local MQTT listener and logger
   cloud/ttn_payloads/         TTN payload decoder and notes
   docs/                       reports, runbooks, setup notes
@@ -176,6 +179,18 @@ Most important files:
 | [`source/firmware/esp32_node/components/comm_lorawan/`](./source/firmware/esp32_node/components/comm_lorawan/) | compact LoRaWAN payload and Heltec radio integration |
 | [`source/firmware/ina219_power_monitor/src/main.cpp`](./source/firmware/ina219_power_monitor/src/main.cpp) | INA219 monitor output |
 | [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md) | map of evidence to assignment requirements |
+
+PlatformIO projects in this repository:
+
+| PlatformIO file | Role | Framework | Use for final demo? |
+| --- | --- | --- | --- |
+| [`source/firmware/esp32_node/platformio.ini`](./source/firmware/esp32_node/platformio.ini) | Main adaptive-sampling node firmware | `ESP-IDF` + FreeRTOS | Yes. This is the final DUT firmware. |
+| [`source/firmware/ina219_power_monitor/platformio.ini`](./source/firmware/ina219_power_monitor/platformio.ini) | INA219 power monitor firmware for the second board | Arduino | Yes, only for energy measurement. |
+| [`source/firmware/heltec_lorawan_smoke_test/platformio.ini`](./source/firmware/heltec_lorawan_smoke_test/platformio.ini) | Small standalone Heltec LoRaWAN join/uplink test | Arduino | Support evidence only; the final LoRaWAN path is integrated in `esp32_node`. |
+| [`source/test_codes/platformio.ini`](./source/test_codes/platformio.ini) | Temporary bring-up/scratch code | `ESP-IDF` | No. Kept only for traceability while testing. |
+| [`tools/_example_repo_review/IoTSignalProcessing/platformio.ini`](./tools/_example_repo_review/IoTSignalProcessing/platformio.ini) | Class reference/example repo copy used for comparison | varies | No. This is not part of the final implementation. |
+
+For the workshop, the important project is [`source/firmware/esp32_node`](./source/firmware/esp32_node). The INA219 monitor is separate because it runs on the second board and measures the DUT power externally.
 
 FreeRTOS task responsibilities:
 
