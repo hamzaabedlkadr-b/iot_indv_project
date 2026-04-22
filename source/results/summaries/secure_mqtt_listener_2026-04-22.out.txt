@@ -1,0 +1,5 @@
+connecting to broker broker.emqx.io:8883 and waiting for topic iot_indv_project/hamza/adaptive-sampling-node/secure tls=enabled verify=required
+subscribed to iot_indv_project/hamza/adaptive-sampling-node/secure on broker.emqx.io:8883 as hamza-secure-edge-listener tls=enabled
+message window=9 profile=clean_reference fs=40.0Hz dominant=5.0Hz avg=-0.0 anomalies=0 listener_latency_us=624484 end_to_end_latency_us=956607
+message window=10 profile=clean_reference fs=40.0Hz dominant=5.0Hz avg=0.0 anomalies=0 listener_latency_us=555125 end_to_end_latency_us=886945
+message window=11 profile=clean_reference fs=40.0Hz dominant=5.0Hz avg=-0.0 anomalies=0 listener_latency_us=547704 end_to_end_latency_us=879133

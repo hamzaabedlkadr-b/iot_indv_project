@@ -77,6 +77,28 @@ Key values:
 - average dominant frequency: `5.000 Hz`
 - average payload size: `401.667 B`
 
+## Secure MQTT / TLS Proof
+
+Use this run for the secure MQTT rubric item:
+
+- [`secure_mqtt_evidence_2026-04-22.md`](./secure_mqtt_evidence_2026-04-22.md)
+- [`summaries/secure_mqtt_listener_2026-04-22.out.txt`](./summaries/secure_mqtt_listener_2026-04-22.out.txt)
+- [`summaries/secure_mqtt_run_final_2026-04-22.csv`](./summaries/secure_mqtt_run_final_2026-04-22.csv)
+- [`summaries/secure_mqtt_summary_final_2026-04-22.md`](./summaries/secure_mqtt_summary_final_2026-04-22.md)
+- [`../pics/2026-04-22_secure_mqtt_listener_tls.png`](../pics/2026-04-22_secure_mqtt_listener_tls.png)
+- [`../pics/2026-04-22_secure_mqtt_cert_validated.png`](../pics/2026-04-22_secure_mqtt_cert_validated.png)
+- [`../pics/2026-04-22_secure_mqtt_heltec_sent.png`](../pics/2026-04-22_secure_mqtt_heltec_sent.png)
+
+Key values:
+
+- broker: `broker.emqx.io:8883`
+- topic: `iot_indv_project/hamza/adaptive-sampling-node/secure`
+- listener proof: `tls=enabled verify=required`
+- ESP32 proof: `Certificate validated`
+- messages received: `3`
+- missing windows: `0`
+- average end-to-end latency: `907,561.667 us`
+
 ## Communication Volume
 
 Use this table for the network-volume rubric item:
@@ -154,9 +176,10 @@ Important wording:
 - the small average energy change is still a valid result because both runs were measured under the same hardware and workload conditions
 - deep sleep is an additional low-power strategy and should be presented separately from the required adaptive-sampling comparison
 
-## Still Pending
+## Final Notes
 
-- live secure MQTT proof if a TLS broker is available
+- secure MQTT proof is now captured and linked above
+- local secrets remain in ignored `project_config_local.h`, not in the repository
 
 Power-test reference plan:
 

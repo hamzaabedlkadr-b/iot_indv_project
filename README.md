@@ -14,7 +14,8 @@ This project builds an IoT node that generates a virtual sensor signal, samples 
 - [Performance Evaluation](#performance-evaluation)
 - [Evidence Gallery](#evidence-gallery)
 - [Setup And Run](#setup-and-run)
-- [Current Limitation](#current-limitation)
+- [Presentation Walkthrough](#presentation-walkthrough)
+- [Submission Notes](#submission-notes)
 
 ## Overview
 
@@ -36,6 +37,7 @@ Main features:
 - Adaptive sampling from `50 Hz` to `40 Hz`.
 - Window average over `5 s`.
 - MQTT edge delivery with saved listener logs and latency summaries.
+- Secure MQTT validation over `MQTTS` with TLS certificate verification.
 - LoRaWAN + TTN uplink proof with serial and TTN screenshots.
 - INA219 energy comparison for baseline, adaptive, and adaptive + deep sleep.
 - Three signal profiles and extended anomaly-filter evaluation.
@@ -54,7 +56,7 @@ Main features:
 | End-to-end latency | Saved synchronized MQTT listener run | [`source/results/summaries/mqtt_summary_2026-04-18_listener.md`](./source/results/summaries/mqtt_summary_2026-04-18_listener.md) |
 | Three input signals | `clean_reference`, `noisy_reference`, `anomaly_stress` | [`source/pics/input_signal_profiles_2026-04-22.png`](./source/pics/input_signal_profiles_2026-04-22.png), [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md) |
 | Anomaly filters bonus | Z-score and Hampel evaluated at `p=1%, 5%, 10%` | [`source/results/summaries/anomaly_filter_evaluation_2026-04-21.md`](./source/results/summaries/anomaly_filter_evaluation_2026-04-21.md) |
-| Secure MQTT | Firmware supports `mqtts://`; live TLS broker proof still pending | [`source/docs/SECURE_MQTT_SETUP.md`](./source/docs/SECURE_MQTT_SETUP.md) |
+| Secure MQTT | Real Heltec board published aggregates over `MQTTS` to `broker.emqx.io:8883`; listener used TLS with certificate verification required | [`source/results/secure_mqtt_evidence_2026-04-22.md`](./source/results/secure_mqtt_evidence_2026-04-22.md), [`source/docs/SECURE_MQTT_SETUP.md`](./source/docs/SECURE_MQTT_SETUP.md) |
 
 ## System Architecture
 
@@ -226,6 +228,26 @@ Evidence:
 
 - [`source/results/summaries/mqtt_summary_2026-04-18_listener.md`](./source/results/summaries/mqtt_summary_2026-04-18_listener.md)
 
+### Secure MQTT Validation
+
+The secure MQTT rubric item was validated on `2026-04-22` with the real Heltec board publishing aggregate messages over `MQTTS` to a TLS broker:
+
+| Item | Value |
+| --- | --- |
+| Broker | `broker.emqx.io:8883` |
+| Topic | `iot_indv_project/hamza/adaptive-sampling-node/secure` |
+| Transport | `MQTTS` / TLS |
+| Certificate verification | enabled on the ESP32 through the ESP-IDF certificate bundle |
+| Listener verification | `tls=enabled verify=required` |
+| Received windows | `9`, `10`, `11` with `0` missing windows |
+| Average secure run payload size | `446.333 B` |
+| Average secure run end-to-end latency | `907,561.667 us` |
+
+Evidence:
+
+- [`source/results/secure_mqtt_evidence_2026-04-22.md`](./source/results/secure_mqtt_evidence_2026-04-22.md)
+- [`source/results/summaries/secure_mqtt_summary_final_2026-04-22.md`](./source/results/summaries/secure_mqtt_summary_final_2026-04-22.md)
+
 ### Bonus Anomaly Filters
 
 The anomaly-filter evaluation covers:
@@ -268,6 +290,11 @@ Main artifact:
 | ![Static energy-result plot from INA219 summaries.](./source/pics/result_energy_comparison_2026-04-22.png) | ![Static communication-volume plot comparing fixed and adaptive modes.](./source/pics/result_communication_volume_2026-04-22.png) | ![Static MQTT latency plot from listener summaries.](./source/pics/result_mqtt_latency_2026-04-22.png) | ![Static anomaly-filter result plot comparing Z-score and Hampel filters.](./source/pics/result_anomaly_filters_2026-04-22.png) |
 | Baseline vs adaptive vs deep sleep. | Local samples and aggregate bytes. | Average and p95 latency. | Detection and error reduction. |
 
+| Secure MQTT Listener | TLS Certificate Validation | Heltec MQTT Heartbeat |
+| --- | --- | --- |
+| ![Python edge listener subscribed to the secure MQTT topic with TLS enabled and verification required.](./source/pics/2026-04-22_secure_mqtt_listener_tls.png) | ![ESP32 serial log showing WiFi connection, MQTT startup, and certificate validation.](./source/pics/2026-04-22_secure_mqtt_cert_validated.png) | ![ESP32 serial log showing MQTT heartbeat with WiFi and MQTT connected and sent aggregates.](./source/pics/2026-04-22_secure_mqtt_heltec_sent.png) |
+| Secure listener received aggregate windows. | ESP-IDF certificate bundle validated the broker. | `wifi=1`, `mqtt=1`, and sent counter increasing. |
+
 ## Setup And Run
 
 ### 1. Clone
@@ -299,7 +326,7 @@ pio run -d source\firmware\esp32_node -e heltec_wifi_lora_32_V3
 pio run -d source\firmware\esp32_node -e heltec_wifi_lora_32_V3 -t upload
 ```
 
-### 5. Run Edge Listener
+### 5. Run Plain Edge Listener
 
 ```powershell
 python -m pip install -r source\edge_server\mqtt_listener\requirements.txt
@@ -309,19 +336,45 @@ python -m pip install -r source\edge_server\mqtt_listener\requirements.txt
 python source\edge_server\mqtt_listener\listen_aggregates.py --host <BROKER_HOST> --port 1883 --topic project/adaptive-sampling-node/aggregate --csv source\results\summaries\latest_listener.csv --jsonl source\results\summaries\latest_listener.jsonl
 ```
 
-### 6. Power Test Helper
+### 6. Run Secure Edge Listener
+
+```powershell
+python source\edge_server\mqtt_listener\listen_aggregates.py --host broker.emqx.io --port 8883 --tls --topic iot_indv_project/hamza/adaptive-sampling-node/secure --client-id hamza-secure-edge-listener --csv source\results\summaries\secure_mqtt_run.csv --jsonl source\results\summaries\secure_mqtt_run.jsonl --limit 3
+```
+
+The important proof lines are:
+
+```text
+tls=enabled verify=required
+Certificate validated
+MQTT heartbeat | wifi=1 mqtt=1
+```
+
+### 7. Power Test Helper
 
 For a second person rerunning the power test, use:
 
 - [`source/docs/POWER_TEST_QUICKSTART_FOR_FRIEND.md`](./source/docs/POWER_TEST_QUICKSTART_FOR_FRIEND.md)
 
-## Current Limitation
+## Presentation Walkthrough
 
-The only remaining weaker item is live secure-MQTT proof. The firmware supports `mqtts://`, certificate verification, and optional authentication, but the saved live broker evidence is still for local plain MQTT.
+Use this order during the workshop or presentation:
 
-Setup note:
+- Start with the assignment goal: one ESP32 node samples a signal, computes FFT locally, adapts the sampling rate, aggregates a `5 s` window, and communicates the aggregate to edge and cloud.
+- Show the input equation and the clean waveform image, then explain the three profiles: `clean_reference`, `noisy_reference`, and `anomaly_stress`.
+- Show the maximum sampling benchmark: raw throughput `199,126.59 Hz`, while the full application uses a conservative `50 Hz` fixed baseline.
+- Show the FFT result: the dominant component is `5 Hz`, so the adaptive policy changes from `50 Hz` to `40 Hz`.
+- Show the aggregate fields: `window_id`, `sample_count`, `average_value`, `dominant_frequency_hz`, and timing fields.
+- Show MQTT edge delivery, then secure MQTT proof with `tls=enabled verify=required` and `Certificate validated`.
+- Show LoRaWAN/TTN proof: serial radio activity plus TTN Live Data and decoded uplink screenshots.
+- Show the performance tables: energy, communication volume, and latency.
+- Show the bonus work: three input signals and the Z-score/Hampel anomaly-filter evaluation.
+- Close with the key engineering lesson: adaptive sampling reduces local sample work, but WiFi/display/runtime dominate awake board power, so deep sleep is needed for large energy savings.
 
-- [`source/docs/SECURE_MQTT_SETUP.md`](./source/docs/SECURE_MQTT_SETUP.md)
+Main evidence map:
+
+- [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md)
+- [`source/docs/GRADING_EVIDENCE_MATRIX.md`](./source/docs/GRADING_EVIDENCE_MATRIX.md)
 
 ## Submission Notes
 

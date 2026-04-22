@@ -101,4 +101,4 @@ Use this when the board is already running near a working `LoRaWAN` gateway and 
 ## Final Deferred Items
 
 - optional refresh of the saved Phase 8 `MQTT` evidence bundle
-- optional live `MQTTS` proof if a secure broker is available
+- secure `MQTTS` proof from `2026-04-22`, saved in [`../results/secure_mqtt_evidence_2026-04-22.md`](../results/secure_mqtt_evidence_2026-04-22.md)

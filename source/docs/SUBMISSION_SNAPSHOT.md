@@ -79,12 +79,12 @@ The dominant component is `5 Hz`, and the runtime adaptive policy reduces the sa
 | Latency measurement | Complete | Saved summary artifacts exist |
 | Communication volume | Complete | Fixed `50 Hz` versus adaptive `40 Hz` comparison shows represented samples drop `20%`, while aggregate MQTT bytes stay effectively constant |
 | Energy measurement | Complete | `INA219` comparison shows adaptive `18.422466 mWh` vs baseline `18.433238 mWh` over `120 s`; optional deep sleep saves about `26.04%` |
-| Secure MQTT | Partial | TLS-capable firmware support exists, but live proof is still missing |
+| Secure MQTT | Complete | Live `MQTTS` proof captured on `broker.emqx.io:8883` with `tls=enabled verify=required` and ESP32 certificate validation |
 | Anomaly filters | Complete | `Z-score` and `Hampel` filters are evaluated at `p=1%, 5%, 10%`, including `TPR`, `FPR`, FFT impact, execution time, estimated energy, and Hampel window-size tradeoff |
 
 ## What Is Still Missing Before The Final Final Submission
 
-- one live `MQTTS` validation run if a secure broker is available
+- secure `MQTTS` validation artifacts are saved in [`../results/secure_mqtt_evidence_2026-04-22.md`](../results/secure_mqtt_evidence_2026-04-22.md)
 
 ## Submission Position Today
 
@@ -93,10 +93,10 @@ As of `2026-04-21`, the project is already in a strong submission state:
 - the full adaptive pipeline works on hardware,
 - the edge path is proven with saved artifacts,
 - the cloud path is proven with saved `TTN` screenshots,
-- and the remaining work is concentrated in optional secure-MQTT proof rather than in missing core functionality.
+- and the remaining work is now mostly presentation polish rather than missing core functionality.
 
 If the project had to be submitted today, the correct description would be:
 
 - core functionality: complete
 - hardware validation: complete for `MQTT` and `LoRaWAN`
-- final grading gap: mainly live `MQTTS` proof if a TLS-capable broker is available
+- final secure-MQTT proof: captured and linked in the results folder

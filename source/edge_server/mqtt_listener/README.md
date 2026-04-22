@@ -29,6 +29,14 @@ If the broker requires credentials:
 python listen_aggregates.py --host <BROKER_HOST> --port 1883 --topic project/adaptive-sampling-node/aggregate --username myuser --password mypass
 ```
 
+For secure MQTT over TLS:
+
+```powershell
+python listen_aggregates.py --host broker.emqx.io --port 8883 --tls --topic iot_indv_project/hamza/adaptive-sampling-node/secure --client-id hamza-secure-edge-listener --csv logs\secure_aggregates.csv --jsonl logs\secure_aggregates.jsonl --limit 3
+```
+
+Use `--ca-file` only when the broker requires a custom CA bundle. Do not use `--tls-insecure-skip-verify` for final evidence.
+
 Replace `<BROKER_HOST>` with the IP address or DNS name of your local broker.
 
 ## Logged Timing Fields

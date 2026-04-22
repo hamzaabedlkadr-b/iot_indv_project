@@ -12,7 +12,7 @@ The project is intentionally built around a `virtual sensor` so the required sig
 - The firmware supports three signal profiles: `clean_reference`, `noisy_reference`, and `anomaly_stress`.
 - The board has already been visualized live with `BetterSerialPlotter`.
 - The integrated main app now publishes compact aggregate payloads over `LoRaWAN/TTN` on real hardware near working gateway coverage, and the serial plus `TTN` screenshots are saved in the repo.
-- `Energy` comparison is measured with the `INA219` two-board setup; `secure MQTT` is implemented but still needs a live TLS validation run.
+- `Energy` comparison is measured with the `INA219` two-board setup, and `secure MQTT` is validated with a live TLS broker run.
 
 ## Where To Start
 
@@ -29,6 +29,7 @@ The project is intentionally built around a `virtual sensor` so the required sig
 - Runtime notes from the live board sessions: [`results/runtime_notes_2026-04-17.md`](./results/runtime_notes_2026-04-17.md)
 - Latest clean MQTT evidence bundle: [`results/mqtt_evidence_2026-04-18.md`](./results/mqtt_evidence_2026-04-18.md)
 - Fresh WiFi/MQTT evidence bundle after the network change: [`results/wifi_mqtt_evidence_2026-04-21.md`](./results/wifi_mqtt_evidence_2026-04-21.md)
+- Secure MQTT evidence bundle: [`results/secure_mqtt_evidence_2026-04-22.md`](./results/secure_mqtt_evidence_2026-04-22.md)
 - Latest LoRaWAN evidence bundle: [`results/lorawan_evidence_2026-04-20.md`](./results/lorawan_evidence_2026-04-20.md)
 
 ## System Pipeline
@@ -57,7 +58,7 @@ The final implementation path is the modular firmware under [`firmware/esp32_nod
 | End-to-end latency | Clean home-network dataset captured from synchronized timestamps | [`results/summaries/mqtt_summary_2026-04-18_listener.md`](./results/summaries/mqtt_summary_2026-04-18_listener.md) | Validated |
 | Communication volume | Baseline-vs-adaptive comparison is complete: local represented samples drop `20%`, while MQTT aggregate bytes stay effectively constant | [`results/summaries/communication_volume_comparison_2026-04-21.md`](./results/summaries/communication_volume_comparison_2026-04-21.md) | Validated |
 | Energy savings | `INA219` baseline/adaptive runs show a small awake-mode saving (`-0.06%`), while optional deep sleep reduces energy by `-26.04%` | [`results/summaries/ina219_comparison_2026-04-21.md`](./results/summaries/ina219_comparison_2026-04-21.md), [`results/summaries/ina219_three_mode_comparison_2026-04-21.md`](./results/summaries/ina219_three_mode_comparison_2026-04-21.md), [`pics/hardware.png`](./pics/hardware.png) | Measured |
-| Secure MQTT | TLS-capable `MQTTS` support with certificate verification is implemented; live TLS evidence still pending | [`docs/SECURE_MQTT_SETUP.md`](./docs/SECURE_MQTT_SETUP.md) | Partial |
+| Secure MQTT | Live `MQTTS` run validated on `broker.emqx.io:8883`; listener required TLS verification and the ESP32 log showed certificate validation | [`results/secure_mqtt_evidence_2026-04-22.md`](./results/secure_mqtt_evidence_2026-04-22.md), [`docs/SECURE_MQTT_SETUP.md`](./docs/SECURE_MQTT_SETUP.md) | Validated |
 | Three input signals bonus | `clean`, `noisy`, and `anomaly` profiles were all validated on the real board over MQTT | [`pics/input_signal_profiles_2026-04-22.png`](./pics/input_signal_profiles_2026-04-22.png), [`results/final_evidence_index_2026-04-21.md`](./results/final_evidence_index_2026-04-21.md), [`results/summaries/signal_profile_comparison_2026-04-18.txt`](./results/summaries/signal_profile_comparison_2026-04-18.txt) | Validated |
 | Anomaly filter bonus | `Z-score` and `Hampel` filters evaluated at `p=1%, 5%, 10%`, including `TPR`, `FPR`, mean-error reduction, FFT impact, execution time, estimated filter energy, and window-size tradeoff | [`results/summaries/anomaly_filter_evaluation_2026-04-21.md`](./results/summaries/anomaly_filter_evaluation_2026-04-21.md) | Validated |
 
@@ -166,6 +167,25 @@ Key numbers from that run:
 | Avg end-to-end latency | `1587868.600 us` |
 | Avg payload size | `454 B` |
 | Signal profile | `clean_reference` |
+
+### 4b. Secure MQTT Over TLS
+
+The secure MQTT path was validated with the same aggregate payload format over `MQTTS`.
+
+| Metric | Value |
+| --- | --- |
+| Broker | `broker.emqx.io:8883` |
+| Topic | `iot_indv_project/hamza/adaptive-sampling-node/secure` |
+| TLS listener mode | `tls=enabled verify=required` |
+| ESP32 certificate status | `Certificate validated` |
+| Messages received | `3` |
+| Missing windows | `0` |
+| Average end-to-end latency | `907,561.667 us` |
+
+Evidence:
+
+- [`results/secure_mqtt_evidence_2026-04-22.md`](./results/secure_mqtt_evidence_2026-04-22.md)
+- [`results/summaries/secure_mqtt_summary_final_2026-04-22.md`](./results/summaries/secure_mqtt_summary_final_2026-04-22.md)
 
 ### 5. LoRaWAN + TTN
 
@@ -278,10 +298,13 @@ Typical local workflow:
 - [`results/measurement_summary_template.md`](./results/measurement_summary_template.md)
 - [`docs/SECURE_MQTT_SETUP.md`](./docs/SECURE_MQTT_SETUP.md)
 
-## Remaining Work Before Submission
+## Presentation Checklist
 
-- validate the `secure MQTT` path against a TLS-capable broker and capture one saved run
-- if secure-MQTT evidence is added later, run one final screenshot/link synchronization pass
+- Explain raw max sampling (`199,126.59 Hz`) versus stable full-pipeline baseline (`50 Hz`).
+- Show FFT detecting `5 Hz` and the adaptive change to `40 Hz`.
+- Show MQTT, secure MQTT, and LoRaWAN evidence separately so each communication requirement is clear.
+- Show energy honestly: awake adaptive savings are small (`-0.06%`), while optional deep sleep gives a larger reduction (`-26.04%`).
+- Show the three signal profiles and anomaly-filter plot for the bonus points.
 
 ## Repository Guide
 

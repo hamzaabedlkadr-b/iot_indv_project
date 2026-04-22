@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import ssl
 import sys
 import time
 from pathlib import Path
@@ -156,6 +157,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--client-id", default="edge-listener", help="MQTT client id")
     parser.add_argument("--username", default="", help="Optional MQTT username")
     parser.add_argument("--password", default="", help="Optional MQTT password")
+    parser.add_argument("--tls", action="store_true", help="Enable MQTT over TLS")
+    parser.add_argument(
+        "--ca-file",
+        type=Path,
+        default=None,
+        help="Optional CA bundle path for TLS verification; defaults to system trust store",
+    )
+    parser.add_argument(
+        "--tls-insecure-skip-verify",
+        action="store_true",
+        help="Disable TLS certificate verification; only use for debugging, not final evidence",
+    )
     parser.add_argument("--keepalive", type=int, default=30, help="MQTT keepalive in seconds")
     parser.add_argument(
         "--csv",
@@ -185,6 +198,12 @@ def main() -> int:
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=args.client_id)
     if args.username:
         client.username_pw_set(args.username, args.password)
+    if args.tls:
+        context = ssl.create_default_context(cafile=str(args.ca_file) if args.ca_file else None)
+        if args.tls_insecure_skip_verify:
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
+        client.tls_set_context(context)
 
     def on_connect(
         inner_client: mqtt.Client,
@@ -200,7 +219,8 @@ def main() -> int:
 
         inner_client.subscribe(args.topic, qos=1)
         print(
-            f"subscribed to {args.topic} on {args.host}:{args.port} as {args.client_id}",
+            f"subscribed to {args.topic} on {args.host}:{args.port} as {args.client_id}"
+            f" tls={'enabled' if args.tls else 'disabled'}",
             flush=True,
         )
 
@@ -225,7 +245,9 @@ def main() -> int:
     client.on_message = on_message
 
     print(
-        f"connecting to broker {args.host}:{args.port} and waiting for topic {args.topic}",
+        f"connecting to broker {args.host}:{args.port} and waiting for topic {args.topic}"
+        f" tls={'enabled' if args.tls else 'disabled'}"
+        f" verify={'disabled' if args.tls_insecure_skip_verify else 'required'}",
         flush=True,
     )
     client.connect(args.host, args.port, args.keepalive)

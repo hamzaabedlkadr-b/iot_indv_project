@@ -1,0 +1,68 @@
+{
+  "messages_received": 3,
+  "unique_windows": 3,
+  "missing_windows_between_first_and_last": 0,
+  "first_window_id": 9,
+  "last_window_id": 11,
+  "received_span_s": 9.922347,
+  "signal_profiles_seen": [
+    "clean_reference"
+  ],
+  "listener_latency_us": {
+    "count": 3,
+    "min": 547704.0,
+    "max": 624484.0,
+    "avg": 575771.0,
+    "p95": 624484.0
+  },
+  "end_to_end_latency_us": {
+    "count": 3,
+    "min": 879133.0,
+    "max": 956607.0,
+    "avg": 907561.6666666666,
+    "p95": 956607.0
+  },
+  "edge_delay_us": {
+    "count": 3,
+    "min": 331429.0,
+    "max": 332123.0,
+    "avg": 331790.6666666667,
+    "p95": 332123.0
+  },
+  "anomaly_count": {
+    "count": 3,
+    "min": 0.0,
+    "max": 0.0,
+    "avg": 0.0,
+    "p95": 0.0
+  },
+  "sample_count": {
+    "count": 3,
+    "min": 200.0,
+    "max": 200.0,
+    "avg": 200.0,
+    "p95": 200.0
+  },
+  "sampling_frequency_hz": {
+    "count": 3,
+    "min": 40.0,
+    "max": 40.0,
+    "avg": 40.0,
+    "p95": 40.0
+  },
+  "dominant_frequency_hz": {
+    "count": 3,
+    "min": 5.0,
+    "max": 5.0,
+    "avg": 5.0,
+    "p95": 5.0
+  },
+  "payload_size_bytes": {
+    "count": 3,
+    "min": 446.0,
+    "max": 447.0,
+    "avg": 446.3333333333333,
+    "p95": 447.0
+  },
+  "total_payload_bytes": 1339
+}

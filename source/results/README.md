@@ -18,6 +18,7 @@ Current visual evidence bundles:
 
 - [`lorawan_evidence_2026-04-20.md`](./lorawan_evidence_2026-04-20.md)
 - [`mqtt_evidence_2026-04-18.md`](./mqtt_evidence_2026-04-18.md)
+- [`secure_mqtt_evidence_2026-04-22.md`](./secure_mqtt_evidence_2026-04-22.md)
 - [`../docs/EVIDENCE_SCREENSHOT_CHECKLIST.md`](../docs/EVIDENCE_SCREENSHOT_CHECKLIST.md)
 - [`screenshot_inventory_2026-04-18.md`](./screenshot_inventory_2026-04-18.md)
 
@@ -63,6 +64,17 @@ Reference artifacts from the follow-up live MQTT evidence run on `2026-04-18`:
 - `summaries/mqtt_listener_2026-04-18_live.txt`
 - `mqtt_evidence_2026-04-18.md`
 - `summaries/communication_volume_comparison_2026-04-21.md`
+
+Reference artifacts from the secure MQTT validation run on `2026-04-22`:
+
+- `secure_mqtt_evidence_2026-04-22.md`
+- `summaries/secure_mqtt_listener_2026-04-22.out.txt`
+- `summaries/secure_mqtt_run_final_2026-04-22.csv`
+- `summaries/secure_mqtt_summary_final_2026-04-22.md`
+- `summaries/secure_mqtt_summary_final_2026-04-22.json`
+- `../pics/2026-04-22_secure_mqtt_listener_tls.png`
+- `../pics/2026-04-22_secure_mqtt_cert_validated.png`
+- `../pics/2026-04-22_secure_mqtt_heltec_sent.png`
 
 Reference artifacts for the input-signal and anomaly-filter bonus:
 

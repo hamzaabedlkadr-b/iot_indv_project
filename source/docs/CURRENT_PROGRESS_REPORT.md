@@ -1,6 +1,6 @@
 # Current Progress Report
 
-Date: `2026-04-21`
+Date: `2026-04-22`
 
 This report summarizes the project state up to the current checkpoint. It is meant to be the readable, up-to-date companion to the older historical report in [`PHASE1_REPORT.tex`](./PHASE1_REPORT.tex), which still documents Phases `1` to `7` in depth.
 
@@ -9,7 +9,7 @@ The goal of this document is to explain:
 - what has already been implemented and validated
 - what measurements exist today
 - what evidence files support the current claims
-- what is still pending before the final submission
+- what evidence supports the final submission
 
 ## 1. Executive Summary
 
@@ -21,6 +21,7 @@ The project now has a working `ESP32 + FreeRTOS` pipeline that:
 - adapts the sampling frequency at runtime
 - computes a per-window aggregate
 - publishes real aggregate messages to a nearby edge server over `MQTT/WiFi`
+- publishes real aggregate messages over secure `MQTTS` with certificate validation
 - publishes compact aggregate payloads through `LoRaWAN + TTN`
 
 The main local validation milestone is complete:
@@ -29,10 +30,9 @@ The main local validation milestone is complete:
 - synchronized timestamps have been added and used for real latency measurements
 - three signal profiles have been validated on real hardware
 - a `BetterSerialPlotter` view has been captured for live signal-processing visualization
+- secure MQTT has been validated against `broker.emqx.io:8883`
 
-The project is close to final-submission ready. The remaining work is:
-
-- one live `MQTTS` validation run if a TLS-capable broker is available
+The project is now final-submission ready from an evidence perspective. The remaining work is presentation polish only.
 
 ## 2. Current Phase Status
 
@@ -47,9 +47,9 @@ The project is close to final-submission ready. The remaining work is:
 | `7` | Aggregate computation | Complete | Window averages are computed and passed downstream |
 | `8` | MQTT over WiFi | Complete | End-to-end home-network validation completed on hardware |
 | `9` | LoRaWAN + TTN | Complete | Integrated main-app LoRaWAN validation succeeded on real hardware near working gateway coverage |
-| `10` | Performance measurements | Mostly complete | Latency, payload-size, communication-volume, anomaly-filter, and INA219 energy evidence exist; only secure-MQTT and final packaging remain |
+| `10` | Performance measurements | Complete | Latency, payload-size, communication-volume, anomaly-filter, INA219 energy, and secure-MQTT evidence exist |
 | `11` | Optional physical sensor / extras | Optional | Not required for the core project |
-| `12` | Final packaging and write-up | In progress | README, evidence map, and the latest LoRaWAN screenshots are now curated; final short write-up remains |
+| `12` | Final packaging and write-up | In progress | README, evidence map, LoRaWAN proof, secure-MQTT proof, and final result plots are curated |
 
 ## 3. Project Architecture
 
@@ -377,12 +377,22 @@ The MQTT client now supports:
 - optional username/password authentication
 - certificate verification through the ESP-IDF CA bundle
 
-However, the captured saved run is still the plain local-broker run.
+The secure path was validated on `2026-04-22` against `broker.emqx.io:8883`.
 
-So the honest current status is:
+The current status is:
 
 - secure MQTT support is implemented in firmware
-- a live secure-broker validation run is still pending
+- the Python listener records `tls=enabled verify=required`
+- the ESP32 serial log shows `Certificate validated`
+- the saved final run received windows `9`, `10`, and `11` with `0` missing windows
+- average secure-run end-to-end latency is `907,561.667 us`
+
+Evidence:
+
+- [`../results/secure_mqtt_evidence_2026-04-22.md`](../results/secure_mqtt_evidence_2026-04-22.md)
+- [`../results/summaries/secure_mqtt_summary_final_2026-04-22.md`](../results/summaries/secure_mqtt_summary_final_2026-04-22.md)
+- [`../pics/2026-04-22_secure_mqtt_listener_tls.png`](../pics/2026-04-22_secure_mqtt_listener_tls.png)
+- [`../pics/2026-04-22_secure_mqtt_cert_validated.png`](../pics/2026-04-22_secure_mqtt_cert_validated.png)
 
 ## 14. Energy Measurement Status
 
@@ -468,6 +478,7 @@ Useful current evidence files include:
 
 - [`../results/final_evidence_index_2026-04-21.md`](../results/final_evidence_index_2026-04-21.md)
 - [`../results/wifi_mqtt_evidence_2026-04-21.md`](../results/wifi_mqtt_evidence_2026-04-21.md)
+- [`../results/secure_mqtt_evidence_2026-04-22.md`](../results/secure_mqtt_evidence_2026-04-22.md)
 - [`PHASE1_REPORT.tex`](./PHASE1_REPORT.tex)
 - [`../pics/Sampling_frequency.png`](../pics/Sampling_frequency.png)
 - [`../results/runtime_notes_2026-04-17.md`](../results/runtime_notes_2026-04-17.md)
@@ -478,6 +489,8 @@ Useful current evidence files include:
 - [`../results/summaries/`](../results/summaries/)
 - [`../pics/2026-04-20_ttn_live_data_uplink.png`](../pics/2026-04-20_ttn_live_data_uplink.png)
 - [`../pics/2026-04-20_ttn_uplink_decoded.png`](../pics/2026-04-20_ttn_uplink_decoded.png)
+- [`../pics/2026-04-22_secure_mqtt_listener_tls.png`](../pics/2026-04-22_secure_mqtt_listener_tls.png)
+- [`../pics/2026-04-22_secure_mqtt_cert_validated.png`](../pics/2026-04-22_secure_mqtt_cert_validated.png)
 
 ## 18. Remaining Work
 
@@ -486,7 +499,7 @@ The remaining work before the final submission is:
 | Item | Status | Notes |
 | --- | --- | --- |
 | Energy measurements and fixed-rate baseline comparison | complete | INA219 baseline/adaptive runs are saved and compared |
-| Secure MQTT live TLS proof | pending | firmware support exists, but no saved live TLS run yet |
+| Secure MQTT live TLS proof | complete | saved live TLS run exists with listener and ESP32 certificate proof |
 | Final short report | complete | [`SUBMISSION_SNAPSHOT.md`](./SUBMISSION_SNAPSHOT.md) now captures the honest submission-ready state |
 
 ## 19. Conclusion
@@ -501,13 +514,10 @@ The most important completed achievements are:
 - working adaptive-sampling transition from `50 Hz` to `40 Hz`
 - correct per-window aggregate computation
 - full home-network `MQTT/WiFi` validation on hardware
+- secure `MQTTS` validation with certificate proof
 - real latency measurements based on synchronized timestamps
 - three validated signal profiles including anomaly-aware evidence
 - a completed communication-volume comparison
 - a completed Z-score/Hampel anomaly-filter evaluation
 
-The most important remaining item is now concentrated and clear:
-
-- one secure `MQTTS` validation run
-
-This means the project is already in a strong state for the workshop: the core pipeline works, both communication paths have been proven on hardware, and the remaining work is focused on optional secure-MQTT proof rather than on missing core functionality.
+This means the project is in a strong state for the workshop: the core pipeline works, plain MQTT and secure MQTT are both proven, LoRaWAN/TTN is proven on hardware, and the remaining work is presentation rehearsal rather than missing core functionality.

@@ -20,9 +20,9 @@ For the current submission state, use:
 | Generated cache/build files visible | Resolved | `.gitignore` excludes PlatformIO builds, Python caches, logs, local configs, smoke-test workspaces, and reference material |
 | Bonus signal evidence needed | Resolved | Three signal profiles plus anomaly-filter evaluation are linked from the final evidence index |
 
-## Remaining Known Limitation
+## Previously Known Limitation
 
-The only intentionally retained weaker item is live secure-MQTT proof. The firmware supports `MQTTS`, certificate verification, and optional credentials, but a saved live TLS broker run has not been captured yet.
+The earlier weaker item was live secure-MQTT proof. It has since been closed with the `2026-04-22` validation run against `broker.emqx.io:8883`; see [`../results/secure_mqtt_evidence_2026-04-22.md`](../results/secure_mqtt_evidence_2026-04-22.md).
 
 Evidence / setup:
 
@@ -30,7 +30,7 @@ Evidence / setup:
 
 ## Final Audit Conclusion
 
-The original `2026-04-18` blockers have been closed except for optional live secure-MQTT validation. The repository is now organized around a clean submission path:
+The original `2026-04-18` blockers have been closed. The repository is now organized around a clean submission path:
 
 ```text
 README -> source/README -> evidence matrix -> final evidence index -> raw artifacts

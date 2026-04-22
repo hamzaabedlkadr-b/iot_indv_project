@@ -45,7 +45,7 @@ Recommended section order:
 9. Performance evaluation
 10. Bonus signals
 11. Setup and run guide
-12. remaining limitation: live secure-MQTT proof
+12. secure-MQTT proof: `MQTTS`, certificate validation, and listener messages
 
 ### 2. Phase-based storytelling
 
@@ -96,7 +96,7 @@ This is risky in a workshop evaluation.
 Avoid:
 
 - saying LoRaWAN is "done" before the saved `TTN` evidence exists
-- saying MQTT is secure before TLS is actually in place
+- saying MQTT is secure without showing the `2026-04-22` TLS proof screenshots
 - presenting future measurement work as completed evidence
 
 ### 3. Scattered evidence
@@ -178,8 +178,8 @@ Before submission, the main `README.md` should explicitly answer:
 - how latency was measured
 - how communication volume was measured
 - what the three signal profiles are
-- which parts were validated on the home network and which near working `TTN` gateway coverage
-- what secure-MQTT limitation remains if no TLS broker is available
+- which parts were validated on the home network, on the public TLS broker, and near working `TTN` gateway coverage
+- how the secure-MQTT proof differs from the plain local MQTT proof
 
 ## Closing Rule
 

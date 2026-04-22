@@ -2,15 +2,24 @@
 
 This note explains how the firmware can switch from plain local `MQTT` to verified `MQTTS`.
 
-## Current Situation
+## Validated Situation
 
-The real home-network validation in this repository was done with a plain local broker:
+The project has both a plain local MQTT validation run and a secure live `MQTTS` validation run.
+
+Plain local broker evidence was used for development:
 
 - scheme: `mqtt://`
 - transport: local LAN
 - purpose: functional validation of the edge path
 
-That is enough for development, but it does not fully satisfy the grading item about secure MQTT transport.
+Secure MQTT evidence was captured on `2026-04-22`:
+
+- scheme: `mqtts://`
+- broker: `broker.emqx.io:8883`
+- topic: `iot_indv_project/hamza/adaptive-sampling-node/secure`
+- listener: `tls=enabled verify=required`
+- ESP32 log: `Certificate validated`
+- final proof: [`../results/secure_mqtt_evidence_2026-04-22.md`](../results/secure_mqtt_evidence_2026-04-22.md)
 
 ## What The Firmware Supports Now
 
@@ -66,20 +75,13 @@ When `PROJECT_MQTT_SECURITY_MODE` is set to `PROJECT_MQTT_SECURITY_TLS`, the cli
 
 So the board is not just encrypting blindly; it is also verifying the remote broker identity against the trusted CA bundle.
 
-## Current Limitation
+## Final Evidence
 
-This repo does not yet include a live saved run against a TLS-enabled broker, so the secure path is implemented but not yet fully demonstrated in the captured evidence.
+Use these files when presenting the secure MQTT requirement:
 
-That means the secure-MQTT grading item should be described honestly as:
-
-- `implemented in firmware`
-- `ready for validation`
-- `not yet proven with a saved live TLS run`
-
-## Best Final Evidence
-
-If you later validate secure MQTT, the best proof would be:
-
-1. serial log showing connection to the secure broker
-2. listener output showing real messages arriving
-3. one note stating that the transport was `mqtts://` and certificate verification was enabled
+- [`../results/secure_mqtt_evidence_2026-04-22.md`](../results/secure_mqtt_evidence_2026-04-22.md)
+- [`../results/summaries/secure_mqtt_listener_2026-04-22.out.txt`](../results/summaries/secure_mqtt_listener_2026-04-22.out.txt)
+- [`../results/summaries/secure_mqtt_summary_final_2026-04-22.md`](../results/summaries/secure_mqtt_summary_final_2026-04-22.md)
+- [`../pics/2026-04-22_secure_mqtt_listener_tls.png`](../pics/2026-04-22_secure_mqtt_listener_tls.png)
+- [`../pics/2026-04-22_secure_mqtt_cert_validated.png`](../pics/2026-04-22_secure_mqtt_cert_validated.png)
+- [`../pics/2026-04-22_secure_mqtt_heltec_sent.png`](../pics/2026-04-22_secure_mqtt_heltec_sent.png)
