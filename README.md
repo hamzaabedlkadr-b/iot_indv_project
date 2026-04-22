@@ -9,12 +9,15 @@ This project builds an IoT node that generates a virtual sensor signal, samples 
 - [Overview](#overview)
 - [Assignment Coverage](#assignment-coverage)
 - [System Architecture](#system-architecture)
+- [Design Rationale](#design-rationale)
 - [Code Organization](#code-organization)
 - [Implementation Details](#implementation-details)
 - [Performance Evaluation](#performance-evaluation)
 - [Evidence Gallery](#evidence-gallery)
 - [Setup And Run](#setup-and-run)
+- [How To Reproduce Key Claims](#how-to-reproduce-key-claims)
 - [Presentation Walkthrough](#presentation-walkthrough)
+- [Likely Evaluation Questions](#likely-evaluation-questions)
 - [Submission Notes](#submission-notes)
 
 ## Overview
@@ -82,6 +85,21 @@ Hardware used:
 | laptop | PlatformIO build, serial monitor, Mosquitto broker, MQTT listener |
 | TTN console | LoRaWAN cloud validation |
 
+## Design Rationale
+
+These are the main design decisions and the short explanation to use if asked during evaluation.
+
+| Decision | Why it was used |
+| --- | --- |
+| Virtual sensor instead of an external analog sensor | The assignment defines the required input as a mathematical signal. Generating it in firmware makes the `3 Hz + 5 Hz` input repeatable, avoids ADC wiring noise, and lets every run be compared fairly. |
+| Raw max benchmark plus strict full-pipeline baseline | The raw benchmark answers "how fast can the board generate samples?" and reached `199,126.59 Hz`. The strict `50 Hz` baseline answers "what stable rate can the full FreeRTOS pipeline run with FFT, queues, MQTT, LoRaWAN, metrics, and display enabled?" |
+| Adaptive target of `40 Hz` for a `5 Hz` dominant signal | A `2x` Nyquist rate would be the theoretical minimum, but this implementation uses an `8x` oversampling policy for practical margin, stable FFT windows, and cleaner real-time scheduling on the ESP32. |
+| One aggregate per `5 s` window | The edge and cloud receive useful summaries instead of raw samples. This directly reduces communication overhead compared with transmitting every sample. |
+| Same aggregate for MQTT and LoRaWAN | The system computes one result and then sends it through two communication paths: JSON over MQTT and compact binary over LoRaWAN. |
+| Secure MQTT tested separately from local MQTT | Local MQTT proves the edge pipeline in the lab. Secure MQTT proves the transport security requirement with `MQTTS`, TLS verification, and certificate validation. |
+| Energy measured with an external INA219 monitor | The INA219 measures real board power instead of estimating from code. The same DUT, monitor, signal, and run duration were used for baseline and adaptive runs. |
+| Deep sleep reported separately | Deep sleep gives the large energy reduction, but it is a duty-cycle optimization. The required adaptive-sampling comparison is still reported honestly in awake mode. |
+
 ## Code Organization
 
 ```text
@@ -107,6 +125,18 @@ Most important files:
 | [`source/firmware/esp32_node/components/comm_lorawan/`](./source/firmware/esp32_node/components/comm_lorawan/) | compact LoRaWAN payload and Heltec radio integration |
 | [`source/firmware/ina219_power_monitor/src/main.cpp`](./source/firmware/ina219_power_monitor/src/main.cpp) | INA219 monitor output |
 | [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md) | map of evidence to assignment requirements |
+
+FreeRTOS task responsibilities:
+
+| Task/module | Responsibility | Output |
+| --- | --- | --- |
+| `signal_input` | Generates the virtual signal at the current sampling frequency | sample queue |
+| `signal_processing` | Buffers each `5 s` window, computes FFT peaks, and creates aggregates | aggregate queues |
+| `sampling_control` | Applies the adaptive policy from dominant frequency to sampling rate | runtime sampling update |
+| `comm_mqtt` | Connects WiFi, synchronizes time, and publishes aggregate JSON | MQTT broker / edge listener |
+| `comm_lorawan` | Packs compact aggregate payloads and uses the Heltec radio stack | TTN uplink |
+| `metrics` | Tracks timing, counters, latency-related fields, and heartbeats | serial metrics logs |
+| `app_display` | Emits simple serial/display status for live observation | serial/display heartbeat |
 
 ## Implementation Details
 
@@ -356,6 +386,35 @@ For a second person rerunning the power test, use:
 
 - [`source/docs/POWER_TEST_QUICKSTART_FOR_FRIEND.md`](./source/docs/POWER_TEST_QUICKSTART_FOR_FRIEND.md)
 
+## How To Reproduce Key Claims
+
+All local secrets should go in `source/firmware/esp32_node/include/project_config_local.h`. Do not edit secrets into the public `project_config.h`, and do not commit `project_config_local.h`.
+
+| Claim | What to configure | What to run | What proof to look for |
+| --- | --- | --- | --- |
+| Raw maximum sampling frequency | `PROJECT_ENABLE_RAW_SAMPLING_BENCHMARK = 1` and normal communication disabled if desired | Flash the firmware and open serial monitor at `115200` | Log line like `Raw benchmark result ... achieved=199126.59Hz stable=yes` |
+| Full adaptive pipeline | `PROJECT_ENABLE_RAW_SAMPLING_BENCHMARK = 0`, `PROJECT_ENABLE_ADAPTIVE_SAMPLING = 1`, `PROJECT_SIGNAL_PROFILE_CLEAN_REFERENCE` | Flash and monitor serial | `FFT result ... dominant=5.00 Hz`, then `Adaptive sampling update ... new_fs=40.0 Hz` |
+| Fixed baseline for energy comparison | `PROJECT_ENABLE_ADAPTIVE_SAMPLING = 0` | Run DUT through the INA219 monitor | Baseline power summary in `source/results/summaries/ina219_baseline_2026-04-21.md` |
+| Adaptive energy comparison | `PROJECT_ENABLE_ADAPTIVE_SAMPLING = 1` | Run DUT through the same INA219 monitor setup | Adaptive power summary in `source/results/summaries/ina219_adaptive_2026-04-21.md` |
+| Deep-sleep energy comparison | `PROJECT_ENABLE_DEEP_SLEEP_EXPERIMENT = 1` in the private local config | Run DUT through INA219 and capture the lower-power trace | Deep-sleep summary in `source/results/summaries/ina219_deepsleep_2026-04-21.md` |
+| Plain MQTT edge delivery | Set WiFi, broker host/port, and `PROJECT_MQTT_SECURITY_PLAINTEXT` | Run the Python listener and flash the DUT | Listener receives consecutive `window_id` values with no missing windows |
+| Secure MQTT delivery | Set broker `broker.emqx.io`, port `8883`, and `PROJECT_MQTT_SECURITY_TLS` | Run the listener with `--tls`; flash the DUT | `tls=enabled verify=required`, `Certificate validated`, and `mqtt=1` heartbeat |
+| LoRaWAN / TTN delivery | Enable `PROJECT_LORAWAN_ENABLE_RADIO_TX = 1` and put TTN keys in local config | Flash near gateway coverage and watch TTN Live Data | Serial `Tx Done` plus TTN uplink screenshots |
+| Three signal profiles | Change `PROJECT_SIGNAL_PROFILE` between clean, noisy, and anomaly modes | Run MQTT listener for each profile | Profile summaries and anomaly counts in `source/results/summaries/` |
+
+Most useful serial lines during a live demo:
+
+```text
+Raw benchmark result
+FFT result | window=... dominant=5.00 Hz
+Adaptive sampling update | previous_fs=50.0 Hz new_fs=40.0 Hz
+Prepared MQTT aggregate payload
+MQTT heartbeat | wifi=1 mqtt=1
+LoRaWAN heartbeat | radio_tx=1 joined=1
+TX on freq ...
+Event : Tx Done
+```
+
 ## Presentation Walkthrough
 
 Use this order during the workshop or presentation:
@@ -375,6 +434,21 @@ Main evidence map:
 
 - [`source/results/final_evidence_index_2026-04-21.md`](./source/results/final_evidence_index_2026-04-21.md)
 - [`source/docs/GRADING_EVIDENCE_MATRIX.md`](./source/docs/GRADING_EVIDENCE_MATRIX.md)
+
+## Likely Evaluation Questions
+
+| Question | Short answer |
+| --- | --- |
+| Is the input really a sensor? | The project uses a virtual sensor because the assignment explicitly defines a mathematical input signal. The firmware generates that signal in real time, samples it through the same FreeRTOS pipeline, and treats it as the sensor source. |
+| Why are there two sampling-frequency numbers? | `199,126.59 Hz` is the raw sample-generation benchmark. `50 Hz` is the conservative full-pipeline baseline with FFT, queues, MQTT, LoRaWAN, metrics, and display enabled. |
+| Why is adaptive sampling `40 Hz` instead of `10 Hz` for a `5 Hz` signal? | `10 Hz` is the theoretical Nyquist minimum. The implemented policy uses `8x` the dominant frequency to keep stable FFT windows and scheduling margin on the real board. |
+| What is the aggregate? | It is the average value over a `5 s` window, plus metadata such as `window_id`, `sample_count`, `sampling_frequency_hz`, `dominant_frequency_hz`, `signal_profile`, and timing fields. |
+| Did adaptive sampling reduce communication volume? | It reduced represented local samples by `20%` over the same five-window period. MQTT payload bytes stay flat because the design already sends one aggregate per window, not raw samples. |
+| Why is awake energy saving only `-0.06%`? | The ESP32 was still awake with WiFi, display, MQTT, FreeRTOS tasks, and radio support. Those dominate power more than the small reduction from `50 Hz` to `40 Hz` sampling. |
+| Why include deep sleep if adaptive awake savings are small? | Deep sleep shows what is required for meaningful battery savings. It is reported separately because it changes the duty cycle, while the main adaptive comparison keeps the board awake. |
+| How is MQTT secure? | The secure run used `MQTTS` on port `8883`, the listener required TLS verification, and the ESP32 log showed certificate validation through the ESP-IDF certificate bundle. |
+| How is LoRaWAN proven? | The repo includes serial logs/screenshots showing join and transmit activity plus TTN Live Data and decoded uplink screenshots for the same Heltec node. |
+| What should be shown first in class? | Show the README coverage table, then raw max frequency, adaptive FFT result, MQTT/secure MQTT evidence, TTN evidence, energy/communication/latency plots, and finally the anomaly-filter bonus. |
 
 ## Submission Notes
 
